@@ -1,20 +1,37 @@
+const http = require("http");
+const dotenv=require("dotenv");
 const express = require('express');
-const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
+const morgan = require('morgan');
+const mongoose= require('mongoose');
+const bp = require('body-parser');
+const app= express();
+var cors = require("cors");
+const userRouter = require("./routes/userRoute");
 
-const users = require('./routes/user');
-const app = express();
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+app.use(express.json());
+app.use(cors());
+// Set up Global configuration access
+dotenv.config();
+let port = process.env.PORT || 3000;
 
-const db = require('./config/keys').mongoURI;
-mongoose
-    .connect(db, { useNewUrlParser: true })
-    .then(() => console.log('MongoDB Connected'))
-    .catch(err => console.log(err));
+//connect to mongodbs
+const db=process.env.NGO_URL_HOSTED;
+mongoose.set('strictQuery', true);
+mongoose.connect(db, {useNewUrlParser: true, useUnifiedTopology: true})
+.then((result)=> app.listen(port, () => console.log(`Server running on port ${port}`)))
+.catch((err)=>console.log('DB connection error',err));
 
-app.use('/api/users', users);
 
-const port = process.env.PORT || 5000;
-app.listen(port, () => console.log(`Server running on port ${port}`));
+app.use(express.urlencoded({extended: true}));
+app.use(morgan('dev'));
+app.use(bp.json())
+app.use(bp.urlencoded({ extended: true }))
 
+
+//middleware & static files
+app.use(express.static('public'));
+app.use(morgan('dev'));
+
+
+
+app.use('/api/users', userRouter);
