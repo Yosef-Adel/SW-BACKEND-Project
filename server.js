@@ -7,7 +7,7 @@ let port = process.env.PORT || 3000;
 
 mongoose.set('strictQuery', true);
 mongoose.connect(db, {useNewUrlParser: true, useUnifiedTopology: true})
-.then((result)=> app.listen(port, () => console.log(`Server running on port ${port}`)))
+.then((result)=> console.log(`MongoDB connected successfully`))
 .catch((err)=>console.log('DB connection error',err));
 
 const server = app.listen(port, () => {
