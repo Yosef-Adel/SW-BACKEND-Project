@@ -5,6 +5,8 @@ const bp = require('body-parser');
 const app= express();
 var cors = require("cors");
 const userRouter = require("./routes/userRoute");
+const eventRouter = require("./routes/eventRoute");
+const categoryRouter = require("./routes/categoryRoute");
 
 app.use(express.json());
 app.use(cors());
@@ -20,10 +22,7 @@ app.use(express.static('public'));
 app.use(morgan('dev'));
 
 app.use('/api/users', userRouter);
-app.use("", (req, res, next) => {
-    res.status(200).json({
-        message: "Welcome to the API"
-    });
-});
+app.use('/api/event', eventRouter);
+app.use('/api/category', categoryRouter);
 
 module.exports = app;
