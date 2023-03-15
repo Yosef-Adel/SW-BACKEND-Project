@@ -1,42 +1,43 @@
+//const { uniqueId } = require('lodash');
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 var uniqueValidator = require('mongoose-unique-validator');
+const jwt = require('jsonwebtoken');
 
 
-const UserSchema = new Schema({
 
-    name:{
+const userSchema = new Schema({
 
-        firstName: {
-            type: String,
-            required: true
-        },
-    
-        lastName: {
-            type: String,
-            required: true
-        }
-
+    firstName: {
+        type: String,
+        required: true
     },
 
-    email:{
+    lastName: {
+        type: String,
+        required: true
+    },
 
-        emailAddress: {
-            type: String,
-            required: true,
-            unique: true
-        },
-    
-        isVerified: {
-            type: Boolean,
-            default: false
-        }
-
+    emailAddress: {
+        type: String,
+        required: true,
+        unique: true
     },
 
     password: {
         type: String,
         required: true
+    },
+
+    isVerified: {
+        type: Boolean,
+        required: false
+    },
+
+    isCreator:{
+        type:Boolean,
+        required:false,
+        default: false
     },
 
     prefix: {
@@ -47,7 +48,6 @@ const UserSchema = new Schema({
     gender: {
         type: String,
         required: false
-        
     },
 
     jobTitle: {
@@ -60,38 +60,44 @@ const UserSchema = new Schema({
         required: false
     },
 
-    phone:{
-        cellPhone: {
-            type: String,
-            required: false
-        },
-    
-        workPhone: {
-            type: String,
-            required: false
-        }
+    cellPhone: {
+        type: String,
+        required: false
     },
 
-    address:{
-        homeAddress: {
-            type: String,
-            required: false
-        },
+    workPhone: {
+        type: String,
+        required: false
+    },
 
-        workAddress: {
-            type: String,
-            required: false
-        },
+    homeAddress: {
+        type: String,
+        required: false
+    },
 
-        shippingAddress: {
-            type: String,
-            required: false
-        }
+    workAddress: {
+        type: String,
+        required: false
+    },
 
+    shippingAddress: {
+        type: String,
+        required: false
     }
 
-})
-UserSchema.plugin(uniqueValidator);
+}, {timestamps: true});
 
 
-module.exports = User = mongoose.model('users', UserSchema);
+userSchema.plugin(uniqueValidator);
+
+
+userSchema.methods.generateAuthToken = async function() {
+    const user= this;
+    const token = jwt.sign({_id: user._id.toString()}, process.env.JWT_KEY, {
+        expiresIn: "24h"
+    });
+    return token;
+};
+
+
+module.exports = User = mongoose.model('users', userSchema);

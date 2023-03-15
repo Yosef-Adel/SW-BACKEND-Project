@@ -13,27 +13,23 @@ const OrderSchema = new Schema({
         ref: 'user'
     },
 
-    ticketsBought:[{
-        number:{
-            type: Number,
-            required: true
-        },
-        ticketClass:{
-            type: Schema.Types.ObjectId,
-            ref: 'ticket'
-        }
-    }],
+    numberOfTicketsBought:{
+        type: Number,
+        required: true
+    },
+    ticketClassBought:{
+        type: Schema.Types.ObjectId,
+        ref: 'ticket'
+    },
 
-    fees:{
-        priceBeforeDiscount:{
-            type: Number,
-            required: true
-        },
-        discountAmount:{
-            type: Number,
-            required: true
-        }
+    priceBeforeDiscount:{
+        type: Number,
+        required: true
+    },
+    discountAmount:{
+        type: Number,
+        required: true
     }
-})
+}, {timestamps: true})
 
 module.exports = Order = mongoose.model('order', OrderSchema);

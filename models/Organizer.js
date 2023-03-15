@@ -37,6 +37,6 @@ const OrganizerSchema = new Schema({
         required: false
     }
 
-})
+}, {timestamps: true})
 
 module.exports = Organizer = mongoose.model('organizer', OrganizerSchema);

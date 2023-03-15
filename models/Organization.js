@@ -27,6 +27,6 @@ const OrganizationSchema = new Schema({
         ref: 'organizer',
         default: []
     }]
-})
+}, {timestamps: true})
 
 module.exports = Organization = mongoose.model('organization', OrganizationSchema);

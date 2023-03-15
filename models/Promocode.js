@@ -7,17 +7,15 @@ const PromocodeSchema = new Schema({
         required: true
     },
 
-    appliedTo: {
-        event: {
+    event: {
             type: Schema.Types.ObjectId,
             ref: 'event'
         },
 
-        tickets:[{
-            type: Schema.Types.ObjectId,
-            ref: 'ticket'
-        }]
-    },
+    tickets:[{
+        type: Schema.Types.ObjectId,
+        ref: 'ticket'
+    }],
 
     amount: {
         type: Number,
@@ -38,6 +36,6 @@ const PromocodeSchema = new Schema({
         type: Date,
         required: true
     }
-})
+}, {timestamps: true})
 
 module.exports = Promocode = mongoose.model('promocode', PromocodeSchema);
