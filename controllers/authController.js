@@ -1,13 +1,12 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const bcrypt = require("bcryptjs");
-const saltRounds = 10;
-const password = "Admin@123";
 const sendMail = require('../utils/emailVerification');
 const crypto = require('crypto');
 const appError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
-
+const saltRounds = 10;
+const password = "Admin@123";
 
 bcrypt.genSalt(saltRounds)
   .then(salt => {
@@ -16,7 +15,6 @@ bcrypt.genSalt(saltRounds)
   }).then(hash => {
     console.log('Hash: ', hash);
   }).catch(err => console.error(err.message));
-
 
 const signToken = id => {
     return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE })};
@@ -47,6 +45,7 @@ const signUp= async (req, res) => {
         subject: `Verify your email address with Eventbrite`,
         message: verifyEmailText
         });
+        await user.save();
 
         return res.json("check your email for verification",user);
     }
@@ -92,8 +91,11 @@ const login= async (req, res) => {
                 throw new Error("User is not found");
             }
             
+            console.log(user.password);
+            console.log(req.body.password);
             const isMatch = await bcrypt.compare(req.body.password, user.password);
-            if (isMatch) 
+            console.log(isMatch);
+            if (!isMatch) 
             {
                 throw new Error("Password is incorrect");
             }
@@ -153,17 +155,17 @@ const sendForgotPasswordToken = async emailAddress => {
 };
 
 
-const loginWithFacebookOrGoogle = async (req, res) => {
+// const loginWithFacebookOrGoogle = async (req, res) => {
     
-    const token = signToken(req.user._id);
+//     const token = signToken(req.user._id);
 
-    res.status(200).json({
-      status: 'Success',
-      success: true,
-      expireDate: process.env.JWT_EXPIRE,
-      token
-      });
-  };
+//     res.status(200).json({
+//       status: 'Success',
+//       success: true,
+//       expireDate: process.env.JWT_EXPIRE,
+//       token
+//       });
+//   };
 
 
 
