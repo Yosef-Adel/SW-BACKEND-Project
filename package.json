@@ -28,6 +28,7 @@
     "crypto-js": "^4.1.1",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
+    "express-session": "^1.17.3",
     "joi": "^17.8.4",
     "jsdoc": "^4.0.2",
     "jsonwebtoken": "^9.0.0",
