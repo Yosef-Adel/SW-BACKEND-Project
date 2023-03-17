@@ -31,6 +31,6 @@ const VenueSchema = new Schema({
         required: true
     }
 
-})
+}, {timestamps: true})
 
 module.exports = Venue = mongoose.model('venue', VenueSchema);

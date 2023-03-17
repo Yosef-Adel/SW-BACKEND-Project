@@ -5,6 +5,7 @@ const bp = require('body-parser');
 const app= express();
 var cors = require("cors");
 const userRouter = require("./routes/userRoute");
+const authRouter = require('./routes/authRoute');
 
 app.use(express.json());
 app.use(cors());
@@ -20,10 +21,19 @@ app.use(express.static('public'));
 app.use(morgan('dev'));
 
 app.use('/api/users', userRouter);
-app.use("", (req, res, next) => {
-    res.status(200).json({
-        message: "Welcome to the API"
-    });
-});
+// app.use("", (req, res, next) => {
+//     res.status(200).json({
+//         message: "Welcome to the API"
+//     });
+// });
+
+////////////// auth route //////////////
+app.use('/auth', authRouter);
+
+////////////// user route //////////////
+app.use('/user', userRouter);
+
+
+
 
 module.exports = app;
