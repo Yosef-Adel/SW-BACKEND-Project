@@ -1,7 +1,5 @@
 const User = require('../models/User');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const keys = require('../config/keys');
+
 
 // @route   GET api/users/test
 // @desc    Tests users route

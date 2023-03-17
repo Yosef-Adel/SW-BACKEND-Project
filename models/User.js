@@ -131,7 +131,7 @@ userSchema.methods.generateEmailVerificationToken = async function () {
 
     this.verifyEmailTokenExpiry= process.env.JWT_EXPIRE;
     await this.save({
-      validateBeforeSave: false
+        validateBeforeSave: false
     });
     
     return verifyToken;
@@ -154,9 +154,9 @@ userSchema.methods.generateForgotPasswordToken = async (req,res)=>{
     }
     this.passwordResetTokenExpiry= process.env.JWT_EXPIRE;
 
-    await this.save({
-        validateBeforeSave: false
-      });
+    // await this.save({
+    //     validateBeforeSave: false
+    //   });
 
     return resetPasswordToken;
 }

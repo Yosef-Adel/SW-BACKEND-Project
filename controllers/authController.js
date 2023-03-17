@@ -38,8 +38,17 @@ const signUp= async (req, res) => {
         }
 
         const hashedPass = await bcrypt.hash(req.body.password, saltRounds);
-        user.password= hashedPass;       
-        return res.json(user);
+        user.password= hashedPass;  
+        const verifyEmailToken = await user.generateEmailVerificationToken();
+        const verifyEmailText = "Please click on the button to complete the verification process."
+    
+        await sendMail({
+        email: user.emailAddress,
+        subject: `Verify your email address with Eventbrite`,
+        message: verifyEmailText
+        });
+
+        return res.json("check your email for verification",user);
     }
     
     catch (err) {
