@@ -23,6 +23,11 @@ const TicketSchema = new Schema({
         required: true
     },
 
+    fee:{
+        type: Number,
+        required: true
+    },
+
     regularCapacity:{
         type: Number,
         required: true
