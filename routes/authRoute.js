@@ -2,10 +2,16 @@ const express = require('express');
 const authRouter = express.Router();
 const authController = require('../controllers/authController');
 
-/////////// post requests ///////////
-authRouter.post('/sign-up', authController.signUp);
 
-authRouter.post('/log-in', authController.logIn);
+
+authRouter.post('/sign-up', authController.signUp);
+authRouter.post('/login', authController.login);
+
+//authRouter.post('/forgot-password', authController.forgotPassword);
+
+//authRouter.patch('/reset-password/:token', authController.resetPassword);
+
+//authRouter.get('/sign-up-verify/:token', authController.verification);
 
 
 
