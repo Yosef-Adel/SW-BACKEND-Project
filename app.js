@@ -7,6 +7,7 @@ var cors = require("cors");
 const userRouter = require("./routes/userRoute");
 const authRouter = require('./routes/authRoute');
 const orderRouter = require('./routes/orderRoute');
+const ticketRouter = require('./routes/ticketRoute');
 
 app.use(express.json({ extended: false }));
 app.use(cors());
@@ -37,6 +38,9 @@ app.use('/user', userRouter);
 
 //////////////order route //////////////
 app.use('/order', orderRouter);
+
+//////////////ticket route //////////////
+app.use('/ticket', ticketRouter);
 
 
 

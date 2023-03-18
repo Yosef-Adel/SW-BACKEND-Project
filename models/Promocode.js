@@ -17,24 +17,32 @@ const PromocodeSchema = new Schema({
         ref: 'ticket'
     }],
 
-    amount: {
+    //the percent off the single ticket price
+    percentOff: {
         type: Number,
         required: true
     },
 
+    //the number of times the promocode can be used
     limit: {
         type: Number,
-        required: true
+        required: false
+    },
+
+    //the number of times the promocode has been used
+    used: {
+        type: Number,
+        required: false
     },
 
     startDate: {
         type: Date,
-        required: true
+        required: false
     },
     
     endDate: {
         type: Date,
-        required: true
+        required: false
     }
 }, {timestamps: true})
 

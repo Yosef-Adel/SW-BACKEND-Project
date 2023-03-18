@@ -33,22 +33,28 @@ const OrderSchema = new Schema({
         }
     }],
 
+    promocode:{
+        type: Schema.Types.ObjectId,
+        ref: 'promocode',
+        required: false
+    },
+
     // the subtotal is the sum of the price of each ticket bought
     subTotal:{
         type: Number,
-        required: true
+        required: false
     },
 
     //the added fee to the subtotal
     fees:{
         type: Number,
-        required: true
+        required: false
     },
 
     //the discount amount of the promocode
     discountAmount:{
         type: Number,
-        required: true
+        required: false
     },
     
 
@@ -56,7 +62,7 @@ const OrderSchema = new Schema({
     //which is the subtotal + fees - discountAmount
     total:{
         type: Number,
-        required: true
+        required: false
     }
 
 }, {timestamps: true})
