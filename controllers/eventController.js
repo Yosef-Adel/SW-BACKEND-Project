@@ -1,7 +1,7 @@
 const Event = require('../models/Events');
 const Category = require('../models/Category');
 
-// @route   Create api/event/
+// @route   Create api/events/
 // @desc    Create event
 // @access  Public
 exports.create = (req, res) => {
@@ -32,25 +32,25 @@ exports.create = (req, res) => {
     
 }
 
-// @route   GET api/event/
+// @route   GET api/events?category=category_id&
 // @desc    Get all events
 // @access  Public
 exports.getAll = (req, res) => {
-    Event.find()
+    Event.find().populate('category')
         .then(events => res.json(events))
         .catch(err => res.status(400).json(err));
 }
 
-// @route   GET api/event/:id
+// @route   GET api/events/:id
 // @desc    Get event by id
 // @access  Public
 exports.getById = (req, res) => {
-    Event.findById(req.params.id)
+    Event.findById(req.params.id).populate('category')
         .then(event => res.json(event))
         .catch(err => res.status(400).json(err));
 }
 
-// @route   PUT api/event/:id
+// @route   PUT api/events/:id
 // @desc    Update event by id
 // @access  Public
 exports.update = (req, res) => {
@@ -62,3 +62,36 @@ exports.update = (req, res) => {
         .then(event => res.json(event))
         .catch(err => res.status(400).json(err));
 }
+
+// @route   DELETE api/events/:id
+// @desc    Delete event by id
+// @access  Public
+exports.delete = (req, res) => {
+    Event.findByIdAndDelete(req.params.id)
+        .then(event => res.json(event))
+        .catch(err => res.status(400).json(err));
+}
+
+// @route   GET api/events/search?q=keyword
+// @desc    Search events by name
+// @access  Public
+exports.search = (req, res) => {
+    const query = req.query.q;
+    if (query === undefined || query === "") {
+        return res.status(400).json({ message: "Query is undefined" });
+    }
+    const events = Event.aggregate([
+        {
+            "$search": {
+                "index": "eventsName",
+                "autocomplete": {
+                    "query": query,
+                    "path": "name",
+                }
+            }
+        }
+    ]).then(events => res.json(events)).catch(err => res.status(400).json(err));
+
+
+}
+

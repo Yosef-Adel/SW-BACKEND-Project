@@ -22,7 +22,7 @@ app.use(express.static('public'));
 app.use(morgan('dev'));
 
 app.use('/api/users', userRouter);
-app.use('/api/event', eventRouter);
-app.use('/api/category', categoryRouter);
+app.use('/api/events', eventRouter);
+app.use('/api/categories', categoryRouter);
 
 module.exports = app;
