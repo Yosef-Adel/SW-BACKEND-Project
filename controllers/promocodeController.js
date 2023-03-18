@@ -2,6 +2,9 @@
 const Promocode = require('../models/Promocode');
 
 
+//@route POST api/promocode/:event_id
+//@desc create a new promocode
+//@access public
 const createPromocode = async (req, res, next) => {
         if (!(req.user)) {
             return res.status(400).json({ message: "User is not logged in." });

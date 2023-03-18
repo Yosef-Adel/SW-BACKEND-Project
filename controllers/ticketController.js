@@ -1,6 +1,10 @@
 
 const Ticket = require('../models/Tickets');
 
+
+//@route POST api/ticket/:event_id
+//@desc create a new ticket
+//@access public
 const createTicket = async (req, res, next ) => {
 
     if (!(req.user)) {
