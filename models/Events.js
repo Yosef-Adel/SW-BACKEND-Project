@@ -65,7 +65,7 @@ const EventSchema = new Schema({
         ref: 'venue'
     }
 
-})
+}, {timestamps: true})
 
 module.exports = Event = mongoose.model('event', EventSchema);
 

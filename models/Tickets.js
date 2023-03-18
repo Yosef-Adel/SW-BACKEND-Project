@@ -23,43 +23,37 @@ const TicketSchema = new Schema({
         required: true
     },
 
-    capacity:{
-        regular:{
-            type: Number,
-            required: true
-        },
-        onHold:{
-            type: Number,
-            required: false
-        }
+    regularCapacity:{
+        type: Number,
+        required: true
+    },
+    onHoldCapacity:{
+        type: Number,
+        required: false
     },
 
-    perOrder:{
-        minQuantity:{
-            type: Number,
-            required: true
-        },
-        maxQuantity:{
-            type: Number,
-            required: true
-        }
+    minQuantityPerOrder:{
+        type: Number,
+        required: true
+    },
+    maxQuantityPerOrder:{
+        type: Number,
+        required: true
     },
 
-    sales:{
-        salesStart:{
-            type: Date,
-            required: true
-        },
-        salesEnd:{
-            type: Date,
-            required: true
-        },
-        status:{
-            type: String,
-            required: true
-        }
+    salesStart:{
+        type: Date,
+        required: true
+    },
+    salesEnd:{
+        type: Date,
+        required: true
+    },
+    salesStatus:{
+        type: String,
+        required: true
     }
 
-})
+}, {timestamps: true})
 
 module.exports = Ticket = mongoose.model('ticket', TicketSchema);

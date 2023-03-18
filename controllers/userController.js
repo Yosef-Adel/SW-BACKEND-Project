@@ -1,7 +1,5 @@
 const User = require('../models/User');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const keys = require('../config/keys');
+
 
 // @route   GET api/users/test
 // @desc    Tests users route
@@ -16,4 +14,17 @@ exports.test = (req, res) => {
 exports.register = (req, res) => {
     return res.json({ msg: 'Register Works' });
 }
+
+
+//a test to check if the user is authorized
+//the user must be logged in to access this route
+//the route should have all the user info in the request
+exports.testAuthorization = (req, res) => {
+    res.json({
+        msg: 'The user is authorized ',
+        user: req.user,
+        isCreator: req.isCreator
+    });
+}
+
 
