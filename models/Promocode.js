@@ -2,15 +2,16 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const PromocodeSchema = new Schema({
+    
+    event: {
+        type: Schema.Types.ObjectId,
+        ref: 'event'
+    },
+
     name: {
         type: String,
         required: true
     },
-
-    event: {
-            type: Schema.Types.ObjectId,
-            ref: 'event'
-        },
 
     tickets:[{
         type: Schema.Types.ObjectId,

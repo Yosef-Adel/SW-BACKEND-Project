@@ -1,5 +1,7 @@
 const { boolean } = require('joi');
 const Order = require('../models/Order');
+const TicketClass = require('../models/Tickets');
+const Event = require('../models/Events');
 
 
 // @route   POST api/orders/:event_id
