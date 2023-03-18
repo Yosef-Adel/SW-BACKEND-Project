@@ -2,6 +2,7 @@ const { boolean } = require('joi');
 const Order = require('../models/Order');
 const TicketClass = require('../models/Tickets');
 const Event = require('../models/Events');
+const Promocode = require('../models/Promocode');
 
 
 // @route   POST api/orders/:event_id
@@ -28,62 +29,78 @@ const createOrder=async (req, res, next ) => {
     let total = 0;
 
     //loop through the tickets bought array
-    for(let i=0; i<ticketsBought.length; i++){
+    for(let i=0; i< ticketsBought.length; i++){
         //the ticket class id
         const ticketClassId = ticketsBought[i].ticketClass;
+        console.log("ticketClassId: " + ticketClassId);
         //the number of tickets bought
         const numberOfTicketsBought = ticketsBought[i].number;
-        //populate the ticket class
-        await ticketClassId.populate('ticketClass').execPopulate();
+        console.log("numberOfTicketsBought: " + numberOfTicketsBought);
+        let ticketPriceOriginal = 0;
+        let ticketPrice = 0;
+        let ticketFee = 0;
+        //find the ticket class by id 
+        //and get the ticket class object
+        await TicketClass.findById(ticketClassId)
+        .then(async ticketClass => {
+            ///////////////////////////////////Availablity Check/////////////////////////////////////
+            //check if the ticket class is available
+            //check on the start date and end date of ticket class
+            if(ticketClass.capacity < numberOfTicketsBought || ticketClass.startDate > Date.now() || ticketClass.endDate < Date.now()){
+                return res.status(500).json({message: "Ticket Class not available!"});
+            }
 
+            //check on the min and max quantity per order
+            if(numberOfTicketsBought < ticketClass.minQuantityPerOrder || numberOfTicketsBought > ticketClass.maxQuantityPerOrder){
+                return res.status(500).json({message: "Number of tickets bought is not in the range of min and max quantity per order!"});
+            }
+            console.log("old capacity: " + ticketClass.capacity);
+
+            //update the capacity of the ticket class
+            ticketClass.capacity -= numberOfTicketsBought;
+            console.log("new capacity: " + ticketClass.capacity);
+
+            //save the ticket class
+            try {
+                await ticketClass.save();
+            } catch (err) {
+                return res.status(500).json({message: "Ticket Class update failed!"});
+            }
+
+            ticketPriceOriginal = ticketClass.price;
+            ticketPrice = ticketClass.price;
+            ticketFee = ticketClass.fee;
+            console.log("ticketPrice: " + ticketPrice);
+            console.log("ticketFee: " + ticketFee);
+
+        });
         
-        ////////////////////////////////////Availablity Check/////////////////////////////////////
-        //check if the ticket class is available
-        //check on the start date and end date of ticket class
-        if(ticketClassId.capacity < numberOfTicketsBought || ticketClassId.startDate > Date.now() || ticketClassId.endDate < Date.now()){
-            return res.status(500).json({message: "Ticket Class not available!"});
-        }
-
-        //check on the min and max quantity per order
-        if(numberOfTicketsBought < ticketClassId.minQuantityPerOrder || numberOfTicketsBought > ticketClassId.maxQuantityPerOrder){
-            return res.status(500).json({message: "Number of tickets bought is not in the range of min and max quantity per order!"});
-        }
-
-        //update the capacity of the ticket class
-        ticketClassId.capacity -= numberOfTicketsBought;
-
-        //save the ticket class
-        try {
-            await ticketClassId.save();
-        } catch (err) {
-            return res.status(500).json({message: "Ticket Class update failed!"});
-        }
-
-        ticketPrice = ticketClassId.price;
-        ticketFee = ticketClassId.fee;
         ////////////////////////////////////Promocode check/////////////////////////////////////
         //check if there was a promocode
         if(promocode){
             //populate the promocode to get all the info from its id
-            await promocode.populate('promocode').execPopulate();
-            //check if the promocode is valid
-            //check on the start and end dates
-            //check on the limit of uses and the number of uses
-            if(promocode.startDate > Date.now() || promocode.endDate < Date.now() || promocode.used <= promocode.limit){
-                return res.status(500).json({message: "Promocode not available!"});
-            }
-            //update the number of uses of the promocode
-            promocode.numberOfUses += 1;
-            //save the promocode
-            try {
-                await promocode.save();
-            }
-            catch (err) {
-                return res.status(500).json({message: "Promocode update failed!"});
-            }
+            await Promocode.findById(promocode).then(async promocode => {
+                //check if the promocode is valid
+                //check on the start and end dates
+                //check on the limit of uses and the number of uses
+                if(promocode.startDate > Date.now() || promocode.endDate < Date.now() || promocode.used <= promocode.limit){
+                    return res.status(500).json({message: "Promocode not available!"});
+                }
+                //update the number of uses of the promocode
+                promocode.numberOfUses += 1;
+                //save the promocode
+                try {
+                    await promocode.save();
+                }
+                catch (err) {
+                    return res.status(500).json({message: "Promocode update failed!"});
+                }
+            });
             //update the ticket ticket price
-            ticketPrice = ticketPrice - (ticketPrice * promocode.percentOff);
+            ticketPrice = ticketPrice - (ticketPrice * (promocode.percentOff/100));
         }
+        
+
         //Update the total number of tickets
         totalTickets += numberOfTicketsBought;
         //Update the subtotal
@@ -91,11 +108,17 @@ const createOrder=async (req, res, next ) => {
         //Update the total fees
         totalFees += ticketFee * numberOfTicketsBought;
         //Update the total discount amount
-        totalDiscountAmount += (ticketClassId.price - ticketPrice) * numberOfTicketsBought;
+        totalDiscountAmount += (ticketPriceOriginal - ticketPrice) * numberOfTicketsBought;
         //Update the total
         total += subTotal + totalFees - totalDiscountAmount;
     }
 
+    console.log("totalTickets: " + totalTickets);
+    console.log("subTotal: " + subTotal);
+    console.log("totalFees: " + totalFees);
+    console.log("totalDiscountAmount: " + totalDiscountAmount);
+    console.log("total: " + total);
+    console.log("ticketsBought: " + ticketsBought);
     //create a new order
     const order = new Order({
         event: eventId,
