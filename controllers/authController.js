@@ -9,18 +9,24 @@ const Date = require("date.js");
 const saltRounds = 10;
 const password = "Admin@123";
 
+/**
+ * @description setting bycrypt to hash password
+ */
 
 bcrypt.genSalt(saltRounds)
-  .then(salt => {
+    .then(salt => {
     console.log('Salt: ', salt);
     return bcrypt.hash(password, salt)
-  }).then(hash => {
+    }).then(hash => {
     console.log('Hash: ', hash);
-  }).catch(err => console.error(err.message));
+    }).catch(err => console.error(err.message));
 
 const signToken = id => {
     return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE })};
 
+
+
+/*      sign up + sending verification email       */
 
 const signUp= async (req, res) => {
     try{
@@ -59,10 +65,10 @@ const signUp= async (req, res) => {
     
     catch (err) {
         return res.status(400).json({ message: err.message });
-      }
+    }
 };
 
-
+/*      account verification via token       */
 const verification = catchAsync(async (req, res, next) => {
     try{
         if (!req.params.token)
@@ -87,14 +93,14 @@ const verification = catchAsync(async (req, res, next) => {
         expireDate: process.env.JWT_EXPIRE,
         secret: process.env.JWT_SECRET,
         token : userToken
-      });  
+        });  
     }
     catch(err){
         return res.status(400).json({ message: err.message });
     }
 });
 
-
+/*      login + generating token       */
 const login= async (req, res) => {
     try {
         if (req.body.emailAddress){
@@ -128,6 +134,7 @@ const login= async (req, res) => {
     }
 };
 
+/*      sending forgot password email with a token      */
 const forgotPassword = catchAsync(async (req, res) => {
     try{
 
@@ -157,16 +164,16 @@ const forgotPassword = catchAsync(async (req, res) => {
         res.status(200).json({
             status: 'success',
             message: 'Password token sent to email'
-          });
+        });
     }
     catch (err){
         
         throw new appError(`There was an error in sending forgot password token. ${err}`, 400);
     }
     
-  
 });
 
+/*      reseting password via token       */
 const resetPassword = async (req, res) => {
     try{
         if (!req.params.token) return next(new appError('No email confirmation token found.'));
@@ -184,8 +191,8 @@ const resetPassword = async (req, res) => {
 
         await user.save();
         res.status(200).json({
-          status: 'Success',
-          message: "password reset successfully"
+            status: 'Success',
+            message: "password reset successfully"
         });
     }
     catch(err)
@@ -194,18 +201,19 @@ const resetPassword = async (req, res) => {
     }
 };
 
+/*     sign in with facebook       */
 
 const loginWithFacebook = async (req, res) => {
     
     const token = signToken(req.user._id);
 
     res.status(200).json({
-      status: 'Success',
-      success: true,
-      expireDate: process.env.JWT_EXPIRE,
-      token
-      });
-  };
+        status: 'Success',
+        success: true,
+        expireDate: process.env.JWT_EXPIRE,
+        token
+        });
+};
 
 
 
