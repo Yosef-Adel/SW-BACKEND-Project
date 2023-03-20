@@ -5,8 +5,10 @@ const sendMail = require('../utils/emailVerification');
 const crypto = require('crypto');
 const appError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
+const Date = require("date.js");
 const saltRounds = 10;
 const password = "Admin@123";
+
 
 bcrypt.genSalt(saltRounds)
   .then(salt => {
@@ -37,9 +39,11 @@ const signUp= async (req, res) => {
 
         const hashedPass = await bcrypt.hash(req.body.password, saltRounds);
         user.password= hashedPass;  
+        
         const verifyEmailToken = await user.generateEmailVerificationToken();
-        const verifyEmailText = "Please click on the button to complete the verification process."
-    
+        user.verifyEmailTokenExpiry= Date(process.env.JWT_EXPIRE);
+        const verifyEmailText = `Please click on the link to complete the verification process http://localhost:3000/sign-up-verify/${verifyEmailToken}\n`;
+        
         await sendMail({
         email: user.emailAddress,
         subject: `Verify your email address with Eventbrite`,
@@ -47,7 +51,10 @@ const signUp= async (req, res) => {
         });
         await user.save();
 
-        return res.json("check your email for verification",user);
+        return res.status(200).json({
+            status: 'success',
+            message: 'Check your email for verification.'}
+            );
     }
     
     catch (err) {
@@ -57,28 +64,35 @@ const signUp= async (req, res) => {
 
 
 const verification = catchAsync(async (req, res, next) => {
-    if (!req.params.token)
+    try{
+        if (!req.params.token)
     return next(new appError('No email confirmation token found.'));
 
-    const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
+    //const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
 
 
-    const user = await User.findOne({verifyEmailToken: hashedToken} );
+    const user = await User.findOne({verifyEmailToken: req.params.token} );
     if (!user) return next(new appError(`Token is invalid or has expired`, 400));
 
     user.verifyEmailToken = undefined;
+    user.verifyEmailTokenExpiry = undefined;
     user.isVerified = true;
     await user.save();
-    
-    const token = signToken(user._id);
-
+    console.log("saved");
+    const userToken = await user.generateAuthToken();
+    //console.log("token = ", userToken)
     res.status(200).json({
         status: 'Success',
         success: true,
         expireDate: process.env.JWT_EXPIRE,
-        token
+        secret: process.env.JWT_SECRET,
+        token : userToken
       });  
-})
+    }
+    catch(err){
+        return res.status(400).json({ message: err.message });
+    }
+});
 
 
 const login= async (req, res) => {
@@ -105,6 +119,7 @@ const login= async (req, res) => {
             console.log("user logged-in", user);
 
             return res.json({token, user});
+
         }
     }
 
@@ -113,60 +128,85 @@ const login= async (req, res) => {
     }
 };
 
-const forgotPassword = async (req, res) => {
-    await sendForgotPasswordToken(req.body.emailAddress);
-  
-    res.status(200).json({
-      status: 'success',
-      message: 'Token sent to email!'
-    });
-}
-
-const sendForgotPasswordToken = async emailAddress => {
-    const user = await User.find({emailAddress});
-
-    if (!user)
-    {
-        console.log('Email not found');
-    }
-
-    const forgotPasswordToken = user.generateForgotPasswordToken();
-
-    const forgotPasswordEmailText = "We received a request to reset your password for your Eventbrite account. We received a request to reset your password for your Eventbrite account.";
-
+const forgotPassword = catchAsync(async (req, res) => {
     try{
+
+        console.log("inside try and email = ", req.body.emailAddress)
+        const user = await User.findOne({emailAddress: req.body.emailAddress});
+
+        if (!user)
+        {
+            res.status(400).send("User not found");
+        }
+        console.log("user found", user);
+        
+        const forgotPasswordToken = await user.generateForgotPasswordToken();
+        user.forgotPasswordTokenExpiry= Date(process.env.JWT_EXPIRE);
+        const forgotPasswordEmailText = `Click on the link to reset your password http://localhost:3000/reset-password/${forgotPasswordToken}\n`;
+
+        await user.save();
+        
         await sendMail({
-            email: user.emailAddress,
-            subject: 'We received a request to reset your password for your Eventbrite account',
+            email: req.body.emailAddress,
+            subject: `We received a request to reset your password for your Eventbrite account`,
             message:forgotPasswordEmailText
         });
+
+        
+
+        res.status(200).json({
+            status: 'success',
+            message: 'Password token sent to email'
+          });
     }
     catch (err){
-        user.resetPasswordToken = undefined;
-        user.resetPasswordTokenExpiry = undefined;
-
-        await User.save({
-            validateBeforeSave: false
-          });
         
         throw new appError(`There was an error in sending forgot password token. ${err}`, 400);
     }
     
+  
+});
+
+const resetPassword = async (req, res) => {
+    try{
+        if (!req.params.token) return next(new appError('No email confirmation token found.'));
+
+        if (!req.body.password) return next(new appError('No email confirmation token found.'));
+        
+        const user = await User.findOne({forgotPasswordToken: req.params.token});
+        if (!user) res.status(400).send("User not found");
+
+        
+        const hashedPass = await bcrypt.hash(req.body.password, saltRounds);
+        user.password= hashedPass;  
+        user.forgotPasswordToken=undefined;
+        user.forgotPasswordTokenExpiry=undefined;
+
+        await user.save();
+        res.status(200).json({
+          status: 'Success',
+          message: "password reset successfully"
+        });
+    }
+    catch(err)
+    {
+        throw new appError(`There was an error in sending forgot password token. ${err}`, 400);
+    }
 };
 
 
-// const loginWithFacebookOrGoogle = async (req, res) => {
+const loginWithFacebook = async (req, res) => {
     
-//     const token = signToken(req.user._id);
+    const token = signToken(req.user._id);
 
-//     res.status(200).json({
-//       status: 'Success',
-//       success: true,
-//       expireDate: process.env.JWT_EXPIRE,
-//       token
-//       });
-//   };
+    res.status(200).json({
+      status: 'Success',
+      success: true,
+      expireDate: process.env.JWT_EXPIRE,
+      token
+      });
+  };
 
 
 
-module.exports = {signUp, login, verification, forgotPassword};
+module.exports = {signUp, login, verification, forgotPassword, resetPassword, loginWithFacebook};
