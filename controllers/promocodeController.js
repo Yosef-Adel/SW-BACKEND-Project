@@ -25,6 +25,7 @@ const createPromocode = async (req, res, next) => {
             tickets: req.body.tickets,
             percentOff: req.body.percentOff,
             limit: req.body.limit,
+            used: req.body.used,
             startDate: new Date(req.body.startDate),
             endDate: new Date(req.body.endDate)
             });
