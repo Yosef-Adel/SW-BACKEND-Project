@@ -12,7 +12,8 @@ const TicketSchema = new Schema({
         type: String,
         required: true
     },
-
+    
+    //free or paid
     type:{
         type: String,
         required: true
@@ -23,13 +24,14 @@ const TicketSchema = new Schema({
         required: true
     },
 
-    regularCapacity:{
+    fee:{
         type: Number,
         required: true
     },
-    onHoldCapacity:{
+
+    capacity:{
         type: Number,
-        required: false
+        required: true
     },
 
     minQuantityPerOrder:{
@@ -47,10 +49,6 @@ const TicketSchema = new Schema({
     },
     salesEnd:{
         type: Date,
-        required: true
-    },
-    salesStatus:{
-        type: String,
         required: true
     }
 
