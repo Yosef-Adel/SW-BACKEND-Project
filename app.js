@@ -34,9 +34,6 @@ app.use('/auth', authRouter);
 
 ////////////// user route //////////////
 app.use('/user', userRouter);
-
-
-
 app.use('/api/events', eventRouter);
 app.use('/api/categories', categoryRouter);
 

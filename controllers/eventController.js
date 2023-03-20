@@ -1,5 +1,9 @@
 const Event = require('../models/Events');
 const Category = require('../models/Category');
+const Venue = require('../models/Venue');
+const axios = require('axios');
+
+
 
 // @route   Create api/events/
 // @desc    Create event
@@ -11,6 +15,9 @@ exports.create = (req, res) => {
     if (Category.findById(category) === null) {
         return res.status(400).json({ message: "Category does not exist" });
     }
+
+    // TODO: Check if venue exists
+
 
     // Create event
     const newEvent = new Event({
@@ -93,5 +100,29 @@ exports.search = (req, res) => {
     ]).then(events => res.json(events)).catch(err => res.status(400).json(err));
 
 
+}
+
+// @route   GET api/events/nearest?lat=latitude&lng=longitude
+// @desc    Get nearest events
+// @access  Public
+exports.getNearest = async (req, res) => {
+    const lat = req.query.lat;
+    const lng = req.query.lng;
+    let city = "";
+
+    const mapboxtoken = process.env.MAPBOX_TOKEN;
+    const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${mapboxtoken}`;
+
+    const data = await axios.get(url);
+    const json = data.data;
+    for (const feature of json.features) {
+        if (feature.place_type[0] === "region") {
+            city = feature.text;
+            break;
+        }
+    }
+    
+    const events = []
+    res.json({ city, events});
 }
 
