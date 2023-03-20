@@ -6,6 +6,9 @@ const app= express();
 var cors = require("cors");
 const userRouter = require("./routes/userRoute");
 const authRouter = require('./routes/authRoute');
+const orderRouter = require('./routes/orderRoute');
+const ticketRouter = require('./routes/ticketRoute');
+const promocodeRouter = require('./routes/promocodeRoute');
 
 app.use(express.json({ extended: false }));
 app.use(cors());
@@ -33,6 +36,16 @@ app.use('/auth', authRouter);
 
 ////////////// user route //////////////
 app.use('/user', userRouter);
+
+
+//////////////order route //////////////
+app.use('/order', orderRouter);
+
+//////////////ticket route //////////////
+app.use('/ticket', ticketRouter);
+
+//////////////promocode route //////////////
+app.use('/promocode', promocodeRouter);
 
 
 

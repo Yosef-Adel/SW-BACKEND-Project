@@ -34,13 +34,13 @@ const authorization = async (req, res, next) => {
                         })
 
 
+                        next();
                 });   
         } 
         else {
             return res.status(401).json({message: 'No token provided!'});
         }
             
-        next();
 };
 
 module.exports = authorization;
