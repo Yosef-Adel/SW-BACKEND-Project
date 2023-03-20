@@ -78,7 +78,7 @@ const verification = catchAsync(async (req, res, next) => {
 
 
     const user = await User.findOne({verifyEmailToken: req.params.token} );
-    if (!user) return next(new appError(`Token is invalid or has expired`, 400));
+    if (!user) throw new Error("Verification token has expired");
 
     user.verifyEmailToken = undefined;
     user.verifyEmailTokenExpiry = undefined;
@@ -109,6 +109,10 @@ const login= async (req, res) => {
             if (!user)
             {
                 throw new Error("User is not found");
+            }
+            if (!user.isVerified)
+            {
+                throw new Error("Please verify your email first.");
             }
             
             console.log(user.password);
@@ -178,10 +182,10 @@ const resetPassword = async (req, res) => {
     try{
         if (!req.params.token) return next(new appError('No email confirmation token found.'));
 
-        if (!req.body.password) return next(new appError('No email confirmation token found.'));
+        if (!req.body.password) return next(new appError('Please enter the new password.'));
         
         const user = await User.findOne({forgotPasswordToken: req.params.token});
-        if (!user) res.status(400).send("User not found");
+        if (!user) res.status(400).send("Password token has expired");
 
         
         const hashedPass = await bcrypt.hash(req.body.password, saltRounds);
