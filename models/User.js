@@ -1,23 +1,19 @@
-//const { uniqueId } = require('lodash');
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
 var uniqueValidator = require('mongoose-unique-validator');
 const jwt = require('jsonwebtoken');
 const crypto = require("crypto");
-const validator = require('validator');
-
-
+const Schema = mongoose.Schema;
 
 const userSchema = new Schema({
 
     firstName: {
         type: String,
-        required: true
+        required: false
     },
 
     lastName: {
         type: String,
-        required: true
+        required: false
     },
 
     emailAddress: {
@@ -38,18 +34,22 @@ const userSchema = new Schema({
 
     password: {
         type: String,
-        required: true
+        required: false
     },
-
-    resetPasswordToken: String,
     
-    resetPasswordTokenExpiry: Date,
+
+    forgotPasswordToken: String,
+    
+    forgotPasswordTokenExpiry: Date,
 
     isCreator:{
         type:Boolean,
         required:false,
         default: false
     },
+
+    facebookID: String,
+    googleID: String,
 
     prefix: {
         type: String,
@@ -110,7 +110,7 @@ userSchema.methods.generateAuthToken = async function() {
     return token;
 };
 
-userSchema.methods.generateEmailVerificationToken = async function () {
+userSchema.methods.generateEmailVerificationToken = async function() {
     let verifyToken;
     let flag = false;
     while(!flag) {
@@ -138,27 +138,33 @@ userSchema.methods.generateEmailVerificationToken = async function () {
 };
 
 
-
-userSchema.methods.generateForgotPasswordToken = async (req,res)=>{
-    let resetPasswordToken;
+userSchema.methods.generateForgotPasswordToken = async function() {
+    let passwordToken;
     let flag = false;
-    while (!flag)
-    {
-        resetPasswordToken=crypto.randomBytes(32).toString('hex');
-        this.passwordResetToken= crypto.createHash('sha256').update(resetPasswordToken).digest('hex');
+    console.log("flag in forgot password=", flag)
+    while(!flag) {
+        //generate token
+        passwordToken = crypto.randomBytes(32).toString('hex');
+        this.forgotPasswordToken = crypto.createHash('sha256').update(passwordToken).digest('hex');
 
-        const isUnique=await this.modelName('users').find({ passwordResetToken: this.passwordResetToken});
-        if (!isUnique){
-            flag=1;
+        //check if it exists before
+        const isUnique = await this.model('users').find({
+            forgotPasswordToken: this.forgotPasswordToken
+        }); 
+
+        //if unique, break
+        if(isUnique.length === 0) {
+            flag = 1;
         }
     }
-    this.passwordResetTokenExpiry= process.env.JWT_EXPIRE;
 
-    // await this.save({
-    //     validateBeforeSave: false
-    //   });
+    this.forgotPasswordTokenExpiry= process.env.JWT_EXPIRE;
+    await this.save({
+        validateBeforeSave: false
+    });
+    
+    return passwordToken;
+};
 
-    return resetPasswordToken;
-}
 
 module.exports = User = mongoose.model('users', userSchema);
