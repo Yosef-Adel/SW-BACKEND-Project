@@ -9,6 +9,7 @@ const authRouter = require('./routes/authRoute');
 const orderRouter = require('./routes/orderRoute');
 const ticketRouter = require('./routes/ticketRoute');
 const promocodeRouter = require('./routes/promocodeRoute');
+const venueRouter = require('./routes/venueRoute');
 
 app.use(express.json({ extended: false }));
 app.use(cors());
@@ -46,6 +47,9 @@ app.use('/ticket', ticketRouter);
 
 //////////////promocode route //////////////
 app.use('/promocode', promocodeRouter);
+
+//////////////venue route //////////////
+app.use('/venue', venueRouter);
 
 
 
