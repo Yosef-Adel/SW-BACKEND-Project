@@ -10,6 +10,8 @@ const orderRouter = require('./routes/orderRoute');
 const ticketRouter = require('./routes/ticketRoute');
 const promocodeRouter = require('./routes/promocodeRoute');
 const venueRouter = require('./routes/venueRoute');
+const qrCodeRouter = require('./routes/qrCodeRoute');
+
 
 app.use(express.json({ extended: false }));
 app.use(cors());
@@ -50,6 +52,9 @@ app.use('/promocode', promocodeRouter);
 
 //////////////venue route //////////////
 app.use('/venue', venueRouter);
+
+//////////////qrCode route //////////////
+app.use('/qrCode', qrCodeRouter);
 
 
 
