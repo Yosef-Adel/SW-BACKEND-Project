@@ -9,9 +9,10 @@ const Date = require("date.js");
 const saltRounds = 10;
 const password = "Admin@123";
 
-/**
- * @description setting bycrypt to hash password
- */
+
+
+
+/////////////////////////   setting bycrypt to hash password   /////////////////////////  
 
 bcrypt.genSalt(saltRounds)
     .then(salt => {
@@ -21,12 +22,14 @@ bcrypt.genSalt(saltRounds)
     console.log('Hash: ', hash);
     }).catch(err => console.error(err.message));
 
+
 const signToken = id => {
     return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE })};
 
 
 
-/*      sign up + sending verification email       */
+
+/////////////////////////   sign up + sending verification email   /////////////////////////   
 
 const signUp= async (req, res) => {
     try{
@@ -68,7 +71,11 @@ const signUp= async (req, res) => {
     }
 };
 
-/*      account verification via token       */
+
+
+
+/////////////////////////   account verification via token   /////////////////////////   
+
 const verification = catchAsync(async (req, res, next) => {
     try{
         if (!req.params.token)
@@ -85,14 +92,12 @@ const verification = catchAsync(async (req, res, next) => {
     user.isVerified = true;
     await user.save();
     console.log("saved");
-    const userToken = await user.generateAuthToken();
-    //console.log("token = ", userToken)
+    
     res.status(200).json({
         status: 'Success',
         success: true,
         expireDate: process.env.JWT_EXPIRE,
-        secret: process.env.JWT_SECRET,
-        token : userToken
+        secret: process.env.JWT_SECRET
         });  
     }
     catch(err){
@@ -100,7 +105,11 @@ const verification = catchAsync(async (req, res, next) => {
     }
 });
 
-/*      login + generating token       */
+
+
+
+/////////////////////////   login + generating a token   /////////////////////////   
+
 const login= async (req, res) => {
     try {
         if (req.body.emailAddress){
@@ -134,7 +143,11 @@ const login= async (req, res) => {
     }
 };
 
-/*      sending forgot password email with a token      */
+
+
+
+/////////////////////////   sending forgot password email with a token   /////////////////////////   
+
 const forgotPassword = catchAsync(async (req, res) => {
     try{
 
@@ -173,7 +186,11 @@ const forgotPassword = catchAsync(async (req, res) => {
     
 });
 
-/*      reseting password via token       */
+
+
+
+/////////////////////////   reseting password via token   /////////////////////////   
+
 const resetPassword = async (req, res) => {
     try{
         if (!req.params.token) return next(new appError('No email confirmation token found.'));
@@ -201,20 +218,48 @@ const resetPassword = async (req, res) => {
     }
 };
 
-/*     sign in with facebook       */
 
-const loginWithFacebook = async (req, res) => {
+
+
+/////////////////////////   sign in with facebook   /////////////////////////   
+
+const facebookCallback = async (req,res) => {
+    res.redirect('/home');
+}
+// const loginWithFacebook = async (req, res) => {
     
-    const token = signToken(req.user._id);
+//     const token = signToken(req.user._id);
 
-    res.status(200).json({
-        status: 'Success',
-        success: true,
-        expireDate: process.env.JWT_EXPIRE,
-        token
-        });
-};
+//     res.status(200).json({
+//         status: 'Success',
+//         success: true,
+//         expireDate: process.env.JWT_EXPIRE,
+//         token
+//         });
+// };
 
 
 
-module.exports = {signUp, login, verification, forgotPassword, resetPassword, loginWithFacebook};
+
+/////////////////////////   sign in with google   /////////////////////////   
+const googleCallback = async (req,res) => {
+    res.json("done");
+}
+
+
+// const loginWithGoogle = async (req, res) => {
+    
+//     const token = signToken(req.user._id);
+
+//     res.status(200).json({
+//         status: 'Success',
+//         success: true,
+//         expireDate: process.env.JWT_EXPIRE,
+//         token
+//         });
+// };
+
+
+
+
+module.exports = {signUp, login, verification, forgotPassword, resetPassword, facebookCallback, googleCallback};

@@ -12,6 +12,10 @@ const promocodeRouter = require('./routes/promocodeRoute');
 const venueRouter = require('./routes/venueRoute');
 const qrCodeRouter = require('./routes/qrCodeRoute');
 
+const passport = require("passport");
+const passportConfig = require("./config/passport");
+
+const session = require("express-session");
 
 app.use(express.json({ extended: false }));
 app.use(cors());
@@ -22,16 +26,17 @@ app.use(morgan('dev'));
 app.use(bp.json())
 app.use(bp.urlencoded({ extended: true }))
 
+
+passportConfig.googlePass(passport);
+passportConfig.facebookPass(passport);
+
+
+
+app.use(session({secret: process.env.JWT_KEY}));
+
 //middleware & static files
 app.use(express.static('public'));
 app.use(morgan('dev'));
-
-app.use('/api/users', userRouter);
-// app.use("", (req, res, next) => {
-//     res.status(200).json({
-//         message: "Welcome to the API"
-//     });
-// });
 
 
 ////////////// auth route //////////////
