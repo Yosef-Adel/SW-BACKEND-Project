@@ -1,7 +1,7 @@
 const express = require('express');
+const passport = require('passport');
 const authRouter = express.Router();
 const authController = require('../controllers/authController');
-//const passport = require("../config/passport");
 
 
 
@@ -14,7 +14,12 @@ authRouter.patch('/reset-password/:token', authController.resetPassword);
 
 authRouter.get('/sign-up-verify/:token', authController.verification);
 
-//authRouter.post('/facebook', passport.authenticate('facebook-token', { session: false }), authController.loginWithFacebook);
-//authRouter.post('/google', passport.authenticate('facebook-token', { session: false }), authController.loginWithGoogle)
+
+
+authRouter.get('/facebook', passport.authenticate('facebook'));
+authRouter.get('/facebook/callback', passport.authenticate('facebook'), authController.facebookCallback);
+
+authRouter.get('/google', passport.authenticate('google', { scope : ['profile', 'email'] }));
+authRouter.get('/google/callback', authController.googleCallback);
 
 module.exports = authRouter;
