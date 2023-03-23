@@ -243,7 +243,7 @@ const facebookCallback = async (req,res) => {
 
 /////////////////////////   sign in with google   /////////////////////////   
 const googleCallback = async (req,res) => {
-    res.redirect('/home');
+    res.json("done");
 }
 
 

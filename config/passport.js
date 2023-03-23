@@ -14,24 +14,26 @@ exports.googlePass= function(passport){
             },
         async function(accessToken, refreshToken, profile, done) {
             try {
+                console/log("inside try");
                 const { _json: profileInfo } = profile;
                 console.log("google profile: ", profile);
                 // Check if user signed up before using facebook
                 const userExists = await User.findOne({ googleID: profile.id })
-            
+                console.log(userExists);
                 if (userExists) {
                     return done(null, userExists)
                 }
 
 
                 // Create new user 
+                console.log("creating new user");
                 const newUser = new User({
-                    emailAddress: profileInfo.email,
+                    emailAddress: profile.emails[0].value,
                     googleID: profile.id,
                     isVerified: true
                 })
-            
-                await newUser.save()
+                console.log(profile.emails[0].value);
+                await newUser.save();
                 done(null, newUser)
             } 
 
@@ -48,7 +50,6 @@ exports.googlePass= function(passport){
     passport.deserializeUser(function(id, done) {
         return done(null, id);
     });
-
 }
 
 
@@ -66,24 +67,22 @@ exports.facebookPass = function(passport) {
                 console.log("facebook profile: ", profile);
                 // Check if user signed up before using facebook
                 const userExists = await User.findOne({ facebookID: profile.id })
-            
+                
                 if (userExists) {
                     return done(null, userExists)
                 }
-    
-    
                 // Create new user 
                 const newUser = new User({
                     emailAddress: profileInfo.email,
                     facebookID: profile.id,
                     isVerified: true
                 })
-            
-                await newUser.save()
-                done(null, newUser)
+                
+                await newUser.save();
+                done(null, newUser);
                 } 
                 catch (error) {
-                done(error, false, error.message)
+                done(error, false, error.message);
                 }
         }
     ));

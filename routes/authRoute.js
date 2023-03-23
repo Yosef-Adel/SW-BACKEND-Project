@@ -20,6 +20,6 @@ authRouter.get('/facebook', passport.authenticate('facebook'));
 authRouter.get('/facebook/callback', passport.authenticate('facebook'), authController.facebookCallback);
 
 authRouter.get('/google', passport.authenticate('google', { scope : ['profile', 'email'] }));
-authRouter.get('/google/callback', passport.authenticate('google'), authController.googleCallback);
+authRouter.get('/google/callback', authController.googleCallback);
 
 module.exports = authRouter;

@@ -20,6 +20,7 @@ app.use(morgan('dev'));
 app.use(bp.json())
 app.use(bp.urlencoded({ extended: true }))
 
+
 passportConfig.googlePass(passport);
 passportConfig.facebookPass(passport);
 
