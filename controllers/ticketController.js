@@ -15,10 +15,16 @@ const createTicket = async (req, res, next ) => {
     if (!req.isCreator) {
         return res.status(400).json({ message: "User is not a creator." });
     }
-    //check on all fields 
-    if (!(req.body.name && req.body.type && req.body.price && req.body.fee && req.body.capacity && req.body.minQuantityPerOrder && req.body.maxQuantityPerOrder && req.body.salesStart && req.body.salesEnd)) {
+    //check on all fields
+    //check if string is empty
+    //check if number doesn't exist
+    //zero is fine
+    //only give error when the field is not there
+    if (!req.body.name || !req.body.type || req.body.price==NaN || req.body.fee==NaN || req.body.capacity==NaN || req.body.minQuantityPerOrder==NaN || req.body.maxQuantityPerOrder==NaN || req.body.salesStart==NaN || req.body.salesEnd==NaN) {
         return res.status(400).json({ message: "All fields are required." });
     }
+
+
     let event = await Event.findById(req.params.event_id);
     if (!event) {
         return res.status(400).json({ message: "Event not found." });
@@ -27,6 +33,7 @@ const createTicket = async (req, res, next ) => {
     /////////////////////////////////check on the event capacity/////////////////////////////////////
     let eventCapacity = event.capacity;
     //loop through the tickets of the event and sum the capacities
+    //not tested yet
     let tickets = event.tickets;
     let totalCapacity = req.body.capacity;
     for (let i = 0; i < tickets.length; i++) {
