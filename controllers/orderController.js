@@ -4,6 +4,11 @@ const TicketClass = require('../models/Tickets');
 const Event = require('../models/Events');
 const Promocode = require('../models/Promocode');
 
+//require the function in the qr code controller 
+const {generateQRCodeAndSendEmail}=require('../controllers/qrCodeController');
+
+
+
 // @route   POST api/orders/:event_id
 // @desc    Create a new order
 // @access  Public
@@ -145,9 +150,15 @@ const createOrder=async (req, res ) => {
     //save the order
     try {
         await order.save();
+        //generate the qr code and send the email
+        let eventURL=process.env.CURRENTURL+"events/"+eventId;
+        await generateQRCodeAndSendEmail(eventURL,req.user._id);
+
         res.status(201).json({message: "Order created successfully!",
         order: order
         });
+        
+
     } catch (err) {
         res.status(500).json({message: "Order creation failed!"});
     }
