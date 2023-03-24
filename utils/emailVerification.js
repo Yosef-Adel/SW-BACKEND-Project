@@ -51,7 +51,6 @@ const sendMailWithAttachment = async options => {
       }
     ]
 };
-console.log(options.attachments[0].filename)
 await transporter.sendMail(mailOptions);
 };
 

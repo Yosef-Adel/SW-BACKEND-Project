@@ -22,11 +22,10 @@ const generateQRCodeAndSendEmail = async (req, res) => {
     //find the user by id from the id in the request
     let user = await User.findById(req.user._id);
     let userEmail = user.emailAddress;
-    console.log(userEmail);
 
     //generate the QR code
-    const qrImageName = await createQR(req.body.data);
-    console.log(qrImageName)
+    const qrImageName = await createQR(req.body.url);
+    
 
     //create a string combining the environment variable and the QR code name
     const qr = process.env.CURRENTURL + qrImageName;
@@ -42,7 +41,6 @@ const generateQRCodeAndSendEmail = async (req, res) => {
     await sendMailWithAttachment({
         email: userEmail,
         subject: 'QR Code',
-        // html: '<p>Please find the QR code below:</p>',
         attachments: [
             {
                 filename: qrImageName,
@@ -52,21 +50,12 @@ const generateQRCodeAndSendEmail = async (req, res) => {
                 cid: 'image'
             }
         ],
-        // html:'<p>Please find the QR code below:</p><br><img src="' + qr + '" alt="QrCode" title="QrCode" style="display:block" width="200" height="200" />'
         html: personalizedTemplate,
-        // attachments: [
-        //     {
-        //         filename: qrImageName,
-        //         path: "../public/" + qrImageName,
-        //         content: image,
-        //         cid: 'image'
-        //     }
-        // ]
     })
     await user.save();
 
     //delete the image file that was sent
-    await fs.unlinkSync('./public/' + qrImageName);
+    fs.unlinkSync('./public/' + qrImageName);
 
 
     return res.status(200).json({ message: "QR code sent successfully!" });
