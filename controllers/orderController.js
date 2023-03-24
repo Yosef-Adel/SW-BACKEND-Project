@@ -57,7 +57,7 @@ const createOrder=async (req, res ) => {
             }
 
             //check on the min and max quantity per order
-            if(numberOfTicketsBought < ticketClass.minQuantityPerOrder || numberOfTicketsBought > ticketClass.maxQuantityPerOrder){
+            if((numberOfTicketsBought!=0 && numberOfTicketsBought < ticketClass.minQuantityPerOrder) || numberOfTicketsBought > ticketClass.maxQuantityPerOrder){
                 isNumberOfTicketsBoughtInRange=false;
                 break;
             }
