@@ -4,6 +4,10 @@ const morgan = require('morgan');
 const bp = require('body-parser');
 const app= express();
 var cors = require("cors");
+
+const path = require('path');
+app.use(express.static(path.join(__dirname, 'public')));
+
 const userRouter = require("./routes/userRoute");
 const authRouter = require('./routes/authRoute');
 const orderRouter = require('./routes/orderRoute');

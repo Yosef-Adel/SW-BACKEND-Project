@@ -7,7 +7,7 @@ const {createQR} = require('../utils/createQR');
 //require the user model
 const User = require('../models/User');
 //require the sendEmail function
-const sendEmail = require('../utils/emailVerification');
+const {sendMailWithAttachment} = require('../utils/emailVerification');
 
 
 //generate the QR code and send it to the user's email
@@ -24,15 +24,29 @@ const generateQRCodeAndSendEmail = async (req, res) => {
     console.log(userEmail);
 
     //generate the QR code
-    const qr = await createQR(req.body.data);
+    const qrImageName = await createQR(req.body.data);
+
+    //create a string combining the environment variable and the QR code name
+    const qr = process.env.CURRENTURL + qrImageName;
+
     //send the QR code to the user's email
-    await sendEmail({
+    await sendMailWithAttachment({
         email: userEmail,
         subject: 'QR Code',
-        message: 'Here is your QR code',
+        // html: '<p>Please find the QR code below:</p>',
+        // attachments: [
+        //     {
+        //         filename: qrImageName,
+        //         path: "./public/" + qrImageName,
+        //         contentType: 'image/png'
+        //     }
+        // ]
+        html:'<p>Please find the QR code below:</p><br><img src="' + qr + '" alt="QrCode" title="QrCode" style="display:block" width="200" height="200" />'
+        
     })
+    await user.save();
 
-    res.status(200).json({ message: "QR code sent successfully!" });
+    return res.status(200).json({ message: "QR code sent successfully!" });
 
 }
 
