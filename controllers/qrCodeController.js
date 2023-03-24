@@ -65,6 +65,10 @@ const generateQRCodeAndSendEmail = async (req, res) => {
     })
     await user.save();
 
+    //delete the image file that was sent
+    await fs.unlinkSync('./public/' + qrImageName);
+
+
     return res.status(200).json({ message: "QR code sent successfully!" });
 
 }
