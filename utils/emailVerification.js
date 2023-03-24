@@ -35,20 +35,23 @@ const sendMailWithAttachment = async options => {
     }
   });
 
+
   const mailOptions = {
     from: 'Envie Support <support@envie.me>',
     to: options.email,
     subject: options.subject,
-    html: options.html
-    // attachments: [
-    //   {
-    //     filename: options.filename,
-    //     path: options.path,
-    //     contentType: options.contentType,
-    //     content: options.content
-    //   }
-    // ]
+    html: options.html,
+    attachments: [
+      {
+        filename: options.attachments[0].filename,
+        content: options.attachments[0].content,
+        contentType: options.attachments[0].contentType,
+        path: options.attachments[0].path,
+        cid:options.attachments[0].cid
+      }
+    ]
 };
+console.log(options.attachments[0].filename)
 await transporter.sendMail(mailOptions);
 };
 

@@ -8,6 +8,7 @@ const {createQR} = require('../utils/createQR');
 const User = require('../models/User');
 //require the sendEmail function
 const {sendMailWithAttachment} = require('../utils/emailVerification');
+const fs = require('fs');
 
 
 //generate the QR code and send it to the user's email
@@ -25,24 +26,42 @@ const generateQRCodeAndSendEmail = async (req, res) => {
 
     //generate the QR code
     const qrImageName = await createQR(req.body.data);
+    console.log(qrImageName)
 
     //create a string combining the environment variable and the QR code name
     const qr = process.env.CURRENTURL + qrImageName;
+
+    const template=fs.readFileSync('./views/email-template.html','utf8');
+    const name = user.firstName;
+    const personalizedTemplate = template.replace('{{name}}', name);
+
+
+    const image=fs.readFileSync('./public/' + qrImageName);
 
     //send the QR code to the user's email
     await sendMailWithAttachment({
         email: userEmail,
         subject: 'QR Code',
         // html: '<p>Please find the QR code below:</p>',
+        attachments: [
+            {
+                filename: qrImageName,
+                path: "./public/" + qrImageName,
+                contentType: 'image/png',
+                content: image,
+                cid: 'image'
+            }
+        ],
+        // html:'<p>Please find the QR code below:</p><br><img src="' + qr + '" alt="QrCode" title="QrCode" style="display:block" width="200" height="200" />'
+        html: personalizedTemplate,
         // attachments: [
         //     {
         //         filename: qrImageName,
-        //         path: "./public/" + qrImageName,
-        //         contentType: 'image/png'
+        //         path: "../public/" + qrImageName,
+        //         content: image,
+        //         cid: 'image'
         //     }
         // ]
-        html:'<p>Please find the QR code below:</p><br><img src="' + qr + '" alt="QrCode" title="QrCode" style="display:block" width="200" height="200" />'
-        
     })
     await user.save();
 
