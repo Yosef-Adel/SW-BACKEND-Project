@@ -1,5 +1,6 @@
 
 const Ticket = require('../models/Tickets');
+const Event = require('../models/Events');
 
 
 //@route POST api/ticket/:event_id
@@ -18,6 +19,25 @@ const createTicket = async (req, res, next ) => {
     if (!(req.body.name && req.body.type && req.body.price && req.body.fee && req.body.capacity && req.body.minQuantityPerOrder && req.body.maxQuantityPerOrder && req.body.salesStart && req.body.salesEnd)) {
         return res.status(400).json({ message: "All fields are required." });
     }
+    let event = await Event.findById(req.params.event_id);
+    if (!event) {
+        return res.status(400).json({ message: "Event not found." });
+    }
+
+    /////////////////////////////////check on the event capacity/////////////////////////////////////
+    let eventCapacity = event.capacity;
+    //loop through the tickets of the event and sum the capacities
+    let tickets = event.tickets;
+    let totalCapacity = req.body.capacity;
+    for (let i = 0; i < tickets.length; i++) {
+        let ticket = await Ticket.findById(tickets[i]);
+        totalCapacity += ticket.capacity;
+    }
+    //check if the total capacity of the tickets is less than the event capacity
+    if (totalCapacity >= eventCapacity) {
+        return res.status(400).json({ message: "The total capacity of the tickets is greater than the event capacity." });
+    }
+
 
     try {
         const ticket = new Ticket({
