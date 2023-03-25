@@ -2,6 +2,8 @@
 const supertest = require('supertest');
 const assert = require('assert');
 
+
+
 //mongoose
 const mongoose = require('mongoose');
 
@@ -209,10 +211,12 @@ beforeAll(async () => {
 //         expect(1).toBe(1);
 //     });
 // });
+
+//Testing the place order function WITHOUT the QR code part
+//comment the generateQRCode function in the createOrder function for the test to pass
 describe('Place order', () => {
-    //Working but without sending the qr code part
-    //comment the generateQRCode function in the createOrder function for the test to pass
-    describe('Normal Case, tickets are available and the promocode is available', () => {
+
+    describe('Case 1: Normal Case, tickets are available and the promocode is available', () => {
         it('should return 201', async () => {
             const event = eventId;
             const user_id = userId;
@@ -250,7 +254,7 @@ describe('Place order', () => {
         });
 
     });
-    describe('Normal Case, tickets are available and no promocode applied', () => {
+    describe('Case 2: Normal Case, tickets are available and no promocode applied', () => {
         it('should return 201', async () => {
             const event = eventId;
             const user_id = userId;
@@ -284,6 +288,82 @@ describe('Place order', () => {
             assert.equal(res.statusCode, 201);
             assert.equal(res.data.message, "Order created successfully!");
         });
+
+    });
+    describe('Case 3: Failed Case, the number of bought tickets is more than the ticket capacity', () => {
+        it('should return 500', async () => {
+            const event = eventId;
+            const user_id = userId;
+            const ticketsBought = [
+                {
+                    "ticketClass": ticketClass2Id,
+                    "number": 1
+                }
+            ];
+
+            const req = {
+                params: {
+                    event_id: event
+                },
+                user: {
+                    _id: user_id
+                },
+                body: {
+                    ticketsBought: ticketsBought
+                }
+            };
+            const res = {
+                status: function (status) {
+                    this.statusCode = status;
+                    return this;
+                },
+                json: function (data) {
+                    this.data = data;
+                }
+            };
+            await createOrder(req, res);
+            assert.equal(res.statusCode, 500);
+            assert.equal(res.data.message, "Ticket Class not available!");
+        });
+
+        describe("Case 4: Failed Case, the ticket didn't start selling yet", () => {
+            it('should return 500', async () => {
+                const event = eventId;
+                const user_id = userId;
+                const ticketsBought = [
+                    {
+                        "ticketClass": ticketClass3Id,
+                        "number": 4
+                    }
+                ];
+
+                const req = {
+                    params: {
+                        event_id: event
+                    },
+                    user: {
+                        _id: user_id
+                    },
+                    body: {
+                        ticketsBought: ticketsBought
+                    }
+                };
+                const res = {
+                    status: function (status) {
+                        this.statusCode = status;
+                        return this;
+                    },
+                    json: function (data) {
+                        this.data = data;
+                    }
+                };
+                await createOrder(req, res);
+                assert.equal(res.statusCode, 500);
+                assert.equal(res.data.message, "Ticket Class not available!");
+            });
+
+        });
+
 
 
     });

@@ -51,7 +51,7 @@ const createOrder=async (req, res ) => {
             ///////////////////////////////////Availablity Check/////////////////////////////////////
             //check if the ticket class is available
             //check on the start date and end date of ticket class
-            if(ticketClass.capacity < numberOfTicketsBought || ticketClass.salesStart > Date.now || ticketClass.salesEnd < Date.now()){
+            if(ticketClass.capacity < numberOfTicketsBought || ticketClass.salesStart > Date.now() || ticketClass.salesEnd < Date.now()){
                 isTicketClassAvailable=false;
                 break;
             }
@@ -158,7 +158,7 @@ const createOrder=async (req, res ) => {
     try {
         await order.save();
         //generate the qr code and send the email
-        
+
         // let eventURL=process.env.CURRENTURL+"events/"+eventId;
         // await generateQRCodeAndSendEmail(eventURL,req.user._id);
 
