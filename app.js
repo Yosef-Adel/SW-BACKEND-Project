@@ -9,6 +9,8 @@ const path = require('path');
 app.use(express.static(path.join(__dirname, 'public')));
 
 const userRouter = require("./routes/userRoute");
+const eventRouter = require("./routes/eventRoute");
+const categoryRouter = require("./routes/categoryRoute");
 const authRouter = require('./routes/authRoute');
 const orderRouter = require('./routes/orderRoute');
 const ticketRouter = require('./routes/ticketRoute');
@@ -64,8 +66,7 @@ app.use('/venue', venueRouter);
 
 //////////////qrCode route //////////////
 app.use('/qrCode', qrCodeRouter);
-
-
-
+app.use('/api/events', eventRouter);
+app.use('/api/categories', categoryRouter);
 
 module.exports = app;
