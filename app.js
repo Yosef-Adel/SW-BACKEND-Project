@@ -5,6 +5,8 @@ const bp = require('body-parser');
 const app= express();
 var cors = require("cors");
 const userRouter = require("./routes/userRoute");
+const eventRouter = require("./routes/eventRoute");
+const categoryRouter = require("./routes/categoryRoute");
 const authRouter = require('./routes/authRoute');
 const orderRouter = require('./routes/orderRoute');
 const ticketRouter = require('./routes/ticketRoute');
@@ -55,8 +57,7 @@ app.use('/promocode', promocodeRouter);
 
 //////////////venue route //////////////
 app.use('/venue', venueRouter);
-
-
-
+app.use('/api/events', eventRouter);
+app.use('/api/categories', categoryRouter);
 
 module.exports = app;
