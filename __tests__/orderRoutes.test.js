@@ -250,6 +250,43 @@ describe('Place order', () => {
         });
 
     });
+    describe('Normal Case, tickets are available and no promocode applied', () => {
+        it('should return 201', async () => {
+            const event = eventId;
+            const user_id = userId;
+            const ticketsBought = [
+                {
+                    "ticketClass": ticketClass1Id,
+                    "number": 4
+                }
+            ];
+            const req = {
+                params: {
+                    event_id: event
+                },
+                user: {
+                    _id: user_id
+                },
+                body: {
+                    ticketsBought: ticketsBought
+                }
+            };
+            const res = {
+                status: function (status) {
+                    this.statusCode = status;
+                    return this;
+                },
+                json: function (data) {
+                    this.data = data;
+                }
+            };
+            await createOrder(req, res);
+            assert.equal(res.statusCode, 201);
+            assert.equal(res.data.message, "Order created successfully!");
+        });
+
+
+    });
 });
 
 //close the connection to the database

@@ -158,8 +158,9 @@ const createOrder=async (req, res ) => {
     try {
         await order.save();
         //generate the qr code and send the email
-        let eventURL=process.env.CURRENTURL+"events/"+eventId;
-        await generateQRCodeAndSendEmail(eventURL,req.user._id);
+        
+        // let eventURL=process.env.CURRENTURL+"events/"+eventId;
+        // await generateQRCodeAndSendEmail(eventURL,req.user._id);
 
         res.status(201).json({message: "Order created successfully!",
         order: order
