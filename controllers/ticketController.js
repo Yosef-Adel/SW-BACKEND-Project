@@ -20,8 +20,23 @@ const createTicket = async (req, res, next ) => {
     //check if number doesn't exist
     //zero is fine
     //only give error when the field is not there
-    if (!req.body.name || !req.body.type || req.body.price==NaN || req.body.fee==NaN || req.body.capacity==NaN || req.body.minQuantityPerOrder==NaN || req.body.maxQuantityPerOrder==NaN || req.body.salesStart==NaN || req.body.salesEnd==NaN) {
+    if (!req.body.name || !req.body.type || req.body.capacity==NaN || req.body.minQuantityPerOrder==NaN || req.body.maxQuantityPerOrder==NaN || req.body.salesStart==NaN || req.body.salesEnd==NaN) {
         return res.status(400).json({ message: "All fields are required." });
+    }
+
+    let ticketPrice=0;
+    let ticketFee=0;
+
+    if (req.body.type=="free") {
+        ticketPrice=0;
+        ticketFee=0;
+    }
+    else if (req.body.type=="paid") {
+        if (req.body.price==NaN || req.body.fee==NaN) {
+            return res.status(400).json({ message: "All fields are required." });
+        }
+        ticketPrice=req.body.price;
+        ticketFee=req.body.fee;
     }
 
 
@@ -51,8 +66,8 @@ const createTicket = async (req, res, next ) => {
         event: req.params.event_id,
         name: req.body.name,
         type: req.body.type,
-        price: req.body.price,
-        fee: req.body.fee,
+        price: ticketPrice,
+        fee: ticketFee,
         capacity: req.body.capacity,
         minQuantityPerOrder: req.body.minQuantityPerOrder,
         maxQuantityPerOrder: req.body.maxQuantityPerOrder,

@@ -1,4 +1,4 @@
-const { boolean } = require('joi');
+const { boolean, date } = require('joi');
 const Order = require('../models/Order');
 const TicketClass = require('../models/Tickets');
 const Event = require('../models/Events');
@@ -27,10 +27,10 @@ const createOrder=async (req, res ) => {
 
     //initialization of everything that will be calculated
     let totalTickets = 0;
-    let subTotal = 0;
-    let totalFees = 0;
-    let totalDiscountAmount = 0;
-    let total = 0;
+    let subTotal = 0.00;
+    let totalFees = 0.00;
+    let totalDiscountAmount = 0.00;
+    let total = 0.00;
     let isTicketClassAvailable=true;
     let isNumberOfTicketsBoughtInRange=true;
     let isPromocodeAvailable=true;
@@ -41,17 +41,17 @@ const createOrder=async (req, res ) => {
         const ticketClassId = ticketsBought[i].ticketClass;
         //the number of tickets bought
         const numberOfTicketsBought = ticketsBought[i].number;
-        let ticketPriceOriginal = 0;
-        let ticketPrice = 0;
-        let ticketFee = 0;
+        let ticketPriceOriginal = 0.00;
+        let ticketPrice = 0.00;
+        let ticketFee = 0.00;
         //find the ticket class by id 
         //and get the ticket class object
-        let ticketClass = await TicketClass.findById(ticketClassId)
+        let ticketClass = await TicketClass.findById(ticketClassId);
         if(ticketClass){
             ///////////////////////////////////Availablity Check/////////////////////////////////////
             //check if the ticket class is available
             //check on the start date and end date of ticket class
-            if(ticketClass.capacity < numberOfTicketsBought || ticketClass.startDate > Date.now() || ticketClass.endDate < Date.now()){
+            if(ticketClass.capacity < numberOfTicketsBought || ticketClass.salesStart > Date.now || ticketClass.salesEnd < Date.now()){
                 isTicketClassAvailable=false;
                 break;
             }
@@ -90,18 +90,25 @@ const createOrder=async (req, res ) => {
                     isPromocodeAvailable=false;
                     break;
                 }
+            };
+
+            //search in the array of ticket classes in the promocode model
+            //to see if the ticket class is in the array
+            let isTicketClassInPromocode = promocodeObject.tickets.includes(ticketClassId);
+            //if the ticket class is in the array
+            //update the ticket price
+            if(isTicketClassInPromocode){
                 //update the number of uses of the promocode
                 promocodeObject.used += 1;
                 //save the promocode
                 try {
                     await promocodeObject.save();
-                }
+                    }
                 catch (err) {
                     return res.status(500).json({message: "Promocode update failed!"});
-                }
-            };
-            //update the ticket ticket price
-            ticketPrice = ticketPriceOriginal - (ticketPriceOriginal * (promocodeObject.percentOff/100));
+                    }
+                ticketPrice = ticketPriceOriginal - (ticketPriceOriginal * (promocodeObject.percentOff/100));
+            }
         }
         
 
