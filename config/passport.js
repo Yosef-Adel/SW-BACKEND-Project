@@ -9,7 +9,7 @@ exports.googlePass= function(passport){
         new googleStrategy(
             {
                 clientID: process.env.GOOGLE_CLIENT_ID,
-                clientSecret: "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",
+                clientSecret: process.env.GOOGLE_APP_SECRET,
                 callbackURL: process.env.GOOGLE_CALLBACKURL
             },
         async function(accessToken, refreshToken, profile, done) {
@@ -17,7 +17,7 @@ exports.googlePass= function(passport){
             try {
                 const { _json: profileInfo } = profile;
                 console.log("google profile: ", profile);
-                // Check if user signed up before using facebook
+                // Check if user signed up before using google
                 const userExists = await User.findOne({ googleID: profile.id })
                 console.log(userExists);
                 if (userExists) {

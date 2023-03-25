@@ -26,7 +26,11 @@ passportConfig.facebookPass(passport);
 
 
 
-app.use(session({secret: process.env.JWT_KEY}));
+app.use(session({
+    secret: process.env.JWT_KEY,
+    resave: false,
+    saveUninitialized: true.valueOf
+}));
 
 //middleware & static files
 app.use(express.static('public'));

@@ -16,7 +16,7 @@ authRouter.get('/sign-up-verify/:token', authController.verification);
 
 
 
-authRouter.get('/facebook', passport.authenticate('facebook'));
+authRouter.get('/facebook', passport.authenticate('facebook', {scope: ['public_profile' ,'email']}));
 authRouter.get('/facebook/callback', passport.authenticate('facebook'), authController.facebookCallback);
 
 authRouter.get('/google', passport.authenticate('google', { scope : ['profile', 'email'] }));
