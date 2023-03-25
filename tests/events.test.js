@@ -11,5 +11,14 @@ describe("Events", () => {
                 .expect(200);
         });
     });
+    
+    describe("GET /events/:id", () => {
+        it("should return 200 OK",async () => {
+            await request(app)
+                .get("/api/events/1")
+                .expect(200);
+        });
+    });
+
 
 });
