@@ -77,7 +77,7 @@ beforeAll(async () => {
         price: 10,
         fee: 1,
         capacity: 100,
-        minQuantityPerOrder: 1,
+        minQuantityPerOrder: 2,
         maxQuantityPerOrder: 10,
         salesStart: "2023-03-21T00:00:00.000Z",
         salesEnd: "2023-03-31T00:00:00.000Z"
@@ -325,48 +325,233 @@ describe('Place order', () => {
             assert.equal(res.statusCode, 500);
             assert.equal(res.data.message, "Ticket Class not available!");
         });
-
-        describe("Case 4: Failed Case, the ticket didn't start selling yet", () => {
-            it('should return 500', async () => {
-                const event = eventId;
-                const user_id = userId;
-                const ticketsBought = [
-                    {
-                        "ticketClass": ticketClass3Id,
-                        "number": 4
-                    }
-                ];
-
-                const req = {
-                    params: {
-                        event_id: event
-                    },
-                    user: {
-                        _id: user_id
-                    },
-                    body: {
-                        ticketsBought: ticketsBought
-                    }
-                };
-                const res = {
-                    status: function (status) {
-                        this.statusCode = status;
-                        return this;
-                    },
-                    json: function (data) {
-                        this.data = data;
-                    }
-                };
-                await createOrder(req, res);
-                assert.equal(res.statusCode, 500);
-                assert.equal(res.data.message, "Ticket Class not available!");
-            });
-
-        });
-
-
-
     });
+
+    describe("Case 4: Failed Case, the ticket didn't start selling yet", () => {
+        it('should return 500', async () => {
+            const event = eventId;
+            const user_id = userId;
+            const ticketsBought = [
+                {
+                    "ticketClass": ticketClass3Id,
+                    "number": 4
+                }
+            ];
+
+            const req = {
+                params: {
+                    event_id: event
+                },
+                user: {
+                    _id: user_id
+                },
+                body: {
+                    ticketsBought: ticketsBought
+                }
+            };
+            const res = {
+                status: function (status) {
+                    this.statusCode = status;
+                    return this;
+                },
+                json: function (data) {
+                    this.data = data;
+                }
+            };
+            await createOrder(req, res);
+            assert.equal(res.statusCode, 500);
+            assert.equal(res.data.message, "Ticket Class not available!");
+        });
+    });
+
+    describe("Case 5: Failed Case, bought tickets is less than the minimum per order", () => {
+        it('should return 500', async () => {
+            const event = eventId;
+            const user_id = userId;
+            const ticketsBought = [
+                {
+                    "ticketClass": ticketClass1Id,
+                    "number": 1
+                }
+            ];
+
+            const req = {
+                params: {
+                    event_id: event
+                },
+                user: {
+                    _id: user_id
+                },
+                body: {
+                    ticketsBought: ticketsBought
+                }
+            };
+            const res = {
+                status: function (status) {
+                    this.statusCode = status;
+                    return this;
+                },
+                json: function (data) {
+                    this.data = data;
+                }
+            };
+            await createOrder(req, res);
+            assert.equal(res.statusCode, 500);
+            assert.equal(res.data.message, "Number of tickets bought is not in range!");
+        });
+    });
+
+    describe("Case 6: Failed Case, bought tickets is more than the maximum per order", () => {
+        it('should return 500', async () => {
+            const event = eventId;
+            const user_id = userId;
+            const ticketsBought = [
+                {
+                    "ticketClass": ticketClass1Id,
+                    "number": 11
+                }
+            ];
+
+            const req = {
+                params: {
+                    event_id: event
+                },
+                user: {
+                    _id: user_id
+                },
+                body: {
+                    ticketsBought: ticketsBought
+                }
+            };
+            const res = {
+                status: function (status) {
+                    this.statusCode = status;
+                    return this;
+                },
+                json: function (data) {
+                    this.data = data;
+                }
+            };
+            await createOrder(req, res);
+            assert.equal(res.statusCode, 500);
+            assert.equal(res.data.message, "Number of tickets bought is not in range!");
+        });
+    });
+
+    describe("Case 7: Failed Case, the promocode is not available, used to its limit", () => {
+        it('should return 500', async () => {
+            const event = eventId;
+            const user_id = userId;
+            const ticketsBought = [
+                {
+                    "ticketClass": ticketClass1Id,
+                    "number": 4
+                }
+            ];
+            const promocode = promocode2Id;
+            const req = {
+                params: {
+                    event_id: event
+                },
+                user: {
+                    _id: user_id
+                },
+                body: {
+                    ticketsBought: ticketsBought,
+                    promocode: promocode
+                }
+            };
+            const res = {
+                status: function (status) {
+                    this.statusCode = status;
+                    return this;
+                },
+                json: function (data) {
+                    this.data = data;
+                }
+            };
+            await createOrder(req, res);
+            assert.equal(res.statusCode, 500);
+            assert.equal(res.data.message, "Promocode not available!");
+        });
+    });
+
+    describe("Case 8: Failed Case, the promocode is not available, since its start date hasn't arrived yet", () => {
+        it('should return 500', async () => {
+            const event = eventId;
+            const user_id = userId;
+            const ticketsBought = [
+                {
+                    "ticketClass": ticketClass1Id,
+                    "number": 4
+                }
+            ];
+            const promocode = promocode3Id;
+            const req = {
+                params: {
+                    event_id: event
+                },
+                user: {
+                    _id: user_id
+                },
+                body: {
+                    ticketsBought: ticketsBought,
+                    promocode: promocode
+                }
+            };
+            const res = {
+                status: function (status) {
+                    this.statusCode = status;
+                    return this;
+                },
+                json: function (data) {
+                    this.data = data;
+                }
+            };
+            await createOrder(req, res);
+            assert.equal(res.statusCode, 500);
+            assert.equal(res.data.message, "Promocode not available!");
+        });
+    });
+
+    describe("Case 9: Normal Case: Buying a free ticket only", () => {
+        it('should return 201', async () => {
+            const event = eventId;
+            const user_id = userId;
+            const ticketsBought = [
+                {
+                    "ticketClass": ticketClass4Id,
+                    "number": 1
+                }
+            ];
+
+            const req = {
+                params: {
+                    event_id: event
+                },
+                user: {
+                    _id: user_id
+                },
+                body: {
+                    ticketsBought: ticketsBought
+                }
+            };
+            const res = {
+                status: function (status) {
+                    this.statusCode = status;
+                    return this;
+                },
+                json: function (data) {
+                    this.data = data;
+                }
+            };
+            await createOrder(req, res);
+            assert.equal(res.statusCode, 201);
+            assert.equal(res.data.message, "Order created successfully!");
+        });
+    });
+
+
 });
 
 //close the connection to the database
