@@ -57,7 +57,7 @@ exports.facebookPass = function(passport) {
         new facebookStrategy(
             {
                 clientID: process.env.FACEBOOK_CLIENT_ID,
-                client_secret: process.env.FACEBOOK_APP_SECRET,
+                clientSecret: process.env.FACEBOOK_APP_SECRET,
                 callbackURL: process.env.FACEBOOK_CALLBACKURL
             },
         async function(accessToken, refreshToken, profile, done) {
