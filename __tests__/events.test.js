@@ -29,6 +29,7 @@ async function createCategory(){
     const res = await request(app).post("/api/categories").send({
         "name": randomName,
     });
+    console.log(res.body.category._id);
     return res.body.category._id;
 }
 
@@ -54,7 +55,7 @@ describe("Events", () => {
                 "category": categoryID
             });
 
-            const res = await request(app).get("/api/events/" + event.body.event._id);
+            const res = await request(app).get("/api/event/" + event.body.event._id);
             expect(res.statusCode).toEqual(200);
             expect(res.body).toHaveProperty('name');
             expect(res.body.name).toEqual('Aly event');

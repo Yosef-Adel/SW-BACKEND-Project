@@ -185,19 +185,19 @@ const forgotPassword = async (req, res) => {
         console.log("user found", user);
         
         // testing
-        // const forgotPasswordToken = await user.generateForgotPasswordToken();
-        // user.forgotPasswordTokenExpiry= Date(process.env.JWT_EXPIRE);
-        // const forgotPasswordEmailText = `Click on the link to reset your password http://localhost:3000/reset-password/${forgotPasswordToken}\n`;
+        const forgotPasswordToken = await user.generateForgotPasswordToken();
+        user.forgotPasswordTokenExpiry= Date(process.env.JWT_EXPIRE);
+        const forgotPasswordEmailText = `Click on the link to reset your password http://localhost:3000/reset-password/${forgotPasswordToken}\n`;
         //testing
 
         await user.save();
         
         //testing
-        // await sendMail({
-        //     email: req.body.emailAddress,
-        //     subject: `We received a request to reset your password for your Eventbrite account`,
-        //     message:forgotPasswordEmailText
-        // });
+        await sendMail({
+            email: req.body.emailAddress,
+            subject: `We received a request to reset your password for your Eventbrite account`,
+            message:forgotPasswordEmailText
+        });
         //testing
         
 
