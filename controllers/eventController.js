@@ -2,22 +2,36 @@ const Event = require('../models/Events');
 const Category = require('../models/Category');
 const Venue = require('../models/Venue');
 const axios = require('axios');
+const mongoose = require('mongoose');
 
 
 
 // @route   Create api/events/
 // @desc    Create event
 // @access  Public
-exports.create = (req, res) => {
+exports.create = async (req, res) => {
 
     // Check if category exists
     const category = req.body.category;
-    if (Category.findById(category) === null) {
+    const categoryObject = await Category.exists({ name: req.body.name });
+    if (!categoryObject) {
         return res.status(400).json({ message: "Category does not exist" });
     }
 
     // TODO: Check if venue exists
+    // const venue = req.body.venue;
+    // const venueObject = await Venue.exists({ name: req.body.name });
+    // if (!venueObject) {
+    //     return res.status(400).json({ message: "Venue does not exist" });
+    // }
 
+    const missingFieldErrorMessage = "field is required";
+    const field = ["name", "description", "date", "location", "image", "category", "capacity", "summary", "hostedBy"];
+    for (let i = 0; i < field.length; i++) {
+        if (!req.body[field[i]]) {
+            return res.status(400).json({ message: field[i] + " " + missingFieldErrorMessage });
+        }
+    }
 
     // Create event
     const newEvent = new Event({

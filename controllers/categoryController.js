@@ -5,32 +5,55 @@ const Event = require('../models/Events');
 // @desc    Get all categories
 // @access  Public
 exports.getAll = (req, res) => {
+    const message = "Categories retrieved successfully";
+    const errorMessage = "Categories not found";
     Category.find()
-        .then(categories => res.json(categories))
-        .catch(err => res.status(400).json(err));
+        .then(categories => res.json({ categories, message }))
+        .catch(err => res.status(400).json({ errorMessage, err }));
 }
 
 // @route   GET api/categories/:id
 // @desc    Get category by id
 // @access  Public
-exports.getById = (req, res) => {
-    Category.findById(req.params.id)
-        .then(category => res.json(category))
-        .catch(err => res.status(400).json(err));
+exports.getById = async (req, res) => {
+    const message = "Category retrieved successfully";
+    const errorMessage = "Category not found";
+    const category = await Category.findById(req.params.id)
+    if (!category) {
+        return res.status(404).json({ "message":errorMessage });
+    }
+    return res.json({ category, message });
+
 }
 
 // @route   POST api/categories/
 // @desc    Create category
 // @access  Public
-exports.create = (req, res) => {
+exports.create = async (req, res) => {
+    
+    const message = "Category created successfully";
+    const dublicateErrorMessage = "Category already exists";
+    const noNameErrorMessage = "Category name is required";
+
+    // Check if category name is provided
+    if (!req.body.name) {
+        return res.status(400).json({ "message": noNameErrorMessage });
+    }
+
+    // Check if category already exists
+    const anyCategory = await Category.exists({ name: req.body.name });
+    if (anyCategory) {
+        return res.status(400).json({ "message": dublicateErrorMessage });
+    }
+
     const newCategory = new Category({
         name: req.body.name,
     });
-    const message = "Category created successfully";
 
     newCategory.save()
         .then(category => res.json({ category, message }))
         .catch(err => res.status(400).json(err));
+    
     
 }
 
