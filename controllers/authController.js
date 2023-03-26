@@ -8,7 +8,7 @@ const catchAsync = require('../utils/catchAsync');
 const Date = require("date.js");
 const saltRounds = 10;
 const password = "Admin@123";
-
+const moment = require('moment');
 
 
 
@@ -50,7 +50,7 @@ const signUp= async (req, res) => {
         user.password= hashedPass;  
         
         const verifyEmailToken = await user.generateEmailVerificationToken();
-        user.verifyEmailTokenExpiry= Date(process.env.JWT_EXPIRE);
+        user.verifyEmailTokenExpiry= new Date(process.env.JWT_EXPIRE);
         const verifyEmailText = `Please click on the link to complete the verification process http://localhost:3000/sign-up-verify/${verifyEmailToken}\n`;
         
         await sendMail({
@@ -78,28 +78,32 @@ const signUp= async (req, res) => {
 
 const verification = catchAsync(async (req, res, next) => {
     try{
-        if (!req.params.token)
-    return next(new appError('No email confirmation token found.'));
 
-    //const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
+        const user = await User.findOne({verifyEmailToken: req.params.token} );
+        if (!user)  return next(new appError(`user not found`, 400));
+        
+        const currDate = new Date();
+        const valid = (currDate < user.verifyEmailTokenExpiry);
+        if (!valid)
+        {
+            await User.findOneAndDelete({verifyEmailToken: req.params.token})
+            res.status(400).json({message: 'Token has expired. Please sign up again'});
+        }
 
+        user.verifyEmailToken = undefined;
+        user.verifyEmailTokenExpiry = undefined;
+        user.isVerified = true;
+        await user.save();
+        console.log("saved");
+        
+        //res.redirect('/auth/login');
 
-    const user = await User.findOne({verifyEmailToken: req.params.token} );
-    if (!user) return next(new appError(`Token is invalid or has expired`, 400));
-
-    user.verifyEmailToken = undefined;
-    user.verifyEmailTokenExpiry = undefined;
-    user.isVerified = true;
-    await user.save();
-    console.log("saved");
-    
-    res.status(200).json({
-        status: 'Success',
-        success: true,
-        expireDate: process.env.JWT_EXPIRE,
-        secret: process.env.JWT_SECRET
+        res.status(200).json({
+            success: true,
+            message:'Successfully verified. You can login now'
         });  
-    }
+        
+}
     catch(err){
         return res.status(400).json({ message: err.message });
     }

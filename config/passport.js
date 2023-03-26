@@ -1,4 +1,4 @@
-const passport = require("passport");
+// const passport = require("passport");
 const googleStrategy = require('passport-google-oauth').OAuth2Strategy;
 const facebookStrategy = require("passport-facebook").Strategy;
 const User = require("../models/User");
@@ -9,23 +9,21 @@ exports.googlePass= function(passport){
         new googleStrategy(
             {
                 clientID: process.env.GOOGLE_CLIENT_ID,
-                client_secret: process.env.GOOGLE_APP_SECRET,
+                clientSecret: process.env.GOOGLE_APP_SECRET,
                 callbackURL: process.env.GOOGLE_CALLBACKURL
             },
         async function(accessToken, refreshToken, profile, done) {
+            console.log("google profile: ", profile);
             try {
-                console/log("inside try");
                 const { _json: profileInfo } = profile;
                 console.log("google profile: ", profile);
-                // Check if user signed up before using facebook
+                // Check if user signed up before using google
                 const userExists = await User.findOne({ googleID: profile.id })
                 console.log(userExists);
                 if (userExists) {
                     return done(null, userExists)
                 }
 
-
-                // Create new user 
                 console.log("creating new user");
                 const newUser = new User({
                     emailAddress: profile.emails[0].value,
@@ -38,6 +36,7 @@ exports.googlePass= function(passport){
             } 
 
             catch (error) {
+                console.log(error);
                 done(error, false, error.message)
             }
         }
@@ -58,7 +57,7 @@ exports.facebookPass = function(passport) {
         new facebookStrategy(
             {
                 clientID: process.env.FACEBOOK_CLIENT_ID,
-                client_secret: process.env.FACEBOOK_APP_SECRET,
+                clientSecret: process.env.FACEBOOK_APP_SECRET,
                 callbackURL: process.env.FACEBOOK_CALLBACKURL
             },
         async function(accessToken, refreshToken, profile, done) {
