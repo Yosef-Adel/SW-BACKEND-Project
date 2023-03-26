@@ -13,7 +13,7 @@ exports.create = async (req, res) => {
 
     // Check if category exists
     const category = req.body.category;
-    const categoryObject = await Category.exists({ name: req.body.name });
+    const categoryObject = await Category.exists({ id: category });
     if (!categoryObject) {
         return res.status(400).json({ message: "Category does not exist" });
     }
@@ -74,12 +74,12 @@ exports.getById = (req, res) => {
 // @route   PUT api/events/:id
 // @desc    Update event by id
 // @access  Public
-exports.update = (req, res) => {
-    const event = Event.findById(req.params.id);
+exports.update =async (req, res) => {
+    const event = await Event.findById(req.params.id);
     for (const key in req.body) {
         event[key] = req.body[key];
     }
-    event.save()
+    await event.save()
         .then(event => res.json(event))
         .catch(err => res.status(400).json(err));
 }

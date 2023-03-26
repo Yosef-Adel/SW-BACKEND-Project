@@ -5,11 +5,18 @@ const Event = require('../models/Events');
 const Category = require('../models/Category');
 const Venue = require('../models/Venue');
 
+jest.setTimeout(30000000);
 require("dotenv").config();
+
 
 beforeAll(async () => {
     const url = "mongodb+srv://Eventbrite-backend:envie_backend_2023@eventbrite-cluster.krn9ebx.mongodb.net/TestDB?retryWrites=true&w=majority";
     await mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true });
+    await Event.deleteMany({});
+    await Category.deleteMany({});
+});
+
+beforeEach(async () => {
     await Event.deleteMany({});
     await Category.deleteMany({});
 });
@@ -29,6 +36,7 @@ async function createCategory(){
     const res = await request(app).post("/api/categories").send({
         "name": randomName,
     });
+    console.log(res.body.category._id);
     return res.body.category._id;
 }
 
@@ -51,9 +59,12 @@ describe("Events", () => {
                 "summary": "Aly eventAly eventAly eventAly eventAly eventAly event",
                 "date":"2015-05-02",
                 "organizer": "178c938efc5c9b18a400de22",
-                "category": categoryID
+                "category": categoryID,
+                "location": "178c938efc5c9b18a400de22",
+                "image":"htyppat",
+                "hostedBy":"178c938efc5c9b18a400de22"
             });
-
+            console.log(event.body);
             const res = await request(app).get("/api/events/" + event.body.event._id);
             expect(res.statusCode).toEqual(200);
             expect(res.body).toHaveProperty('name');
@@ -72,7 +83,10 @@ describe("Events", () => {
                 "summary": "Aly eventAly eventAly eventAly eventAly eventAly event",
                 "date":"2015-05-02",
                 "organizer": "178c938efc5c9b18a400de22",
-                "category": categoryID
+                "category": categoryID,
+                "location": "178c938efc5c9b18a400de22",
+                "image":"htyppat",
+                "hostedBy":"178c938efc5c9b18a400de22"
             });
             testFormat(res, 200, "Event created successfully");
             expect(res.body).toHaveProperty('event');
