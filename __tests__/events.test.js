@@ -14,6 +14,11 @@ beforeAll(async () => {
     await Category.deleteMany({});
 });
 
+beforeEach(async () => {
+    await Event.deleteMany({});
+    await Category.deleteMany({});
+});
+
 afterAll(async () => {
     await mongoose.connection.close();
 });
@@ -52,10 +57,13 @@ describe("Events", () => {
                 "summary": "Aly eventAly eventAly eventAly eventAly eventAly event",
                 "date":"2015-05-02",
                 "organizer": "178c938efc5c9b18a400de22",
-                "category": categoryID
+                "category": categoryID,
+                "location": "178c938efc5c9b18a400de22",
+                "image":"htyppat",
+                "hostedBy":"178c938efc5c9b18a400de22"
             });
-
-            const res = await request(app).get("/api/event/" + event.body.event._id);
+            console.log(event.body);
+            const res = await request(app).get("/api/events/" + event.body.event._id);
             expect(res.statusCode).toEqual(200);
             expect(res.body).toHaveProperty('name');
             expect(res.body.name).toEqual('Aly event');
@@ -73,7 +81,10 @@ describe("Events", () => {
                 "summary": "Aly eventAly eventAly eventAly eventAly eventAly event",
                 "date":"2015-05-02",
                 "organizer": "178c938efc5c9b18a400de22",
-                "category": categoryID
+                "category": categoryID,
+                "location": "178c938efc5c9b18a400de22",
+                "image":"htyppat",
+                "hostedBy":"178c938efc5c9b18a400de22"
             });
             testFormat(res, 200, "Event created successfully");
             expect(res.body).toHaveProperty('event');
