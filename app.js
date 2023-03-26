@@ -4,12 +4,20 @@ const morgan = require('morgan');
 const bp = require('body-parser');
 const app= express();
 var cors = require("cors");
+
+const path = require('path');
+app.use(express.static(path.join(__dirname, 'public')));
+
 const userRouter = require("./routes/userRoute");
+const eventRouter = require("./routes/eventRoute");
+const categoryRouter = require("./routes/categoryRoute");
 const authRouter = require('./routes/authRoute');
 const orderRouter = require('./routes/orderRoute');
 const ticketRouter = require('./routes/ticketRoute');
 const promocodeRouter = require('./routes/promocodeRoute');
 const venueRouter = require('./routes/venueRoute');
+const qrCodeRouter = require('./routes/qrCodeRoute');
+
 const passport = require("passport");
 const passportConfig = require("./config/passport");
 
@@ -60,7 +68,9 @@ app.use('/promocode', promocodeRouter);
 //////////////venue route //////////////
 app.use('/venue', venueRouter);
 
-
-
+//////////////qrCode route //////////////
+app.use('/qrCode', qrCodeRouter);
+app.use('/api/events', eventRouter);
+app.use('/api/categories', categoryRouter);
 
 module.exports = app;

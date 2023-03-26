@@ -14,10 +14,10 @@ const createPromocode = async (req, res, next) => {
             return res.status(400).json({ message: "User is not a creator." });
         }
         //check on all fields 
-        if (!(req.body.name && req.body.percentOff && req.body.limit && req.body.startDate && req.body.endDate)) {
+        if (!req.body.name || req.body.tickets==NaN || req.body.percentOff==NaN || req.body.limit==NaN || req.body.startDate==NaN || req.body.endDate==NaN) {
             return res.status(400).json({ message: "All fields are required." });
         }
-    
+
         try {
             const promocode = new Promocode({
             event: req.params.event_id,
@@ -25,7 +25,7 @@ const createPromocode = async (req, res, next) => {
             tickets: req.body.tickets,
             percentOff: req.body.percentOff,
             limit: req.body.limit,
-            used: req.body.used,
+            used: 0,
             startDate: new Date(req.body.startDate),
             endDate: new Date(req.body.endDate)
             });

@@ -1,5 +1,6 @@
 
 const Ticket = require('../models/Tickets');
+const Event = require('../models/Events');
 
 
 //@route POST api/ticket/:event_id
@@ -14,18 +15,59 @@ const createTicket = async (req, res, next ) => {
     if (!req.isCreator) {
         return res.status(400).json({ message: "User is not a creator." });
     }
-    //check on all fields 
-    if (!(req.body.name && req.body.type && req.body.price && req.body.fee && req.body.capacity && req.body.minQuantityPerOrder && req.body.maxQuantityPerOrder && req.body.salesStart && req.body.salesEnd)) {
+    //check on all fields
+    //check if string is empty
+    //check if number doesn't exist
+    //zero is fine
+    //only give error when the field is not there
+    if (!req.body.name || !req.body.type || req.body.capacity==NaN || req.body.minQuantityPerOrder==NaN || req.body.maxQuantityPerOrder==NaN || req.body.salesStart==NaN || req.body.salesEnd==NaN) {
         return res.status(400).json({ message: "All fields are required." });
     }
+
+    let ticketPrice=0;
+    let ticketFee=0;
+
+    if (req.body.type=="free") {
+        ticketPrice=0;
+        ticketFee=0;
+    }
+    else if (req.body.type=="paid") {
+        if (req.body.price==NaN || req.body.fee==NaN) {
+            return res.status(400).json({ message: "All fields are required." });
+        }
+        ticketPrice=req.body.price;
+        ticketFee=req.body.fee;
+    }
+
+
+    let event = await Event.findById(req.params.event_id);
+    if (!event) {
+        return res.status(400).json({ message: "Event not found." });
+    }
+
+    /////////////////////////////////check on the event capacity/////////////////////////////////////
+    let eventCapacity = event.capacity;
+    //loop through the tickets of the event and sum the capacities
+    //not tested yet
+    let tickets = event.tickets;
+    let totalCapacity = req.body.capacity;
+    for (let i = 0; i < tickets.length; i++) {
+        let ticket = await Ticket.findById(tickets[i]);
+        totalCapacity += ticket.capacity;
+    }
+    //check if the total capacity of the tickets is less than the event capacity
+    if (totalCapacity >= eventCapacity) {
+        return res.status(400).json({ message: "The total capacity of the tickets is greater than the event capacity." });
+    }
+
 
     try {
         const ticket = new Ticket({
         event: req.params.event_id,
         name: req.body.name,
         type: req.body.type,
-        price: req.body.price,
-        fee: req.body.fee,
+        price: ticketPrice,
+        fee: ticketFee,
         capacity: req.body.capacity,
         minQuantityPerOrder: req.body.minQuantityPerOrder,
         maxQuantityPerOrder: req.body.maxQuantityPerOrder,
