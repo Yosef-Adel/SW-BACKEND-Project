@@ -37,19 +37,19 @@ async function createCategory(){
 }
 
 
-
-describe("Categories", () => {
-    describe("GET /categories", () => {
-        it("should return 200 OK",async () => {
-            const category1 = await createCategory();
-            const category2 = await createCategory();
-            const res = await request(app).get("/api/categories");
-            expect(res.statusCode).toEqual(200);
-            testFormat(res, 200, "Categories retrieved successfully");
-            expect(res.body).toHaveProperty('categories');
-            expect(res.body.categories).toHaveLength(2);
-        });
+describe("GET /categories", () => {
+    it("should return 200 OK",async () => {
+        const category1 = await createCategory();
+        const category2 = await createCategory();
+        const res = await request(app).get("/api/categories");
+        expect(res.statusCode).toEqual(200);
+        testFormat(res, 200, "Categories retrieved successfully");
+        expect(res.body).toHaveProperty('categories');
+        expect(res.body.categories).toHaveLength(2);
     });
+});
+describe("Categories", () => {
+    
 
     describe("GET /categories/:id", () => {
         it("should return 200 OK",async () => {
