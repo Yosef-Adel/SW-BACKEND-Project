@@ -253,45 +253,20 @@ const resetPassword = async (req, res) => {
 
 
 
-/////////////////////////   sign in with facebook   /////////////////////////   
-
-const facebookCallback = async (req,res) => {
-    res.redirect('/home');
-}
-// const loginWithFacebook = async (req, res) => {
-    
-//     const token = signToken(req.user._id);
-
-//     res.status(200).json({
-//         status: 'Success',
-//         success: true,
-//         expireDate: process.env.JWT_EXPIRE,
-//         token
-//         });
-// };
-
-
-
-
 /////////////////////////   sign in with google   /////////////////////////   
+
 const googleCallback = async (req,res) => {
     res.status(200).json({message: "done"});
 }
 
 
-// const loginWithGoogle = async (req, res) => {
-    
-//     const token = signToken(req.user._id);
-
-//     res.status(200).json({
-//         status: 'Success',
-//         success: true,
-//         expireDate: process.env.JWT_EXPIRE,
-//         token
-//         });
-// };
 
 
+/////////////////////////   sign in with facebook   /////////////////////////   
+
+const facebookCallback = async (req,res) => {
+    res.redirect('/home');
+};
 
 
 module.exports = {signUp, login, verification, forgotPassword, resetPassword, facebookCallback, googleCallback};
