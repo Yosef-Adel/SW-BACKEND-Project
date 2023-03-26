@@ -1,7 +1,7 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const bcrypt = require("bcryptjs");
-const sendMail = require('../utils/emailVerification');
+const {sendMail} = require('../utils/emailVerification');
 const crypto = require('crypto');
 const appError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
@@ -57,18 +57,18 @@ const signUp= async (req, res) => {
         console.log('user created', user); 
         
         //testing
-        // const verifyEmailToken = await user.generateEmailVerificationToken();
-        // user.verifyEmailTokenExpiry= new Date(process.env.JWT_EXPIRE);
-        // const verifyEmailText = `Please click on the link to complete the verification process http://localhost:3000/sign-up-verify/${verifyEmailToken}\n`;
-        
-        // await sendMail({
-        // email: user.emailAddress,
-        // subject: `Verify your email address with Eventbrite`,
-        // message: verifyEmailText
-        // });
-        //testing
-
+        user.verifyEmailToken = await user.generateEmailVerificationToken();
+        user.verifyEmailTokenExpiry= new Date(process.env.JWT_EXPIRE);
         await user.save();
+        const verifyEmailText = `Please click on the link to complete the verification process http://localhost:3000/auth/sign-up-verify/${user.verifyEmailToken}\n`;
+        console.log(user.verifyEmailToken);
+        
+        await sendMail({
+        email: user.emailAddress,
+        subject: `Verify your email address with Eventbrite`,
+        message: verifyEmailText
+        });
+        //testing
 
         return res.status(200).json({
             message: 'Check your email for verification.'}
@@ -85,7 +85,7 @@ const signUp= async (req, res) => {
 
 /////////////////////////   account verification via token   /////////////////////////   
 
-const verification = catchAsync(async (req, res, next) => {
+const verification = async (req, res) => {
     try{
 
         const user = await User.findOne({verifyEmailToken: req.params.token} );
@@ -115,7 +115,7 @@ const verification = catchAsync(async (req, res, next) => {
     catch(err){
         return res.status(400).json({ message: err.message });
     }
-});
+};
 
 
 
@@ -138,22 +138,22 @@ const login= async (req, res) => {
             console.log(req.body.password);
             
             //testing
-            // const isMatch = await bcrypt.compare(req.body.password, user.password);
-            // console.log(isMatch);
-            // if (!isMatch) 
-            // {
-            //     return res.status(400).json({message: "Password is incorrect"})
-            // }
+            const isMatch = await bcrypt.compare(req.body.password, user.password);
+            console.log(isMatch);
+            if (!isMatch) 
+            {
+                return res.status(400).json({message: "Password is incorrect"})
+            }
 
-            //const token = await user.generateAuthToken();
+            const token = await user.generateAuthToken();
             //testing
 
             console.log("user logged-in", user);
 
             //special return for testing
-            return res.status(200).json({message:"successfully logged in"});
+            // return res.status(200).json({message:"successfully logged in"});
             
-            //return res.json({token, user});
+            return res.json({token, user});
 
         }
     }
