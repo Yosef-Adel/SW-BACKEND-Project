@@ -74,12 +74,12 @@ exports.getById = (req, res) => {
 // @route   PUT api/events/:id
 // @desc    Update event by id
 // @access  Public
-exports.update = (req, res) => {
-    const event = Event.findById(req.params.id);
+exports.update =async (req, res) => {
+    const event = await Event.findById(req.params.id);
     for (const key in req.body) {
         event[key] = req.body[key];
     }
-    event.save()
+    await event.save()
         .then(event => res.json(event))
         .catch(err => res.status(400).json(err));
 }
