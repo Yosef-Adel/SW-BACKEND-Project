@@ -5,7 +5,9 @@ const Event = require('../models/Events');
 const Category = require('../models/Category');
 const Venue = require('../models/Venue');
 
+jest.setTimeout(30000000);
 require("dotenv").config();
+
 
 beforeAll(async () => {
     const url = "mongodb+srv://Eventbrite-backend:envie_backend_2023@eventbrite-cluster.krn9ebx.mongodb.net/TestDB?retryWrites=true&w=majority";
