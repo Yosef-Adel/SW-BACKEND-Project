@@ -12,6 +12,17 @@ const EventSchema = new Schema({
         required: true
     },
 
+    date: {
+        type: Date,
+        required: true
+    },
+
+    created_date: {
+        type: Date,
+        default: Date.now
+    },
+
+
     summary: {
         type: String,
         required: true
@@ -36,7 +47,7 @@ const EventSchema = new Schema({
 
     image: {
         type: String,
-        required: true
+        required: false
     },
 
     hostedBy: {
@@ -46,14 +57,14 @@ const EventSchema = new Schema({
 
     qrCode: {
         type: String,
-        required: true
+        required: false
+    },
+
+    venue: {
+        type: Schema.Types.ObjectId,
+        ref: 'venue'
     }
 
 }, {timestamps: true})
 
 module.exports = Event = mongoose.model('event', EventSchema);
-
-
-
-
-
