@@ -8,7 +8,6 @@ const catchAsync = require('../utils/catchAsync');
 const Date = require("date.js");
 const saltRounds = 10;
 const password = "Admin@123";
-const moment = require('moment');
 
 
 
@@ -23,8 +22,8 @@ bcrypt.genSalt(saltRounds)
     }).catch(err => console.error(err.message));
 
 
-const signToken = id => {
-    return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE })};
+// const signToken = id => {
+//     return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE })};
 
 
 
@@ -57,15 +56,15 @@ const signUp= async (req, res) => {
         console.log('user created', user); 
         
         //testing
-        // const verifyEmailToken = await user.generateEmailVerificationToken();
-        // user.verifyEmailTokenExpiry= new Date(process.env.JWT_EXPIRE);
-        // const verifyEmailText = `Please click on the link to complete the verification process http://localhost:3000/sign-up-verify/${verifyEmailToken}\n`;
+        user.verifyEmailToken = await user.generateEmailVerificationToken();
+        user.verifyEmailTokenExpiry= new Date(process.env.JWT_EXPIRE);
+        const verifyEmailText = `Please click on the link to complete the verification process http://localhost:3000/auth/sign-up-verify/${user.verifyEmailToken}\n`;
         
-        // await sendMail({
-        // email: user.emailAddress,
-        // subject: `Verify your email address with Eventbrite`,
-        // message: verifyEmailText
-        // });
+        await sendMail({
+        email: user.emailAddress,
+        subject: `Verify your email address with Eventbrite`,
+        message: verifyEmailText
+        });
         //testing
 
         await user.save();
@@ -138,22 +137,22 @@ const login= async (req, res) => {
             console.log(req.body.password);
             
             //testing
-            // const isMatch = await bcrypt.compare(req.body.password, user.password);
-            // console.log(isMatch);
-            // if (!isMatch) 
-            // {
-            //     return res.status(400).json({message: "Password is incorrect"})
-            // }
+            const isMatch = await bcrypt.compare(req.body.password, user.password);
+            console.log(isMatch);
+            if (!isMatch) 
+            {
+                return res.status(400).json({message: "Password is incorrect"})
+            }
 
-            //const token = await user.generateAuthToken();
+            const token = await user.generateAuthToken();
             //testing
 
             console.log("user logged-in", user);
 
             //special return for testing
-            return res.status(200).json({message:"successfully logged in"});
+            // return res.status(200).json({message:"successfully logged in"});
             
-            //return res.json({token, user});
+            return res.json({token, user});
 
         }
     }
@@ -185,21 +184,18 @@ const forgotPassword = async (req, res) => {
         console.log("user found", user);
         
         // testing
-        // const forgotPasswordToken = await user.generateForgotPasswordToken();
-        // user.forgotPasswordTokenExpiry= Date(process.env.JWT_EXPIRE);
-        // const forgotPasswordEmailText = `Click on the link to reset your password http://localhost:3000/reset-password/${forgotPasswordToken}\n`;
-        //testing
+        const forgotPasswordToken = await user.generateForgotPasswordToken();
+        user.forgotPasswordTokenExpiry= Date(process.env.JWT_EXPIRE);
+        const forgotPasswordEmailText = `Click on the link to reset your password http://localhost:3000/reset-password/${forgotPasswordToken}\n`;
 
+        await sendMail({
+            email: req.body.emailAddress,
+            subject: `We received a request to reset your password for your Eventbrite account`,
+            message:forgotPasswordEmailText
+        });
+        //testing
+        
         await user.save();
-        
-        //testing
-        // await sendMail({
-        //     email: req.body.emailAddress,
-        //     subject: `We received a request to reset your password for your Eventbrite account`,
-        //     message:forgotPasswordEmailText
-        // });
-        //testing
-        
 
         return res.status(200).json({
             message: 'Password token sent to email'
