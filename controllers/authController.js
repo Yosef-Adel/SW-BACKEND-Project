@@ -8,7 +8,6 @@ const catchAsync = require('../utils/catchAsync');
 const Date = require("date.js");
 const saltRounds = 10;
 const password = "Admin@123";
-const moment = require('moment');
 
 
 
@@ -23,8 +22,8 @@ bcrypt.genSalt(saltRounds)
     }).catch(err => console.error(err.message));
 
 
-const signToken = id => {
-    return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE })};
+// const signToken = id => {
+//     return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE })};
 
 
 
@@ -187,11 +186,7 @@ const forgotPassword = async (req, res) => {
         const forgotPasswordToken = await user.generateForgotPasswordToken();
         user.forgotPasswordTokenExpiry= Date(process.env.JWT_EXPIRE);
         const forgotPasswordEmailText = `Click on the link to reset your password http://localhost:3000/reset-password/${forgotPasswordToken}\n`;
-        //testing
 
-        await user.save();
-        
-        //testing
         await sendMail({
             email: req.body.emailAddress,
             subject: `We received a request to reset your password for your Eventbrite account`,
@@ -199,6 +194,7 @@ const forgotPassword = async (req, res) => {
         });
         //testing
         
+        await user.save();
 
         return res.status(200).json({
             message: 'Password token sent to email'
