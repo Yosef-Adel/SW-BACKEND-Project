@@ -58,9 +58,7 @@ const signUp= async (req, res) => {
         //testing
         user.verifyEmailToken = await user.generateEmailVerificationToken();
         user.verifyEmailTokenExpiry= new Date(process.env.JWT_EXPIRE);
-        await user.save();
         const verifyEmailText = `Please click on the link to complete the verification process http://localhost:3000/auth/sign-up-verify/${user.verifyEmailToken}\n`;
-        console.log(user.verifyEmailToken);
         
         await sendMail({
         email: user.emailAddress,
@@ -185,7 +183,7 @@ const forgotPassword = async (req, res) => {
         // testing
         const forgotPasswordToken = await user.generateForgotPasswordToken();
         user.forgotPasswordTokenExpiry= Date(process.env.JWT_EXPIRE);
-        const forgotPasswordEmailText = `Click on the link to reset your password http://localhost:3000/reset-password/${forgotPasswordToken}\n`;
+        const forgotPasswordEmailText = `Click on the link to reset your password http://localhost:3000/auth/reset-password/${forgotPasswordToken}\n`;
 
         await sendMail({
             email: req.body.emailAddress,
@@ -217,7 +215,7 @@ const resetPassword = async (req, res) => {
     try{
         if (!req.params.token) return res.status(400).json({message: 'No email confirmation token found.'});
 
-        if (!req.body.password) return res.status(400).json({message :'No password found.' });
+        if (!req.body.password) return res.status(400).json({message :'No new password found.' });
         
         const user = await User.findOne({forgotPasswordToken: req.params.token});
         if (!user) return res.status(400).send("User not found");
