@@ -186,7 +186,7 @@ const forgotPassword = async (req, res) => {
         // testing
         const forgotPasswordToken = await user.generateForgotPasswordToken();
         user.forgotPasswordTokenExpiry= Date(process.env.JWT_EXPIRE);
-        const forgotPasswordEmailText = `Click on the link to reset your password http://localhost:3000/reset-password/${forgotPasswordToken}\n`;
+        const forgotPasswordEmailText = `Click on the link to reset your password http://localhost:3000/auth/reset-password/${forgotPasswordToken}\n`;
 
         await sendMail({
             email: req.body.emailAddress,
