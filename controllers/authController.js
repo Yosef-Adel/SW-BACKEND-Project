@@ -220,7 +220,7 @@ const resetPassword = async (req, res) => {
         if (!req.body.password) return res.status(400).json({message :'No password found.' });
         
         const user = await User.findOne({forgotPasswordToken: req.params.token});
-        if (!user) res.status(400).send("User not found");
+        if (!user) return res.status(400).send("User not found");
 
         const currDate = new Date();
         const valid = (currDate < user.forgotPasswordTokenExpiry);
