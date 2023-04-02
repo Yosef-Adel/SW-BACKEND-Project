@@ -22,23 +22,22 @@ bcrypt.genSalt(saltRounds)
     }).catch(err => console.error(err.message));
 
 
+
 // const signToken = id => {
 //     return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE })};
 
 
-
-
 /////////////////////////   sign up + sending verification email   /////////////////////////   
 
-const signUp= async (req, res) => {
+exports.signUp= async (req, res) => {
     try{
         const isDuplicate = await User.findOne({emailAddress: req.body.emailAddress})
-        console.log(isDuplicate)
+        
         if (isDuplicate) {
             return res.status(400).json({message: 'users validation failed: emailAddress: Error, expected emailAddress to be unique.'});
         }
 
-        console.log("hi")
+        
 
         if (!(req.body.emailAddress && req.body.password && req.body.firstName && req.body.lastName)) 
         {
@@ -53,14 +52,14 @@ const signUp= async (req, res) => {
         lastName: req.body.lastName,
         password: hashedPass
         });
-        console.log('user created', user); 
+
         
         //testing
         user.verifyEmailToken = await user.generateEmailVerificationToken();
         user.verifyEmailTokenExpiry= new Date(process.env.JWT_EXPIRE);
         await user.save();
         const verifyEmailText = `Please click on the link to complete the verification process http://localhost:3000/auth/sign-up-verify/${user.verifyEmailToken}\n`;
-        console.log(user.verifyEmailToken);
+        
         
         await sendMail({
         email: user.emailAddress,
@@ -84,7 +83,7 @@ const signUp= async (req, res) => {
 
 /////////////////////////   account verification via token   /////////////////////////   
 
-const verification = async (req, res) => {
+exports.verification = async (req, res) => {
     try{
         if (!req.params.token)  return res.status(400).json({message: "no email verification token found"})
 
@@ -103,8 +102,6 @@ const verification = async (req, res) => {
         user.verifyEmailTokenExpiry = undefined;
         user.isVerified = true;
         await user.save();
-        console.log("saved");
-        
         
 
         return res.status(200).json({
@@ -122,7 +119,7 @@ const verification = async (req, res) => {
 
 /////////////////////////   login + generating a token   /////////////////////////   
 
-const login= async (req, res) => {
+exports.login= async (req, res) => {
     try {
         if (req.body.emailAddress){
             const user = await User.findOne({emailAddress: req.body.emailAddress});
@@ -132,21 +129,16 @@ const login= async (req, res) => {
                 return res.status(400).json({message: "user not found"})
             }
             
-            console.log(user.password);
-            console.log(req.body.password);
             
             //testing
             const isMatch = await bcrypt.compare(req.body.password, user.password);
-            console.log(isMatch);
+
             if (!isMatch) 
             {
                 return res.status(400).json({message: "Password is incorrect"})
             }
-
             const token = await user.generateAuthToken();
             //testing
-
-            console.log("user logged-in", user);
 
             //special return for testing
             // return res.status(200).json({message:"successfully logged in"});
@@ -166,10 +158,9 @@ const login= async (req, res) => {
 
 /////////////////////////   sending forgot password email with a token   /////////////////////////   
 
-const forgotPassword = async (req, res) => {
+exports.forgotPassword = async (req, res) => {
     try{
 
-        console.log("inside try and email = ", req.body.emailAddress)
         const user = await User.findOne({emailAddress: req.body.emailAddress});
 
         if (!user)
@@ -180,12 +171,11 @@ const forgotPassword = async (req, res) => {
         if (!user.isVerified) {
             return res.status(400).json({message: "Please verify your email first."})
         }
-        console.log("user found", user);
         
         // testing
         const forgotPasswordToken = await user.generateForgotPasswordToken();
         user.forgotPasswordTokenExpiry= Date(process.env.JWT_EXPIRE);
-        const forgotPasswordEmailText = `Click on the link to reset your password http://localhost:3000/reset-password/${forgotPasswordToken}\n`;
+        const forgotPasswordEmailText = `Click on the link to reset your password http://localhost:3000/auth/reset-password/${forgotPasswordToken}\n`;
 
         await sendMail({
             email: req.body.emailAddress,
@@ -213,7 +203,7 @@ const forgotPassword = async (req, res) => {
 
 /////////////////////////   reseting password via token   /////////////////////////   
 
-const resetPassword = async (req, res) => {
+exports.resetPassword = async (req, res) => {
     try{
         if (!req.params.token) return res.status(400).json({message: 'No email confirmation token found.'});
 
@@ -250,7 +240,7 @@ const resetPassword = async (req, res) => {
 
 /////////////////////////   sign in with google   /////////////////////////   
 
-const googleCallback = async (req,res) => {
+exports.googleCallback = async (req,res) => {
     res.status(200).json({message: "done"});
 }
 
@@ -259,9 +249,9 @@ const googleCallback = async (req,res) => {
 
 /////////////////////////   sign in with facebook   /////////////////////////   
 
-const facebookCallback = async (req,res) => {
-    res.redirect('/home');
-};
+// const facebookCallback = async (req,res) => {
+//     res.redirect('/home');
+// };
 
 
-module.exports = {signUp, login, verification, forgotPassword, resetPassword, facebookCallback, googleCallback};
+//module.exports = {signUp, login, verification, forgotPassword, resetPassword, facebookCallback, googleCallback};
