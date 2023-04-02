@@ -217,7 +217,7 @@ const resetPassword = async (req, res) => {
     try{
         if (!req.params.token) return res.status(400).json({message: 'No email confirmation token found.'});
 
-        if (!req.body.password) return next(new appError('No email confirmation token found.'));
+        if (!req.body.password) return res.status(400).json({message :'No password found.' });
         
         const user = await User.findOne({forgotPasswordToken: req.params.token});
         if (!user) res.status(400).send("User not found");
