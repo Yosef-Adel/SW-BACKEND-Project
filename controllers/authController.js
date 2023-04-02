@@ -213,7 +213,6 @@ const forgotPassword = async (req, res) => {
 
 const resetPassword = async (req, res) => {
     try{
-        if (!req.params.token) return res.status(400).json({message: 'No email confirmation token found.'});
 
         if (!req.body.password) return res.status(400).json({message :'No new password found.' });
         
