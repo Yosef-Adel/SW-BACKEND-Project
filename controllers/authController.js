@@ -30,7 +30,7 @@ bcrypt.genSalt(saltRounds)
 
 /////////////////////////   sign up + sending verification email   /////////////////////////   
 
-const signUp= async (req, res) => {
+exports.signUp= async (req, res) => {
     try{
         const isDuplicate = await User.findOne({emailAddress: req.body.emailAddress})
         console.log(isDuplicate)
@@ -84,7 +84,7 @@ const signUp= async (req, res) => {
 
 /////////////////////////   account verification via token   /////////////////////////   
 
-const verification = catchAsync(async (req, res, next) => {
+exports.verification = catchAsync(async (req, res, next) => {
     try{
 
         const user = await User.findOne({verifyEmailToken: req.params.token} );
@@ -121,7 +121,7 @@ const verification = catchAsync(async (req, res, next) => {
 
 /////////////////////////   login + generating a token   /////////////////////////   
 
-const login= async (req, res) => {
+exports.login= async (req, res) => {
     try {
         if (req.body.emailAddress){
             const user = await User.findOne({emailAddress: req.body.emailAddress});
@@ -167,7 +167,7 @@ const login= async (req, res) => {
 
 /////////////////////////   sending forgot password email with a token   /////////////////////////   
 
-const forgotPassword = async (req, res) => {
+exports.forgotPassword = async (req, res) => {
     try{
 
         console.log("inside try and email = ", req.body.emailAddress)
@@ -214,7 +214,7 @@ const forgotPassword = async (req, res) => {
 
 /////////////////////////   reseting password via token   /////////////////////////   
 
-const resetPassword = async (req, res) => {
+exports.resetPassword = async (req, res) => {
     try{
         if (!req.params.token) return res.status(400).json({message: 'No email confirmation token found.'});
 
@@ -251,7 +251,7 @@ const resetPassword = async (req, res) => {
 
 /////////////////////////   sign in with google   /////////////////////////   
 
-const googleCallback = async (req,res) => {
+exports.googleCallback = async (req,res) => {
     res.status(200).json({message: "done"});
 }
 
@@ -260,13 +260,6 @@ const googleCallback = async (req,res) => {
 
 /////////////////////////   sign in with facebook   /////////////////////////   
 
-const facebookCallback = async (req,res) => {
-    res.redirect('/home');
-}
-
-
-
-
-
-
-module.exports = {signUp, login, verification, forgotPassword, resetPassword, facebookCallback, googleCallback};
+// const facebookCallback = async (req,res) => {
+//     res.redirect('/home');
+// }
