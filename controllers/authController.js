@@ -4,7 +4,7 @@ const bcrypt = require("bcryptjs");
 const {sendMail} = require('../utils/emailVerification');
 const crypto = require('crypto');
 const appError = require('../utils/appError');
-const catchAsync = require('../utils/catchAsync');
+//const catchAsync = require('../utils/catchAsync');
 const Date = require("date.js");
 const saltRounds = 10;
 const password = "Admin@123";
@@ -217,7 +217,7 @@ const resetPassword = async (req, res) => {
     try{
         if (!req.params.token) return res.status(400).json({message: 'No email confirmation token found.'});
 
-        if (!req.body.password) return next(new appError('No email confirmation token found.'));
+        if (!req.body.password) return res.status(400).json({message :'No password found.' });
         
         const user = await User.findOne({forgotPasswordToken: req.params.token});
         if (!user) res.status(400).send("User not found");
