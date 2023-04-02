@@ -34,7 +34,7 @@ app.use(bp.urlencoded({ extended: true }))
 
 
 passportConfig.googlePass(passport);
-passportConfig.facebookPass(passport);
+//passportConfig.facebookPass(passport);
 
 
 
@@ -52,6 +52,7 @@ app.use(morgan('dev'));
 ////////////// auth route //////////////
 app.use('/auth', authRouter);
 
+
 ////////////// user route //////////////
 app.use('/user', userRouter);
 
@@ -59,18 +60,29 @@ app.use('/user', userRouter);
 //////////////order route //////////////
 app.use('/order', orderRouter);
 
+
 //////////////ticket route //////////////
 app.use('/ticket', ticketRouter);
+
 
 //////////////promocode route //////////////
 app.use('/promocode', promocodeRouter);
 
+
 //////////////venue route //////////////
 app.use('/venue', venueRouter);
 
+
 //////////////qrCode route //////////////
 app.use('/qrCode', qrCodeRouter);
+
+
+//////////////event route //////////////
 app.use('/api/events', eventRouter);
+
+
+//////////////categories route //////////////
 app.use('/api/categories', categoryRouter);
+
 
 module.exports = app;
