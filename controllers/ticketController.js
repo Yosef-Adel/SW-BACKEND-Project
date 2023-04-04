@@ -27,16 +27,18 @@ const createTicket = async (req, res, next ) => {
     let ticketPrice=0;
     let ticketFee=0;
 
-    if (req.body.type=="free") {
+    if (req.body.type=="Free") {
         ticketPrice=0;
         ticketFee=0;
     }
-    else if (req.body.type=="paid") {
-        if (req.body.price==NaN || req.body.fee==NaN) {
+    else if (req.body.type=="Paid") {
+        if (req.body.price==NaN) {
             return res.status(400).json({ message: "All fields are required." });
         }
         ticketPrice=req.body.price;
-        ticketFee=req.body.fee;
+        //calculate the fee of the ticket using the equation
+        ticketFee=(ticketPrice * 0.037)+(1.79)+(ticketPrice * 0.029);
+        ticketFee=ticketFee.toFixed(2);
     }
 
 
@@ -59,6 +61,12 @@ const createTicket = async (req, res, next ) => {
     if (totalCapacity >= eventCapacity) {
         return res.status(400).json({ message: "The total capacity of the tickets is greater than the event capacity." });
     }
+    if (req.body.description) {
+        ticketDescription = req.body.description;
+    }
+    else {
+        ticketDescription = "";
+    }
 
 
     try {
@@ -72,7 +80,8 @@ const createTicket = async (req, res, next ) => {
         minQuantityPerOrder: req.body.minQuantityPerOrder,
         maxQuantityPerOrder: req.body.maxQuantityPerOrder,
         salesStart: new Date(req.body.salesStart),
-        salesEnd: new Date(req.body.salesEnd)
+        salesEnd: new Date(req.body.salesEnd),
+        description: ticketDescription
         });
         await ticket.save();
         res.status(201).json({ message: "Ticket created successfully!" });
