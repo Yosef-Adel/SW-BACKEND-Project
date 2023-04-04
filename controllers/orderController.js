@@ -95,9 +95,9 @@ const createOrder=async (req, res ) => {
             //search in the array of ticket classes in the promocode model
             //to see if the ticket class is in the array
             let isTicketClassInPromocode = promocodeObject.tickets.includes(ticketClassId);
-            //if the ticket class is in the array
+            //if the ticket class is in the array and the ticket is paid not free
             //update the ticket price
-            if(isTicketClassInPromocode){
+            if(isTicketClassInPromocode && ticketPriceOriginal!=0){
                 //update the number of uses of the promocode
                 promocodeObject.used += 1;
                 //save the promocode
@@ -107,7 +107,15 @@ const createOrder=async (req, res ) => {
                 catch (err) {
                     return res.status(500).json({message: "Promocode update failed!"});
                     }
-                ticketPrice = ticketPriceOriginal - (ticketPriceOriginal * (promocodeObject.percentOff/100));
+                    if(promocodeObject.amountOff==-1){
+                        //then use the percent off not the amount off
+                        ticketPrice = ticketPriceOriginal - (ticketPriceOriginal * (promocodeObject.percentOff/100));
+                    }
+                    else if (promocodeObject.percentOff==-1){
+                        //then use the amount off not the percent off
+                        ticketPrice = ticketPriceOriginal - promocodeObject.amountOff;
+                    }
+                
             }
         }
         
