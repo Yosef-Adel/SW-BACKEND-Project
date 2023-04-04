@@ -11,10 +11,13 @@ const createTicket = async (req, res, next ) => {
     if (!(req.user)) {
         return res.status(400).json({ message: "User is not logged in." });
     }
-    //check if the user is a creator or not since only creators can create tickets
-    if (!req.isCreator) {
-        return res.status(400).json({ message: "User is not a creator." });
-    }
+
+    // //check if the user is a creator or not since only creators can create tickets
+    // if (!req.isCreator) {
+    //     return res.status(400).json({ message: "User is not a creator." });
+    // }
+
+
     //check on all fields
     //check if string is empty
     //check if number doesn't exist
@@ -93,5 +96,140 @@ const createTicket = async (req, res, next ) => {
 
 }
 
+//retrieve ticket class by id
+const getTicketById = async (req, res, next) => {
+    if (!(req.user)) {
+        return res.status(400).json({ message: "User is not logged in." });
+    }
 
-module.exports = {createTicket};
+    // //check if the user is a creator or not since only creators can view tickets
+    // if (!req.isCreator) {
+    //     return res.status(400).json({ message: "User is not a creator." });
+    // }
+
+    try {
+        const ticket = await Ticket.findById(req.params.ticket_id);
+        if (!ticket) {
+            return res.status(400).json({ message: "Ticket not found." });
+        }
+        res.status(200).json({ ticket: ticket });
+    }
+    catch (err) {
+        return res.status(400).json({ message: err.message });
+    }
+
+};
+
+//deleting a ticket class by id
+const deleteTicketById = async (req, res, next) => {
+    if (!(req.user)) {
+        return res.status(400).json({ message: "User is not logged in." });
+    }
+
+    // //check if the user is a creator or not since only creators can delete tickets
+    // if (!req.isCreator) {
+    //     return res.status(400).json({ message: "User is not a creator." });
+    // }
+
+    try {
+        const ticket = await Ticket.findById(req.params.ticket_id);
+        if (!ticket) {
+            return res.status(400).json({ message: "Ticket not found." });
+        }
+        await ticket.remove();
+        res.status(200).json({ message: "Ticket deleted successfully!",
+        ticket: ticket
+    });
+    }
+    catch (err) {
+        return res.status(400).json({ message: err.message });
+    }
+};
+
+//list the tickets of a certain event
+const getTicketsByEventId = async (req, res, next) => {
+    if (!(req.user)) {
+        return res.status(400).json({ message: "User is not logged in." });
+    }
+
+    // //check if the user is a creator or not since only creators can view tickets
+    // if (!req.isCreator) {
+    //     return res.status(400).json({ message: "User is not a creator." });
+    // }
+
+    try {
+        const tickets = await Ticket.find({event: req.params.event_id});
+        if (!tickets) {
+            return res.status(400).json({ message: "Tickets not found." });
+        }
+        res.status(200).json({ tickets: tickets });
+    }
+    catch (err) {
+        return res.status(400).json({ message: err.message });
+    }
+};
+
+//edit a ticket class by id
+const editTicketById = async (req, res, next) => {
+    if (!(req.user)) {
+        return res.status(400).json({ message: "User is not logged in." });
+    }
+
+    // //check if the user is a creator or not since only creators can edit tickets
+    // if (!req.isCreator) {
+    //     return res.status(400).json({ message: "User is not a creator." });
+    // }
+
+    //find the ticket by id in parameters and only update the fields that are sent
+    try {
+        const ticket = await Ticket.findById(req.params.ticket_id);
+        if (!ticket) {
+            return res.status(400).json({ message: "Ticket not found." });
+        }
+        if (req.body.name) {
+            ticket.name = req.body.name;
+        }
+        if (req.body.type) {
+            ticket.type = req.body.type;
+        }
+        if (req.body.price) {
+            ticket.price = req.body.price;
+            //update the fee using the equation plugging in the updated price
+            ticket.fee=(req.body.price * 0.037)+(1.79)+(req.body.price * 0.029);
+            //fix the fee to 2 decimal places
+            ticket.fee = ticket.fee.toFixed(2);
+
+
+        }
+        if (req.body.capacity) {
+            ticket.capacity = req.body.capacity;
+        }
+        if (req.body.minQuantityPerOrder) {
+            ticket.minQuantityPerOrder = req.body.minQuantityPerOrder;
+        }
+        if (req.body.maxQuantityPerOrder) {
+            ticket.maxQuantityPerOrder = req.body.maxQuantityPerOrder;
+        }
+        if (req.body.salesStart) {
+            ticket.salesStart = new Date(req.body.salesStart);
+        }
+        if (req.body.salesEnd) {
+            ticket.salesEnd = new Date(req.body.salesEnd);
+        }
+        if (req.body.description) {
+            ticket.description = req.body.description;
+        }
+        await ticket.save();
+        res.status(200).json({ message: "Ticket edited successfully!",
+        ticket: ticket
+    });
+    }
+    catch (err) {
+        return res.status(400).json({ message: err.message });
+    }
+
+};
+
+
+
+module.exports = {createTicket, getTicketById, deleteTicketById, getTicketsByEventId, editTicketById};
