@@ -1,10 +1,8 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const bcrypt = require("bcryptjs");
-const sendMail = require('../utils/emailVerification');
+const {sendMail} = require('../utils/emailVerification');
 const crypto = require('crypto');
-const appError = require('../utils/appError');
-const catchAsync = require('../utils/catchAsync');
 const Date = require("date.js");
 const saltRounds = 10;
 const password = "Admin@123";
@@ -22,10 +20,9 @@ bcrypt.genSalt(saltRounds)
     }).catch(err => console.error(err.message));
 
 
+    
 // const signToken = id => {
 //     return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE })};
-
-
 
 
 /////////////////////////   sign up + sending verification email   /////////////////////////   
@@ -33,12 +30,10 @@ bcrypt.genSalt(saltRounds)
 exports.signUp= async (req, res) => {
     try{
         const isDuplicate = await User.findOne({emailAddress: req.body.emailAddress})
-        console.log(isDuplicate)
+
         if (isDuplicate) {
             return res.status(400).json({message: 'users validation failed: emailAddress: Error, expected emailAddress to be unique.'});
         }
-
-        console.log("hi")
 
         if (!(req.body.emailAddress && req.body.password && req.body.firstName && req.body.lastName)) 
         {
@@ -53,7 +48,6 @@ exports.signUp= async (req, res) => {
         lastName: req.body.lastName,
         password: hashedPass
         });
-        console.log('user created', user); 
         
         //testing
         user.verifyEmailToken = await user.generateEmailVerificationToken();
@@ -84,8 +78,9 @@ exports.signUp= async (req, res) => {
 
 /////////////////////////   account verification via token   /////////////////////////   
 
-exports.verification = catchAsync(async (req, res, next) => {
+exports.verification = async (req, res) => {
     try{
+        if (!req.params.token)  return res.status(400).json({message: "no email verification token found"})
 
         const user = await User.findOne({verifyEmailToken: req.params.token} );
         if (!user)  return res.status(400).json({message: "user not found"});
@@ -102,7 +97,7 @@ exports.verification = catchAsync(async (req, res, next) => {
         user.verifyEmailTokenExpiry = undefined;
         user.isVerified = true;
         await user.save();
-        console.log("saved");
+
         
         
 
@@ -114,7 +109,7 @@ exports.verification = catchAsync(async (req, res, next) => {
     catch(err){
         return res.status(400).json({ message: err.message });
     }
-});
+};
 
 
 
@@ -130,12 +125,7 @@ exports.login= async (req, res) => {
             {
                 return res.status(400).json({message: "user not found"})
             }
-            
-            if (!user.isVerified) return res.status(400).json({message: "Please verify your email first."})
-            
-            console.log(user.password);
-            console.log(req.body.password);
-            
+
             //testing
             const isMatch = await bcrypt.compare(req.body.password, user.password);
             console.log(isMatch);
@@ -146,8 +136,6 @@ exports.login= async (req, res) => {
 
             const token = await user.generateAuthToken();
             //testing
-
-            console.log("user logged-in", user);
 
             //special return for testing
             // return res.status(200).json({message:"successfully logged in"});
@@ -216,9 +204,8 @@ exports.forgotPassword = async (req, res) => {
 
 exports.resetPassword = async (req, res) => {
     try{
-        if (!req.params.token) return res.status(400).json({message: 'No email confirmation token found.'});
-
-        if (!req.body.password) return res.status(400).json({message: 'No new password found'});
+        
+        if (!req.body.password) return res.status(400).json({message :'No new password found.' });
         
         const user = await User.findOne({forgotPasswordToken: req.params.token});
         if (!user) return res.status(400).send("User not found");
@@ -252,30 +239,14 @@ exports.resetPassword = async (req, res) => {
 /////////////////////////   sign in with google   /////////////////////////   
 
 exports.googleCallback = async (req,res) => {
-    console.log(req);
-    const {OAuth2Client} = require('google-auth-library');
-    const client = new OAuth2Client(process.env.CLIENT_ID);
-    async function verify() {
-    const ticket = await client.verifyIdToken({
-        idToken: token,
-        audience: process.env.CLIENT_ID,  // Specify the CLIENT_ID of the app that accesses the backend
-        // Or, if multiple clients access the backend:
-        //[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
-    });
-    const payload = ticket.getPayload();
-    const userid = payload['sub'];
-    // If request specified a G Suite domain:
-    // const domain = payload['hd'];
-    }
-    verify().catch(console.error);
-
     res.status(200).json({message: "done"});
 }
 
 
 
+
 /////////////////////////   sign in with facebook   /////////////////////////   
 
-// const facebookCallback = async (req,res) => {
+// exports.facebookCallback = async (req,res) => {
 //     res.redirect('/home');
-// }
+// };
