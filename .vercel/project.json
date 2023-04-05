@@ -1,1 +1,14 @@
-{"orgId":"2z0EGMQY2a1vTDcSwSpgwiEU","projectId":"prj_MCOnl0JXD1MhLQI3OdNB3taX4QRU"}
+{
+  "projectId": "prj_MCOnl0JXD1MhLQI3OdNB3taX4QRU",
+  "orgId": "2z0EGMQY2a1vTDcSwSpgwiEU",
+  "settings": {
+    "createdAt": 1680656697964,
+    "devCommand": null,
+    "installCommand": null,
+    "buildCommand": null,
+    "outputDirectory": null,
+    "rootDirectory": null,
+    "directoryListing": false,
+    "nodeVersion": "18.x"
+  }
+}
