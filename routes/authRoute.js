@@ -18,7 +18,6 @@ authRouter.get('/google', passport.authenticate('google', { scope : ['profile', 
 authRouter.get('/google/callback', passport.authenticate("google"),authController.googleCallback);
 
 
-
 // authRouter.get('/facebook', passport.authenticate('facebook', {scope: ['public_profile' ,'email']}));
 // authRouter.get('/facebook/callback', passport.authenticate('facebook'), authController.facebookCallback);
 

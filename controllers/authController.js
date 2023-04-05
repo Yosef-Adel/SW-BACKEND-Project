@@ -96,10 +96,7 @@ exports.verification = async (req, res) => {
         user.verifyEmailToken = undefined;
         user.verifyEmailTokenExpiry = undefined;
         user.isVerified = true;
-        await user.save();
-
-        
-        
+        await user.save();        
 
         return res.status(200).json({
             message:'Successfully verified. You can login now'
