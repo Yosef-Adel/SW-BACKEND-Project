@@ -19,7 +19,6 @@ bcrypt.genSalt(saltRounds)
     // console.log('Hash: ', hash);
     }).catch(err => console.error(err.message));
 
-
     
 // const signToken = id => {
 //     return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE })};
@@ -69,7 +68,8 @@ exports.signUp= async (req, res) => {
     }
     
     catch (err) {
-        return res.status(400).json({ message: err.message });
+        console.log(err.message)
+        return res.status(400).json({ message: "There was an error in signing up" });
     }
 };
 
@@ -107,7 +107,8 @@ exports.verification = async (req, res) => {
         
 }
     catch(err){
-        return res.status(400).json({ message: err.message });
+        console.log(err.message)
+        return res.status(400).json({ message: "There was an error in verifying email address." });
     }
 };
 
@@ -118,40 +119,42 @@ exports.verification = async (req, res) => {
 
 exports.login= async (req, res) => {
     try {
-        if (req.body.emailAddress){
-            const user = await User.findOne({emailAddress: req.body.emailAddress});
-
-            if (!user)
-            {
-                return res.status(400).json({message: "user not found"})
-            }
-
-            if (!user.isVerified)
-            {
-                return res.status(400).json({message: "Please verify your email first."});
-            }
-            
-            //testing
-            const isMatch = await bcrypt.compare(req.body.password, user.password);
-            console.log(isMatch);
-            if (!isMatch) 
-            {
-                return res.status(400).json({message: "Password is incorrect"})
-            }
-
-            const token = await user.generateAuthToken();
-            //testing
-
-            //special return for testing
-            // return res.status(200).json({message:"successfully logged in"});
-            
-            return res.json({token, user});
-
+        if (!req.body.emailAddress){
+            return res.status(400).json({message: "Please enter email address."})
         }
+
+        const user = await User.findOne({emailAddress: req.body.emailAddress});
+        
+        if (!user)
+        {
+            return res.status(400).json({message: "user not found"})
+        }
+
+        if (!user.isVerified)
+        {
+            return res.status(400).json({message: "Please verify your email first."});
+        }
+
+        //testing
+        const isMatch = await bcrypt.compare(req.body.password, user.password);
+        console.log(isMatch);
+        if (!isMatch) 
+        {
+            return res.status(400).json({message: "Password is incorrect"})
+        }
+        const token = await user.generateAuthToken();
+        //testing
+
+        //special return for testing
+        // return res.status(200).json({message:"successfully logged in"});
+        
+        return res.status(200).json({token, user});
+
     }
 
     catch(err){
-        return res.status(400).json({message: err.message});
+        console.log(err.message)
+        return res.status(400).json({ message: "There was an error in logging in" });
     }
 };
 
@@ -196,8 +199,8 @@ exports.forgotPassword = async (req, res) => {
     }
 
     catch (err){
-        
-        return res.status(400).json({message: err.message});
+        console.log(err.message)
+        return res.status(400).json({ message: "There was an error in sending forgot-password email" });
     }
     
 };
@@ -210,7 +213,7 @@ exports.forgotPassword = async (req, res) => {
 exports.resetPassword = async (req, res) => {
     try{
         
-        if (!req.body.password) return res.status(400).json({message :'No new password found.' });
+        if (!req.body.password) return res.status(400).json({message :'Please enter new password.' });
         
         const user = await User.findOne({forgotPasswordToken: req.params.token});
         if (!user) return res.status(400).send("User not found");
@@ -232,9 +235,9 @@ exports.resetPassword = async (req, res) => {
             message: "password reset successfully"
         });
     }
-    catch(err)
-    {
-        return res.status(400).json({message: err.message});
+    catch(err){
+        console.log(err.message)
+        return res.status(400).json({ message: "There was an error in resetting password" });
     }
 };
 
