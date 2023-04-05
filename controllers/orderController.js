@@ -12,6 +12,9 @@ const {generateQRCodeAndSendEmail}=require('../controllers/qrCodeController');
 // @route   POST api/orders/:event_id
 // @desc    Create a new order
 // @access  Public
+
+//everything will be calculated on in the frontend 
+//the final calculation will be sent to the backend and stored
 const createOrder=async (req, res ) => {
 
     //event id is in the parameters
@@ -21,154 +24,55 @@ const createOrder=async (req, res ) => {
     //in case the user is logged in (authorized)    
     const userId = req.user._id;
 
-    //will only take the tickets bought array from the request
-    //the rest will be calculated and returned in the response
-    const {ticketsBought,promocode} = req.body;
-
-    //initialization of everything that will be calculated
-    let totalTickets = 0;
-    let subTotal = 0.00;
-    let totalFees = 0.00;
-    let totalDiscountAmount = 0.00;
-    let total = 0.00;
-    let isTicketClassAvailable=true;
-    let isNumberOfTicketsBoughtInRange=true;
-    let isPromocodeAvailable=true;
-
-    //loop through the tickets bought array
-    for(let i=0; i< ticketsBought.length; i++){
-        //the ticket class id
-        const ticketClassId = ticketsBought[i].ticketClass;
-        //the number of tickets bought
-        const numberOfTicketsBought = ticketsBought[i].number;
-        let ticketPriceOriginal = 0.00;
-        let ticketPrice = 0.00;
-        let ticketFee = 0.00;
-        //find the ticket class by id 
-        //and get the ticket class object
-        let ticketClass = await TicketClass.findById(ticketClassId);
-        if(ticketClass){
-            ///////////////////////////////////Availablity Check/////////////////////////////////////
-            //check if the ticket class is available
-            //check on the start date and end date of ticket class
-            if(ticketClass.capacity < numberOfTicketsBought || ticketClass.salesStart > Date.now() || ticketClass.salesEnd < Date.now()){
-                isTicketClassAvailable=false;
-                break;
-            }
-
-            //check on the min and max quantity per order
-            if((numberOfTicketsBought!=0 && numberOfTicketsBought < ticketClass.minQuantityPerOrder) || numberOfTicketsBought > ticketClass.maxQuantityPerOrder){
-                isNumberOfTicketsBoughtInRange=false;
-                break;
-            }
-
-            //update the capacity of the ticket class
-            ticketClass.capacity -= numberOfTicketsBought;
-
-            //save the ticket class
-            try {
-                await ticketClass.save();
-            } catch (err) {
-                return res.status(500).json({message: "Ticket Class update failed!"});
-            }
-
-            ticketPriceOriginal = ticketClass.price;
-            ticketPrice = ticketClass.price;
-            ticketFee = ticketClass.fee;
-        }
-        
-        ////////////////////////////////////Promocode check/////////////////////////////////////
-        //check if there was a promocode
-        if(promocode){
-            //populate the promocode to get all the info from its id
-            let promocodeObject = await Promocode.findById(promocode) 
-            if(promocodeObject){
-                //check if the promocode is valid
-                //check on the start and end dates
-                //check on the limit of uses and the number of uses
-                if(promocodeObject.used >= promocodeObject.limit || promocodeObject.startDate > Date.now() || promocodeObject.endDate < Date.now()){
-                    isPromocodeAvailable=false;
-                    break;
-                }
-            };
-
-            //search in the array of ticket classes in the promocode model
-            //to see if the ticket class is in the array
-            let isTicketClassInPromocode = promocodeObject.tickets.includes(ticketClassId);
-            //if the ticket class is in the array and the ticket is paid not free
-            //update the ticket price
-            if(isTicketClassInPromocode && ticketPriceOriginal!=0){
-                //update the number of uses of the promocode
-                promocodeObject.used += 1;
-                //save the promocode
-                try {
-                    await promocodeObject.save();
-                    }
-                catch (err) {
-                    return res.status(500).json({message: "Promocode update failed!"});
-                    }
-                    if(promocodeObject.amountOff==-1){
-                        //then use the percent off not the amount off
-                        ticketPrice = ticketPriceOriginal - (ticketPriceOriginal * (promocodeObject.percentOff/100));
-                    }
-                    else if (promocodeObject.percentOff==-1){
-                        //then use the amount off not the percent off
-                        ticketPrice = ticketPriceOriginal - promocodeObject.amountOff;
-                    }
-                
-            }
-        }
-        
-
-        //Update the total number of tickets
-        totalTickets += numberOfTicketsBought;
-        //Update the subtotal
-        subTotal += ticketPriceOriginal * numberOfTicketsBought;
-        //Update the total fees
-        totalFees += ticketFee * numberOfTicketsBought;
-        //Update the total discount amount
-        totalDiscountAmount += (ticketPriceOriginal - ticketPrice) * numberOfTicketsBought;
-        
+    //check for the fields in the body
+    if (!req.body.ticketsBought || !req.body.subTotal || !req.body.fees || !req.body.total) {
+        return res.status(400).json({ message: "All fields are required." });
+    }
+    if(req.body.promocode && !req.body.discountAmount){
+        return res.status(400).json({ message: "Discount amount is required." });
     }
 
-
-    //check if the ticket class is available
-    if(!isTicketClassAvailable){
-        return res.status(500).json({message: "Ticket Class not available!"});
+    let order;
+    if(req.body.promocode && req.body.discountAmount){
+        order = new Order({
+            event: eventId,
+            user: userId,
+            ticketsBought: req.body.ticketsBought,
+            promocode: req.body.promocode,
+            //calculated in the frontend
+            subTotal: req.body.subTotal,
+            fees: req.body.fees,
+            discountAmount: req.body.discountAmount,
+            total: req.body.total
+        });
     }
+    else{
+        order = new Order({
+            event: eventId,
+            user: userId,
+            ticketsBought: req.body.ticketsBought,
+            //calculated in the frontend
+            subTotal: req.body.subTotal,
+            fees: req.body.fees,
+            discountAmount: 0,
+            total: req.body.total
+        });
 
-    //check if the number of tickets bought is in range
-    if(!isNumberOfTicketsBoughtInRange){
-        return res.status(500).json({message: "Number of tickets bought is not in range!"});
     }
-
-    //check if the promocode is available
-    if(!isPromocodeAvailable){
-        return res.status(500).json({message: "Promocode not available!"});
-    }
-
-    //calculate the total
-    total = subTotal + totalFees - totalDiscountAmount;
-
-    //create a new order
-    const order = new Order({
-        event: eventId,
-        user: userId,
-        ticketsBought: ticketsBought,
-        promocode: promocode,
-        subTotal: subTotal,
-        fees: totalFees,
-        discountAmount: totalDiscountAmount,
-        total: total
-    });
 
     //save the order
     try {
         await order.save();
+        //save the order in the event database
+        //get the event and add the order to the orders array
+        
+        
         //generate the qr code and send the email
 
-        // let eventURL=process.env.CURRENTURL+"events/"+eventId;
-        // await generateQRCodeAndSendEmail(eventURL,req.user._id);
+        //plugin the deployed url
+        // let eventURL="https://sw-backend-project.vercel.app/events/"+eventId;
+        let eventURL=process.env.CURRENTURL+"events/"+eventId;
+        await generateQRCodeAndSendEmail(eventURL,req.user._id);
 
         res.status(201).json({message: "Order created successfully!",
         order: order
@@ -179,6 +83,71 @@ const createOrder=async (req, res ) => {
         res.status(500).json({message: "Order creation failed!"});
     }
 
-}
+};
 
-module.exports={createOrder}
+//get all orders of a certain event
+const getOrdersByEventId=async (req,res)=>{
+    if (!(req.user)) {
+        return res.status(400).json({ message: "User is not logged in." });
+    }
+    //get the event id from the parameters
+    const eventId=req.params.event_id;
+
+    //get all the orders of the event
+    try{
+        const orders= await Order.find({event: eventId});
+        res.status(200).json({message: "Orders fetched successfully!",
+        orders: orders
+        });
+
+    }
+    catch(err){
+        res.status(500).json({message: "Error getting orders!"});
+    }
+
+
+};
+
+//get an order by order id
+const getOrderById=async (req,res)=>{
+    if (!(req.user)) {
+        return res.status(400).json({ message: "User is not logged in." });
+    }
+    //get the order id from the parameters
+    const orderId=req.params.order_id;
+    const order= await Order.findById(orderId);
+    if(!order){
+        return res.status(404).json({message: "Order not found!"});
+    }
+    res.status(200).json({message: "Order fetched successfully!",
+    order: order
+    });
+};
+
+//get all orders of a certain user
+const getOrdersByUserId=async (req,res)=>{
+    if(!(req.user)){
+        return res.status(400).json({message: "User is not logged in."});
+    }
+    if(req.user._id!=req.params.user_id){
+        return res.status(400).json({message: "You can only view your own orders."});
+    }
+    //get the user id from the parameters
+    const userId=req.params.user_id;
+    try{
+        const order= await Order.find({user: userId});
+        if (!order) {
+            return res.status(404).json({ message: "No orders found." });
+        }
+        res.status(200).json({message: "Orders fetched successfully!",
+        orders: order
+        });
+    }
+    catch(err){
+        res.status(500).json({message: "Error getting orders!"});
+    }
+
+};
+
+
+module.exports={createOrder,getOrdersByEventId,getOrderById,getOrdersByUserId}
