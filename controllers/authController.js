@@ -126,6 +126,11 @@ exports.login= async (req, res) => {
                 return res.status(400).json({message: "user not found"})
             }
 
+            if (!user.isVerified)
+            {
+                return res.status(400).json({message: "Please verify your email first."});
+            }
+            
             //testing
             const isMatch = await bcrypt.compare(req.body.password, user.password);
             console.log(isMatch);
