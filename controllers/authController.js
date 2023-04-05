@@ -3,8 +3,6 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require("bcryptjs");
 const {sendMail} = require('../utils/emailVerification');
 const crypto = require('crypto');
-const appError = require('../utils/appError');
-//const catchAsync = require('../utils/catchAsync');
 const Date = require("date.js");
 const saltRounds = 10;
 const password = "Admin@123";
@@ -57,9 +55,7 @@ exports.signUp= async (req, res) => {
         //testing
         user.verifyEmailToken = await user.generateEmailVerificationToken();
         user.verifyEmailTokenExpiry= new Date(process.env.JWT_EXPIRE);
-        await user.save();
         const verifyEmailText = `Please click on the link to complete the verification process http://localhost:3000/auth/sign-up-verify/${user.verifyEmailToken}\n`;
-        
         
         await sendMail({
         email: user.emailAddress,
@@ -68,6 +64,7 @@ exports.signUp= async (req, res) => {
         });
         //testing
 
+        await user.save();
         return res.status(200).json({
             message: 'Check your email for verification.'}
             );
