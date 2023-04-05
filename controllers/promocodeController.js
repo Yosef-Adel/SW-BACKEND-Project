@@ -9,21 +9,38 @@ const createPromocode = async (req, res, next) => {
         if (!(req.user)) {
             return res.status(400).json({ message: "User is not logged in." });
         }
-        //check if the user is a creator or not since only creators can create tickets
-        if (!req.isCreator) {
-            return res.status(400).json({ message: "User is not a creator." });
-        }
+        // //check if the user is a creator or not since only creators can create tickets
+        // if (!req.isCreator) {
+        //     return res.status(400).json({ message: "User is not a creator." });
+        // }
         //check on all fields 
-        if (!req.body.name || req.body.tickets==NaN || req.body.percentOff==NaN || req.body.limit==NaN || req.body.startDate==NaN || req.body.endDate==NaN) {
+        if (!req.body.name || req.body.tickets==NaN || req.body.limit==NaN || req.body.startDate==NaN || req.body.endDate==NaN) {
             return res.status(400).json({ message: "All fields are required." });
         }
+        //check if the body contains amount off or percent off
+        if (!req.body.amountOff && !req.body.percentOff) {
+            return res.status(400).json({ message: "Amount off or percent off is required." });
+        }
+        //check if given which one and store it
+        //let -1 mean a flag that the field is not given
+        let amountOff = -1;
+        let percentOff = -1;
+        if (req.body.amountOff) {
+            amountOff = req.body.amountOff;
+        }
+        if (req.body.percentOff) {
+            percentOff = req.body.percentOff;
+        }
+
+        
 
         try {
             const promocode = new Promocode({
             event: req.params.event_id,
             name: req.body.name,
             tickets: req.body.tickets,
-            percentOff: req.body.percentOff,
+            percentOff: percentOff,
+            amountOff: amountOff,
             limit: req.body.limit,
             used: 0,
             startDate: new Date(req.body.startDate),
@@ -36,8 +53,96 @@ const createPromocode = async (req, res, next) => {
         catch (err) {
             return res.status(400).json({ message: err.message });
         }
-}
+};
 
-module.exports = {createPromocode};
+//get a promocode by id
+const getPromocode = async (req, res, next) => {
+    if (!(req.user)) {
+        return res.status(400).json({ message: "User is not logged in." });
+    }
+    try {
+        const promocode = await Promocode.findById(req.params.promo_id);
+        res.status(200).json({ promocode: promocode });
+    }
+    catch (err) {
+        return res.status(400).json({ message: err.message });
+    }
+};
+
+//update a promocode by id
+const updatePromocode = async (req, res, next) => {
+    if (!(req.user)) {
+        return res.status(400).json({ message: "User is not logged in." });
+    }
+    //find the promocode by id and only update the fields that are given
+    try {
+        const promocode = await Promocode.findById(req.params.promo_id);
+        if (req.body.name) {
+            promocode.name = req.body.name;
+        }
+        if (req.body.tickets) {
+            promocode.tickets = req.body.tickets;
+        }
+        if (req.body.percentOff) {
+            promocode.percentOff = req.body.percentOff;
+            promocode.amountOff = -1;
+        }
+        if (req.body.amountOff) {
+            promocode.amountOff = req.body.amountOff;
+            promocode.percentOff = -1;
+        }
+        if (req.body.limit) {
+            promocode.limit = req.body.limit;
+        }
+        if (req.body.startDate) {
+            promocode.startDate = new Date(req.body.startDate);
+        }
+        if (req.body.endDate) {
+            promocode.endDate = new Date(req.body.endDate);
+        }
+        await promocode.save();
+        res.status(200).json({ message: "Promocode updated successfully!" });
+    }
+    catch (err) {
+        return res.status(400).json({ message: err.message });
+    }
+
+
+    
+};
+
+//delete a promocode by id
+const deletePromocode = async (req, res, next) => {
+    if (!(req.user)) {
+        return res.status(400).json({ message: "User is not logged in." });
+    }
+    try {
+        const promocode = await Promocode.findById(req.params.promo_id);
+        await promocode.remove();
+        res.status(200).json({ message: "Promocode deleted successfully!",
+        promocode: promocode });
+    }
+    catch (err) {
+        return res.status(400).json({ message: err.message });
+    }
+};
+
+//get all promocodes for an event
+const getPromocodes = async (req, res, next) => {
+    if (!(req.user)) {
+        return res.status(400).json({ message: "User is not logged in." });
+    }
+    try {
+        const promocodes = await Promocode.find({event: req.params.event_id});
+        res.status(200).json({ promocodes: promocodes });
+    }
+    catch (err) {
+        return res.status(400).json({ message: err.message });
+    }
+};
+
+
+
+module.exports = {createPromocode, getPromocode, updatePromocode, deletePromocode, getPromocodes};
 
 
