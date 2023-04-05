@@ -32,7 +32,7 @@ exports.googlePass= function(passport){
                 })
                 console.log(profile.emails[0].value);
                 await newUser.save();
-                done(null, newUser)
+                return done(null, newUser);
             } 
 
             catch (error) {

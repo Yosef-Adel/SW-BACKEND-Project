@@ -19,7 +19,6 @@ bcrypt.genSalt(saltRounds)
     // console.log('Hash: ', hash);
     }).catch(err => console.error(err.message));
 
-
     
 // const signToken = id => {
 //     return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE })};
@@ -32,7 +31,7 @@ exports.signUp= async (req, res) => {
         const isDuplicate = await User.findOne({emailAddress: req.body.emailAddress})
 
         if (isDuplicate) {
-            return res.status(400).json({message: 'users validation failed: emailAddress: Error, expected emailAddress to be unique.'});
+            return res.status(400).json({message: 'User validation failed: expected emailAddress to be unique.'});
         }
 
         if (!(req.body.emailAddress && req.body.password && req.body.firstName && req.body.lastName)) 
@@ -52,7 +51,7 @@ exports.signUp= async (req, res) => {
         //testing
         user.verifyEmailToken = await user.generateEmailVerificationToken();
         user.verifyEmailTokenExpiry= new Date(process.env.JWT_EXPIRE);
-        const verifyEmailText = `Please click on the link to complete the verification process http://localhost:3000/auth/sign-up-verify/${user.verifyEmailToken}\n`;
+        const verifyEmailText = `Please click on the link to complete the verification process https://sw-backend-project.vercel.app/auth/sign-up-verify/${user.verifyEmailToken}\n`;
         
         await sendMail({
         email: user.emailAddress,
@@ -69,7 +68,8 @@ exports.signUp= async (req, res) => {
     }
     
     catch (err) {
-        return res.status(400).json({ message: err.message });
+        console.log(err.message)
+        return res.status(400).json({ message: "There was an error in signing up" });
     }
 };
 
@@ -96,10 +96,7 @@ exports.verification = async (req, res) => {
         user.verifyEmailToken = undefined;
         user.verifyEmailTokenExpiry = undefined;
         user.isVerified = true;
-        await user.save();
-
-        
-        
+        await user.save();        
 
         return res.status(200).json({
             message:'Successfully verified. You can login now'
@@ -107,7 +104,8 @@ exports.verification = async (req, res) => {
         
 }
     catch(err){
-        return res.status(400).json({ message: err.message });
+        console.log(err.message)
+        return res.status(400).json({ message: "There was an error in verifying email address." });
     }
 };
 
@@ -118,35 +116,42 @@ exports.verification = async (req, res) => {
 
 exports.login= async (req, res) => {
     try {
-        if (req.body.emailAddress){
-            const user = await User.findOne({emailAddress: req.body.emailAddress});
-
-            if (!user)
-            {
-                return res.status(400).json({message: "user not found"})
-            }
-
-            //testing
-            const isMatch = await bcrypt.compare(req.body.password, user.password);
-            console.log(isMatch);
-            if (!isMatch) 
-            {
-                return res.status(400).json({message: "Password is incorrect"})
-            }
-
-            const token = await user.generateAuthToken();
-            //testing
-
-            //special return for testing
-            // return res.status(200).json({message:"successfully logged in"});
-            
-            return res.json({token, user});
-
+        if (!req.body.emailAddress){
+            return res.status(400).json({message: "Please enter email address."})
         }
+
+        const user = await User.findOne({emailAddress: req.body.emailAddress});
+        
+        if (!user)
+        {
+            return res.status(400).json({message: "user not found"})
+        }
+
+        if (!user.isVerified)
+        {
+            return res.status(400).json({message: "Please verify your email first."});
+        }
+
+        //testing
+        const isMatch = await bcrypt.compare(req.body.password, user.password);
+        console.log(isMatch);
+        if (!isMatch) 
+        {
+            return res.status(400).json({message: "Password is incorrect"})
+        }
+        const token = await user.generateAuthToken();
+        //testing
+
+        //special return for testing
+        // return res.status(200).json({message:"successfully logged in"});
+        
+        return res.status(200).json({token, user});
+
     }
 
     catch(err){
-        return res.status(400).json({message: err.message});
+        console.log(err.message)
+        return res.status(400).json({ message: "There was an error in logging in" });
     }
 };
 
@@ -174,7 +179,7 @@ exports.forgotPassword = async (req, res) => {
         // testing
         const forgotPasswordToken = await user.generateForgotPasswordToken();
         user.forgotPasswordTokenExpiry= Date(process.env.JWT_EXPIRE);
-        const forgotPasswordEmailText = `Click on the link to reset your password http://localhost:3000/auth/reset-password/${forgotPasswordToken}\n`;
+        const forgotPasswordEmailText = `Click on the link to reset your password https://sw-backend-project.vercel.app/auth/reset-password/${forgotPasswordToken}\n`;
 
         await sendMail({
             email: req.body.emailAddress,
@@ -191,8 +196,8 @@ exports.forgotPassword = async (req, res) => {
     }
 
     catch (err){
-        
-        return res.status(400).json({message: err.message});
+        console.log(err.message)
+        return res.status(400).json({ message: "There was an error in sending forgot-password email" });
     }
     
 };
@@ -205,7 +210,7 @@ exports.forgotPassword = async (req, res) => {
 exports.resetPassword = async (req, res) => {
     try{
         
-        if (!req.body.password) return res.status(400).json({message :'No new password found.' });
+        if (!req.body.password) return res.status(400).json({message :'Please enter new password.' });
         
         const user = await User.findOne({forgotPasswordToken: req.params.token});
         if (!user) return res.status(400).send("User not found");
@@ -227,9 +232,9 @@ exports.resetPassword = async (req, res) => {
             message: "password reset successfully"
         });
     }
-    catch(err)
-    {
-        return res.status(400).json({message: err.message});
+    catch(err){
+        console.log(err.message)
+        return res.status(400).json({ message: "There was an error in resetting password" });
     }
 };
 
