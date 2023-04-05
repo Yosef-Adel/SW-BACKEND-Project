@@ -32,7 +32,7 @@ exports.signUp= async (req, res) => {
         const isDuplicate = await User.findOne({emailAddress: req.body.emailAddress})
 
         if (isDuplicate) {
-            return res.status(400).json({message: 'users validation failed: emailAddress: Error, expected emailAddress to be unique.'});
+            return res.status(400).json({message: 'User validation failed: expected emailAddress to be unique.'});
         }
 
         if (!(req.body.emailAddress && req.body.password && req.body.firstName && req.body.lastName)) 
@@ -52,7 +52,7 @@ exports.signUp= async (req, res) => {
         //testing
         user.verifyEmailToken = await user.generateEmailVerificationToken();
         user.verifyEmailTokenExpiry= new Date(process.env.JWT_EXPIRE);
-        const verifyEmailText = `Please click on the link to complete the verification process http://localhost:3000/auth/sign-up-verify/${user.verifyEmailToken}\n`;
+        const verifyEmailText = `Please click on the link to complete the verification process https://sw-backend-project.vercel.app/auth/sign-up-verify/${user.verifyEmailToken}\n`;
         
         await sendMail({
         email: user.emailAddress,
@@ -179,7 +179,7 @@ exports.forgotPassword = async (req, res) => {
         // testing
         const forgotPasswordToken = await user.generateForgotPasswordToken();
         user.forgotPasswordTokenExpiry= Date(process.env.JWT_EXPIRE);
-        const forgotPasswordEmailText = `Click on the link to reset your password http://localhost:3000/auth/reset-password/${forgotPasswordToken}\n`;
+        const forgotPasswordEmailText = `Click on the link to reset your password https://sw-backend-project.vercel.app/auth/reset-password/${forgotPasswordToken}\n`;
 
         await sendMail({
             email: req.body.emailAddress,
