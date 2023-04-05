@@ -36,6 +36,12 @@ const TicketSchema = new Schema({
         type: Number,
         required: true
     },
+    
+    sold:{
+        type: Number,
+        required: false,
+        default: 0
+    },
 
     minQuantityPerOrder:{
         type: Number,

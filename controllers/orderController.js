@@ -34,6 +34,11 @@ const createOrder=async (req, res ) => {
 
     let order;
     if(req.body.promocode && req.body.discountAmount){
+        //find the promocode by id and increase the used count
+        const promocode=await Promocode.findById(req.body.promocode);
+        promocode.used=promocode.used+1;
+        await promocode.save();
+
         order = new Order({
             event: eventId,
             user: userId,
@@ -57,7 +62,14 @@ const createOrder=async (req, res ) => {
             discountAmount: 0,
             total: req.body.total
         });
+    }
 
+    //loop throught the tickets bought array and decrease the capacity by the number of tickets bought
+    //updating the capacity of the ticket class
+    for(let i=0;i<req.body.ticketsBought.length;i++){
+        const ticketClass=await TicketClass.findById(req.body.ticketsBought[i].ticketClass);
+        ticketClass.sold=ticketClass.sold+req.body.ticketsBought[i].number;
+        await ticketClass.save();
     }
 
     //save the order
@@ -149,5 +161,50 @@ const getOrdersByUserId=async (req,res)=>{
 
 };
 
+//cancel an order
+const cancelOrder=async (req,res)=>{
+    //check on the user
+    if(!(req.user)){
+        return res.status(400).json({message: "User is not logged in."});
+    }
+    //the user can only cancel his own order
+    if(req.user._id!=req.params.user_id){
+        return res.status(400).json({message: "You can only cancel your own orders."});
+    }
+    //get the order id from the parameters
+    const orderId=req.params.order_id;
+    //get the order
+    const order = await Order.findById(orderId);
+    if(!order){
+        return res.status(404).json({message: "Order not found!"});
+    }
+    //loop through the tickets and decrease the sold by the number of tickets bought
+    for(let i=0;i<order.ticketsBought.length;i++){
+        const ticketClass=await TicketClass.findById(order.ticketsBought[i].ticketClass);
+        if(ticketClass){
+            ticketClass.sold=ticketClass.sold-order.ticketsBought[i].number;
+            await ticketClass.save();
+        }
+    }
+    //the promocode used will not be updated
+    //assumption that it is already used and the action is not reversible
+    // //check if there is a promocode applied
+    // if(order.promocode){
+    //     //find the promocode by id and decrease the used count
+    //     const promocode=await Promocode.findById(order.promocode);
+    //     promocode.used=promocode.used-1;
+    //     await promocode.save();
+    // }
 
-module.exports={createOrder,getOrdersByEventId,getOrderById,getOrdersByUserId}
+    //delete the order
+    try{
+        await Order.findByIdAndDelete(orderId);
+        res.status(200).json({message: "Order cancelled successfully!",
+        order: order});
+    }
+    catch(err){
+        res.status(500).json({message: "Error cancelling order!"});
+    }
+};
+
+module.exports={createOrder,getOrdersByEventId,getOrderById,getOrdersByUserId,cancelOrder}

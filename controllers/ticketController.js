@@ -147,7 +147,8 @@ const deleteTicketById = async (req, res, next) => {
 };
 
 //list the tickets of a certain event
-const getTicketsByEventId = async (req, res, next) => {
+//all the tickets, available or unavailable
+const getAllTicketsByEventId = async (req, res, next) => {
     if (!(req.user)) {
         return res.status(400).json({ message: "User is not logged in." });
     }
@@ -163,6 +164,46 @@ const getTicketsByEventId = async (req, res, next) => {
             return res.status(400).json({ message: "Tickets not found." });
         }
         res.status(200).json({ tickets: tickets });
+    }
+    catch (err) {
+        return res.status(400).json({ message: err.message });
+    }
+};
+
+
+//get only the available tickets by event id
+//the available tickets are the ones
+//capacity>sold
+//start date is before now
+//end date is after now
+const getAvailableTicketsByEventId = async (req, res, next) => {
+    if (!(req.user)) {
+        return res.status(400).json({ message: "User is not logged in." });
+    }
+
+    // //check if the user is a creator or not since only creators can view tickets
+    // if (!req.isCreator) {
+    //     return res.status(400).json({ message: "User is not a creator." });
+    // }
+
+    try {
+        const tickets = await Ticket.find({event: req.params.event_id});
+        if (!tickets) {
+            return res.status(400).json({ message: "Tickets not found." });
+        }
+        // console.log(tickets);
+        let availableTickets = [];
+        let count = 0;
+        //check for each ticket if it is available or not
+        for (let i = 0; i < tickets.length; i++) {
+            if (tickets[i].capacity > tickets[i].sold && tickets[i].salesStart < Date.now() && tickets[i].salesEnd > Date.now()) {
+                availableTickets[count] = tickets[i];
+                count++;
+            }
+        }
+        res.status(200).json({ message: "Available tickets retrieved successfully!",
+            tickets: availableTickets 
+        });
     }
     catch (err) {
         return res.status(400).json({ message: err.message });
@@ -232,4 +273,4 @@ const editTicketById = async (req, res, next) => {
 
 
 
-module.exports = {createTicket, getTicketById, deleteTicketById, getTicketsByEventId, editTicketById};
+module.exports = {createTicket, getTicketById, deleteTicketById, getAllTicketsByEventId, editTicketById, getAvailableTicketsByEventId};
