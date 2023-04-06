@@ -14,19 +14,19 @@ const OrganizerSchema = new Schema({
     },
     image: {
         type: String,
-        required: true
+        required: false
     },
     url: {
         type: String,
-        required: true
+        required: false
     },
     bio: {
         type: String,
-        required: true
+        required: false
     },
     description: {
         type: String,
-        required: true
+        required: false
     },
     facebookUrl: {
         type: String,

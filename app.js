@@ -8,6 +8,7 @@ var cors = require("cors");
 const path = require('path');
 app.use(express.static(path.join(__dirname, 'public')));
 
+
 const userRouter = require("./routes/userRoute");
 const eventRouter = require("./routes/eventRoute");
 const categoryRouter = require("./routes/categoryRoute");
@@ -17,6 +18,9 @@ const ticketRouter = require('./routes/ticketRoute');
 const promocodeRouter = require('./routes/promocodeRoute');
 const venueRouter = require('./routes/venueRoute');
 const qrCodeRouter = require('./routes/qrCodeRoute');
+const organizationRouter = require('./routes/organizationRoute');
+//const organizerRouter = require('./routes/organizerRoute');
+
 
 const passport = require("passport");
 const passportConfig = require("./config/passport");
@@ -83,6 +87,14 @@ app.use('/api/events', eventRouter);
 
 //////////////categories route //////////////
 app.use('/api/categories', categoryRouter);
+
+
+//////////////organization route //////////////
+app.use('/organization', organizationRouter);
+
+
+//////////////organizer route //////////////
+// app.use('/organizer', organizerRouter);
 
 
 module.exports = app;

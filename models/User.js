@@ -94,6 +94,11 @@ const userSchema = new Schema({
     shippingAddress: {
         type: String,
         required: false
+    },
+
+    organization: {
+        type: Schema.Types.ObjectId,
+        ref: 'organization'
     }
 
 }, {timestamps: true});
