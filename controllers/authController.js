@@ -50,7 +50,6 @@ exports.signUp= async (req, res) => {
         
         //testing
         user.verifyEmailToken = await user.generateEmailVerificationToken();
-        user.verifyEmailTokenExpiry= new Date(process.env.JWT_EXPIRE);
         const verifyEmailText = `Please click on the link to complete the verification process https://sw-backend-project.vercel.app/auth/sign-up-verify/${user.verifyEmailToken}\n`;
         
         await sendMail({
@@ -137,7 +136,6 @@ exports.login= async (req, res) => {
 
         //testing
         const isMatch = await bcrypt.compare(req.body.password, user.password);
-        console.log(isMatch);
         if (!isMatch) 
         {
             return res.status(400).json({message: "Password is incorrect"})
@@ -165,8 +163,6 @@ exports.login= async (req, res) => {
 
 exports.forgotPassword = async (req, res) => {
     try{
-
-        console.log("inside try and email = ", req.body.emailAddress)
         const user = await User.findOne({emailAddress: req.body.emailAddress});
 
         if (!user)
@@ -181,7 +177,6 @@ exports.forgotPassword = async (req, res) => {
         
         // testing
         const forgotPasswordToken = await user.generateForgotPasswordToken();
-        user.forgotPasswordTokenExpiry= Date(process.env.JWT_EXPIRE);
         const forgotPasswordEmailText = `Click on the link to reset your password https://sw-backend-project.vercel.app/auth/reset-password/${forgotPasswordToken}\n`;
 
         await sendMail({
