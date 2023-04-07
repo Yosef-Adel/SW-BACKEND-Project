@@ -82,8 +82,8 @@ const createOrder=async (req, res ) => {
         //generate the qr code and send the email
 
         //plugin the deployed url
-        // let eventURL="https://sw-backend-project.vercel.app/events/"+eventId;
-        let eventURL=process.env.CURRENTURL+"events/"+eventId;
+        let eventURL="https://sw-backend-project.vercel.app/events/"+eventId;
+        // let eventURL=process.env.CURRENTURL+"events/"+eventId;
         await generateQRCodeAndSendEmail(eventURL,req.user._id);
 
         res.status(201).json({message: "Order created successfully!",
