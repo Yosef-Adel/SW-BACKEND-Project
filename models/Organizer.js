@@ -2,13 +2,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const OrganizerSchema = new Schema({
-
-    organization: {
-        type: Schema.Types.ObjectId,
-        ref: 'organization'
-    },
-    
-    name:{
+    name: {
         type: String,
         required: true
     },

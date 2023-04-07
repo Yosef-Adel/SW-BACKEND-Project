@@ -57,7 +57,6 @@ const OrderSchema = new Schema({
         required: false
     },
     
-
     //total amount to be paid
     //which is the subtotal + fees - discountAmount
     total:{
