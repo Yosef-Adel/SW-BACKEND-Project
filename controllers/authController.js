@@ -86,12 +86,12 @@ exports.verification = async (req, res) => {
         if (!user)  return res.status(400).json({message: "user not found"});
         
         const currDate = new Date();
-        const valid = (currDate < user.verifyEmailTokenExpiry);
-        if (!valid)
-        {
-            await User.findOneAndDelete({verifyEmailToken: req.params.token})
-            return res.status(400).json({message: 'Token has expired. Please sign up again'});
-        }
+        // const valid = (currDate < user.verifyEmailTokenExpiry);
+        // if (!valid)
+        // {
+        //     await User.findOneAndDelete({verifyEmailToken: req.params.token})
+        //     return res.status(400).json({message: 'Token has expired. Please sign up again'});
+        // }
 
         user.verifyEmailToken = undefined;
         user.verifyEmailTokenExpiry = undefined;

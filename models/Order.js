@@ -12,16 +12,7 @@ const OrderSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'user'
     },
-
-    // numberOfTicketsBought:{
-    //     type: Number,
-    //     required: true
-    // },
-
-    // ticketClassBought:{
-    //     type: Schema.Types.ObjectId,
-    //     ref: 'ticket'
-    // },
+    
     ticketsBought:[{
         ticketClass:{
             type: Schema.Types.ObjectId,
