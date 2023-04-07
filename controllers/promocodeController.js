@@ -141,6 +141,15 @@ const getPromocodes = async (req, res, next) => {
     }
 };
 
+const checkPromo= async (req, res) => {
+    //check if the user is logged in
+    if (!(req.user)) {
+        return res.status(400).json({ message: "User is not logged in." });
+    }
+    
+
+};
+
 
 
 module.exports = {createPromocode, getPromocode, updatePromocode, deletePromocode, getPromocodes};
