@@ -30,17 +30,12 @@ const userSchema = new Schema({
 
     verifyEmailToken: String,
 
-    verifyEmailTokenExpiry: Date,
-
     password: {
         type: String,
         required: false
     },
     
-
     forgotPasswordToken: String,
-    
-    forgotPasswordTokenExpiry: Date,
 
     isCreator:{
         type:Boolean,
@@ -49,8 +44,9 @@ const userSchema = new Schema({
     },
 
     facebookID: String,
+    
     googleID: String,
-
+    
     prefix: {
         type: String,
         required: false

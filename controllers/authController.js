@@ -69,7 +69,7 @@ exports.signUp= async (req, res) => {
     
     catch (err) {
         console.log(err.message)
-        return res.status(400).json({ message: "There was an error in signing up" });
+        return res.status(400).json({ message: "Error in signing up" });
     }
 };
 
@@ -80,21 +80,24 @@ exports.signUp= async (req, res) => {
 
 exports.verification = async (req, res) => {
     try{
-        if (!req.params.token)  return res.status(400).json({message: "no email verification token found"})
+        //if (!req.params.token)  return res.status(400).json({message: "no email verification token found"})
 
         const user = await User.findOne({verifyEmailToken: req.params.token} );
         if (!user)  return res.status(400).json({message: "user not found"});
         
-        const currDate = new Date();
-        // const valid = (currDate < user.verifyEmailTokenExpiry);
-        // if (!valid)
-        // {
-        //     await User.findOneAndDelete({verifyEmailToken: req.params.token})
-        //     return res.status(400).json({message: 'Token has expired. Please sign up again'});
-        // }
+        let token = req.params.token;
+        let valid = true;
+        await jwt.verify(token, process.env.JWT_KEY, async (err) => {
+            if (err) {
+                valid=false;
+            }
+        });
+        if (!valid){
+            await User.findOneAndDelete({verifyEmailToken: req.params.token});
+            return res.status(401).json({message: 'Token has expired. Please sign up again'});
+        }
 
         user.verifyEmailToken = undefined;
-        user.verifyEmailTokenExpiry = undefined;
         user.isVerified = true;
         await user.save();        
 
@@ -105,7 +108,7 @@ exports.verification = async (req, res) => {
 }
     catch(err){
         console.log(err.message)
-        return res.status(400).json({ message: "There was an error in verifying email address." });
+        return res.status(400).json({ message: "Error in verifying email address." });
     }
 };
 
@@ -151,7 +154,7 @@ exports.login= async (req, res) => {
 
     catch(err){
         console.log(err.message)
-        return res.status(400).json({ message: "There was an error in logging in" });
+        return res.status(400).json({ message: "Error in logging in" });
     }
 };
 
@@ -197,7 +200,7 @@ exports.forgotPassword = async (req, res) => {
 
     catch (err){
         console.log(err.message)
-        return res.status(400).json({ message: "There was an error in sending forgot-password email" });
+        return res.status(400).json({ message: "Error in sending forgot-password email" });
     }
     
 };
@@ -215,17 +218,21 @@ exports.resetPassword = async (req, res) => {
         const user = await User.findOne({forgotPasswordToken: req.params.token});
         if (!user) return res.status(400).send("User not found");
 
-        const currDate = new Date();
-        const valid = (currDate < user.forgotPasswordTokenExpiry);
-        if (!valid)
-        {
-            return res.status(400).json({message: 'Token has expired. Please click on forgot password again'});
+        let token = req.params.token;
+        let valid = true;
+        await jwt.verify(token, process.env.JWT_KEY, async (err) => {
+            if (err) {
+                valid=false;
+            }
+        });
+        if (!valid){
+            return res.status(401).json({message: 'Token has expired.'});
         }
+        
         
         const hashedPass = await bcrypt.hash(req.body.password, saltRounds);
         user.password= hashedPass;  
         user.forgotPasswordToken=undefined;
-        user.forgotPasswordTokenExpiry=undefined;
 
         await user.save();
         return res.status(200).json({
@@ -234,7 +241,7 @@ exports.resetPassword = async (req, res) => {
     }
     catch(err){
         console.log(err.message)
-        return res.status(400).json({ message: "There was an error in resetting password" });
+        return res.status(400).json({ message: "Error in resetting password" });
     }
 };
 
@@ -246,12 +253,3 @@ exports.resetPassword = async (req, res) => {
 exports.googleCallback = async (req,res) => {
     res.status(200).json({message: "done"});
 }
-
-
-
-
-/////////////////////////   sign in with facebook   /////////////////////////   
-
-// exports.facebookCallback = async (req,res) => {
-//     res.redirect('/home');
-// };
