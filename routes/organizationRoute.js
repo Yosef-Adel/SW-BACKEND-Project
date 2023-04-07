@@ -5,16 +5,16 @@ const orgRouter = express.Router();
 
 
 orgRouter.post("/create/:id", orgController.create);
-orgRouter.post("/create/:orgId/organizer", organizerController.createOrganizer);
-
+orgRouter.post("/:orgId/organizer/create", organizerController.createOrganizer);
 
 orgRouter.put("/edit/:orgId", orgController.editInfo);
-orgRouter.put("/organizer/:organizerId", organizerController.editInfo);
+orgRouter.put("/organizer/edit/:organizerId", organizerController.editInfo);
 
 orgRouter.get("/:orgId", orgController.getInfo);
-orgRouter.get("/:orgId/organizer/:organizerId", organizerController.getInfo);
+orgRouter.get("/organizer/:organizerId", organizerController.getInfo);
 
-orgRouter.delete("/:orgId");
-orgRouter.delete("/:orgId/organizer/:organizerId");
+orgRouter.delete("/delete/:orgId", orgController.deleteOrganization);
+orgRouter.delete("/:orgId/organizer/delete/:organizerId", organizerController.deleteOrganizer);
+
 
 module.exports = orgRouter;

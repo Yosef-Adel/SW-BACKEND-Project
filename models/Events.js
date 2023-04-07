@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
+
 const EventSchema = new Schema({
     name: {
         type: String,
@@ -52,6 +53,21 @@ const EventSchema = new Schema({
     hostedBy: {
         type: Schema.Types.ObjectId,
         ref: 'organizer'
+    },
+
+    createdBy:{
+        type: Schema.Types.ObjectId,
+        ref: 'user',
+        required: true
+    },
+
+    isPrivate: {
+        type: Boolean,
+        default: false
+    },
+
+    password: {
+        type: String
     },
 
     qrCode: {

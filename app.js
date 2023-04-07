@@ -19,7 +19,6 @@ const promocodeRouter = require('./routes/promocodeRoute');
 const venueRouter = require('./routes/venueRoute');
 const qrCodeRouter = require('./routes/qrCodeRoute');
 const organizationRouter = require('./routes/organizationRoute');
-//const organizerRouter = require('./routes/organizerRoute');
 
 
 const passport = require("passport");
