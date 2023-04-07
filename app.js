@@ -34,8 +34,6 @@ app.use(bp.urlencoded({ extended: true }))
 
 
 passportConfig.googlePass(passport);
-passportConfig.facebookPass(passport);
-
 
 
 app.use(session({

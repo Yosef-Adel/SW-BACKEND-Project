@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 var uniqueValidator = require('mongoose-unique-validator');
 const jwt = require('jsonwebtoken');
-const crypto = require("crypto");
 const Schema = mongoose.Schema;
 
 const userSchema = new Schema({

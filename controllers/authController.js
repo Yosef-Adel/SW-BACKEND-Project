@@ -2,26 +2,18 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const bcrypt = require("bcryptjs");
 const {sendMail} = require('../utils/emailVerification');
-const crypto = require('crypto');
-const Date = require("date.js");
 const saltRounds = 10;
 const password = "Admin@123";
-
 
 
 /////////////////////////   setting bycrypt to hash password   /////////////////////////  
 
 bcrypt.genSalt(saltRounds)
     .then(salt => {
-    // console.log('Salt: ', salt);
     return bcrypt.hash(password, salt)
     }).then(hash => {
-    // console.log('Hash: ', hash);
     }).catch(err => console.error(err.message));
 
-    
-// const signToken = id => {
-//     return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE })};
 
 
 /////////////////////////   sign up + sending verification email   /////////////////////////   
@@ -207,7 +199,6 @@ exports.forgotPassword = async (req, res) => {
 
 exports.resetPassword = async (req, res) => {
     try{
-        
         if (!req.body.password) return res.status(400).json({message :'Please enter new password.' });
         
         const user = await User.findOne({forgotPasswordToken: req.params.token});
@@ -215,11 +206,13 @@ exports.resetPassword = async (req, res) => {
 
         let token = req.params.token;
         let valid = true;
+
         await jwt.verify(token, process.env.JWT_KEY, async (err) => {
             if (err) {
                 valid=false;
             }
         });
+
         if (!valid){
             return res.status(401).json({message: 'Token has expired.'});
         }
@@ -247,4 +240,4 @@ exports.resetPassword = async (req, res) => {
 
 exports.googleCallback = async (req,res) => {
     res.status(200).json({message: "done"});
-}
+};

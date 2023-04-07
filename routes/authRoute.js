@@ -16,6 +16,6 @@ authRouter.patch('/reset-password/:token', authController.resetPassword);
 
 authRouter.get('/sign-up-verify/:token', authController.verification);
 authRouter.get('/google', passport.authenticate('google', { scope : ['profile', 'email'] }));
-authRouter.get('/google/callback', passport.authenticate("google"),authController.googleCallback);
+authRouter.get('/google/callback', passport.authenticate("google"), authController.googleCallback);
 
 module.exports = authRouter;
