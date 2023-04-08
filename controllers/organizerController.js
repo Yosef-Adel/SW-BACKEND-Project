@@ -12,11 +12,9 @@ exports.createOrganizer = async(req,res)=> {
             return res.status(400).json({message: "Organization not found."});
         }
         const organizerArray = organization.organizers;
-        console.log(organizerArray);
         
         for (let i=0; i<organizerArray.length; i++)
         {
-            console.log(organizerArray[i]);
             const org = await Organizer.findOne(organizerArray[i]);
             if(!org){
                 return res.status(400).json({message: "Organizer not found"});
@@ -27,6 +25,10 @@ exports.createOrganizer = async(req,res)=> {
         }
 
         const organizer = await Organizer.create({...req.body});
+        if (req.file){
+            organizer.image=req.file.path;
+        }
+
         await organizer.save();
         organization.organizers.push(organizer._id);
         await organization.save();
@@ -50,6 +52,10 @@ exports.editInfo = async(req,res)=>{
 
         updates.forEach((element) => (organizer[element] = req.body[element]));
         
+        if (req.file){
+            organizer.image=req.file.path;
+        }
+
         await organizer.save();
         return res.status(200).json(organizer);
 

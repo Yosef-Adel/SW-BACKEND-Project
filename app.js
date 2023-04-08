@@ -3,9 +3,10 @@ const express = require('express');
 const morgan = require('morgan');
 const bp = require('body-parser');
 const app= express();
-const cloudinary = require('cloudinary').v2;
-const { CloudinaryStorage } = require("multer-storage-cloudinary");
+// const cloudinary = require('cloudinary').v2;
+// const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const multer = require("multer");
+
 var cors = require("cors");
 
 const path = require('path');
@@ -40,28 +41,14 @@ app.use(bp.urlencoded({ extended: true }))
 
 
 passportConfig.googlePass(passport);
-//passportConfig.facebookPass(passport);
 
 
-cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-});
 
-const storage = new CloudinaryStorage({
-    cloudinary: cloudinary,
-    params: {
-        folder: "DEV",
-    },
-});
 
-const upload = new multer({storage: storage});
-
-const uploadImage = async(req, res) => {
-    return res.json({image: req.file.path})
-}
-app.post("/", upload.single("image"), uploadImage);
+// const uploadImage = async(req, res) => {
+//     return res.json({image: req.file.path})
+// }
+// app.post("/", upload.single("image"), uploadImage);
 
 
 app.use(session({

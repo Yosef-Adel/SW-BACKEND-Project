@@ -6,26 +6,32 @@ const OrganizerSchema = new Schema({
         type: String,
         required: true
     },
+
     image: {
         type: String,
         required: false
     },
+    
     url: {
         type: String,
         required: false
     },
+    
     bio: {
         type: String,
         required: false
     },
+    
     description: {
         type: String,
         required: false
     },
+    
     facebookUrl: {
         type: String,
         required: false
     },
+    
     twitterUrl: {
         type: String,
         required: false

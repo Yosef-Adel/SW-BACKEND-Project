@@ -1,16 +1,21 @@
 const Organization = require("../models/Organization");
 const Organizer = require("../models/Organizer");
 const User = require("../models/User");
+const Event = require('../models/Events');
 
 exports.create = async(req,res) => {
     try{
         if (!req.body.name){
         return res.status(400).json({message: "Organization name is required."});
         }
-        const organization = await Organization.create({...req.body});
         const user = await User.findById(req.params.id);
         if(!user){
             return res.status(400).json({message: "user not found"});
+        }
+        
+        const organization = await Organization.create({...req.body});
+        if (req.file){
+            organization.image=req.file.path;
         }
         organization.createdBy=user;
         user.organization=organization;
@@ -37,6 +42,10 @@ exports.editInfo = async(req, res) => {
 
         updates.forEach((element)=> (organization[element] = req.body[element]));
         
+        if (req.file){
+            organization.image=req.file.path;
+        }
+
         await organization.save();
         
         return res.status(200).json({message: "Organization info updated successfully", organization});
@@ -83,5 +92,28 @@ exports.deleteOrganization = async(req, res) => {
     catch(err){
         console.log(err.message);
         return res.status(400).json({message: "Error in deleting organization"});
+    }
+}
+
+
+exports.getEvents = async(req, res) => {
+    try{
+        const organization = await Organization.findById(req.params.orgId);
+        if(!organization){
+            return res.status(400).json({message: "Organization not found"});
+        }
+        
+        var events = [];
+        const organizersArray = organization.organizers;
+        for (let i=0; i< organizersArray.length; i++){
+            const event = await Event.findOne({"hostedBy" : organizersArray[i]})
+            events.push(event);
+        }
+
+        return res.status(200).json(events);
+    }
+    catch(err){
+        console.log(err.message);
+        return res.status(400).json({message: "Error in getting organization events"});
     }
 }
