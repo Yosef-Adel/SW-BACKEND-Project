@@ -99,6 +99,11 @@ const userSchema = new Schema({
     organization: {
         type: Schema.Types.ObjectId,
         ref: 'organization'
+    }, 
+
+    img:{
+        data: String,
+        contentType: String
     }
 
 }, {timestamps: true});
