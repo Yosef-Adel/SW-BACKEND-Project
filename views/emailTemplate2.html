@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script>
+        const tickets = [
+        {
+            ticketType: "ticket class 1",
+            quantity: 2,
+            price: 20,
+            fee: 2,
+            totalPrice: 42
+        },
+        {
+            ticketType: "ticket class 2",
+            quantity: 1,
+            price: 10,
+            fee: 1,
+            totalPrice: 21
+        },
+        {
+            ticketType: "ticket class 3",
+            quantity: 3,
+            price: 5,
+            fee: 0.5,
+            totalPrice: 16.5
+        }  
+    ]
+
+    const tickettable=tickets.map(ticket => {
+        return (
+            <table>
+                <tr>
+                    <td>{ticket.ticketType}</td>
+                    <td>{ticket.quantity}</td>
+                    <td>{ticket.price}</td>
+                    <td>{ticket.fee}</td>
+                    <td>{ticket.totalPrice}</td>
+                </tr>
+
+            </table>
+        )
+    })
+
+    </script>
+    <meta charset="UTF-8">
+    <title>Order Confirmation</title>
+    <style>
+    body {
+        font-family: Arial, sans-serif;
+        font-size: 16px;
+        color: #333;
+        background-color: #FFA500;
+    }
+    table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+    th, td {
+        text-align: left;
+        padding: 8px;
+        border-bottom: 1px solid #ddd;
+    }
+    th {
+        background-color: #FF8C00;
+        color: white;
+    }
+    .logo {
+        display: block;
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+    </style>
+</head>
+<body>
+    <h1>Order Confirmation</h1>
+    <p>Dear {{name}},</p>
+    <p>You've got tickets!</p>
+    <p>Here is the QR Code to your event!</p>
+
+    <img src="cid:image" alt="Image">
+    <table>
+    <thead>
+        <tr>
+        <th>Ticket Type</th>
+        <th>Quantity</th>
+        <th>Price</th>
+        <th>Fee</th>
+        <th>Total Price</th>
+        </tr>
+    </thead>
+    <tbody id="ticket-table-body">
+        
+    </tbody>
+    </table>
+    </script>
+    <img class="logo" src="../public/envie.svg" alt="Logo">
+</body>
+</html>
