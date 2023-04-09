@@ -81,8 +81,53 @@ const EventSchema = new Schema({
     },
 
     venue: {
-        type: Schema.Types.ObjectId,
-        ref: 'venue'
+        name: {
+            type: String,
+            required: true
+        },
+        
+        capacity: {
+            type: Number,
+            required: false
+        },
+
+        city: {
+            type: String,
+            required: true
+        },
+
+        address1: {
+            type: String,
+            required: true
+        },
+
+        address2: {
+            type: String,
+            required: false
+        },
+
+        state: {
+            type: String,
+            required: false
+        },
+        country: {
+            type: String,
+            required: true
+        },
+        postalCode: {
+            type: String,
+            required: true
+        },
+
+        longitude: {
+            type: Number,
+            required: false
+        },
+
+        latitude: {
+            type: Number,
+            required: false
+        }
     }
 
 }, {timestamps: true})

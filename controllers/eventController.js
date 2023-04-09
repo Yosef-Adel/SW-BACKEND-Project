@@ -20,20 +20,31 @@ exports.create = async (req, res) => {
         return res.status(400).json({ message: "Category does not exist" });
     }
 
-    // TODO: Check if venue exists
-    // const venue = req.body.venue;
-    // const venueObject = await Venue.exists({ name: req.body.name });
-    // if (!venueObject) {
-    //     return res.status(400).json({ message: "Venue does not exist" });
-    // }
-
     const missingFieldErrorMessage = "field is required";
-    const field = ["name", "description", "date", "location", "category", "capacity", "summary", "hostedBy", "createdBy"];
+    const field = ["name", "description", "date", "venue", "category", "capacity", "summary", "hostedBy", "createdBy"];
     for (let i = 0; i < field.length; i++) {
         if (!req.body[field[i]]) {
             return res.status(400).json({ message: field[i] + " " + missingFieldErrorMessage });
         }
     }
+    // {
+    //     "name": "Ola's venue",
+    //     "city": "Cairo",
+    //     "address1":"ay address 1 talet",
+    //     "country":"Egypt",
+    //     "postalCode":"111111",
+    //     "longitude": 30.123,
+    //     "latitude": 30.123
+    //     "capacity": 100
+    // }
+    const venueFields = ["name", "city", "address1", "country", "postalCode", "longitude", "latitude", "capacity"];
+    for (let i = 0; i < venueFields.length; i++) {
+        if (!req.body.venue[venueFields[i]]) {
+            return res.status(400).json({ message: venueFields[i] + " " + missingFieldErrorMessage });
+        }
+    }
+
+    
 
     // consider this, easier
     // const newEvent = await Event.create({...req.body});
@@ -42,7 +53,7 @@ exports.create = async (req, res) => {
         name: req.body.name,
         description: req.body.description,
         date: req.body.date,
-        venue: req.body.location,
+        venue: req.body.venue,
         // image: req.body.image,
         category: req.body.category,
         capacity: req.body.capacity,
@@ -64,13 +75,41 @@ exports.create = async (req, res) => {
     
 }
 
-// @route   GET api/events?category=category_id&
+// @route   GET api/events?category=category_id&lat=lat&lng=lng
 // @desc    Get all events
 // @access  Public
-exports.getAll = (req, res) => {
-    Event.find({"isPrivate" : false}).populate('category')
-        .then(events => res.json(events))
+exports.getAll = async (req, res) => {
+    const category = req.query.category;
+    const lat = req.query.lat;
+    const lng = req.query.lng;
+
+
+    let city = "";
+
+    const mapboxtoken = process.env.MAPBOX_TOKEN;
+    const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${mapboxtoken}`;
+
+    const data = await axios.get(url);
+    const json = data.data;
+    for (const feature of json.features) {
+        if (feature.place_type[0] === "region") {
+            city = feature.text;
+            break;
+        }
+    }
+
+    const eventQuery = Event.find({isPrivate: false}).populate('category');
+    if (category) {
+        eventQuery.where('category').equals(category);
+    }
+
+    if (lat && lng) {
+        eventQuery.where('venue.city').equals(city);
+    }
+
+    eventQuery.then(events => res.json(events))
         .catch(err => res.status(400).json(err));
+
 }
 
 // @route   GET api/events?category=category_id&
@@ -164,7 +203,7 @@ exports.getNearest = async (req, res) => {
         }
     }
     
-    const events = []
+    const events = await Event.find({ "venue.city": city, isPrivate: false }).populate('category');
     res.json({ city, events});
 }
 
