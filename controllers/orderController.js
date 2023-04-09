@@ -184,9 +184,9 @@ const createOrder=async (req, res ) => {
         //generate the qr code and send the email to the user with link to the event
 
         //plugin the deployed url
-        let eventURL="http://ec2-3-219-197-102.compute-1.amazonaws.com/events/"+eventId;
+        // let eventURL="http://ec2-3-219-197-102.compute-1.amazonaws.com/events/"+eventId;
         // let eventURL=process.env.CURRENTURL+"events/"+eventId;
-        await generateQRCodeAndSendEmail(eventURL,req.user._id);
+        // await generateQRCodeAndSendEmail(eventURL,req.user._id);
 
         res.status(201).json({message: "Order created successfully!",
         order: order
