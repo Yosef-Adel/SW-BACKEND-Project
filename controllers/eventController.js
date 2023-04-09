@@ -21,7 +21,7 @@ exports.create = async (req, res) => {
     }
 
     const missingFieldErrorMessage = "field is required";
-    const field = ["name", "description", "date", "venue", "category", "capacity", "summary", "hostedBy", "createdBy"];
+    const field = ["name", "startDate", "endDate", "hostedBy", "category", "description", "summary"];
     for (let i = 0; i < field.length; i++) {
         if (!req.body[field[i]]) {
             return res.status(400).json({ message: field[i] + " " + missingFieldErrorMessage });
@@ -46,29 +46,28 @@ exports.create = async (req, res) => {
 
     
 
-    // consider this, easier
-    // const newEvent = await Event.create({...req.body});
+    const newEvent = await Event.create({...req.body});
     // Create event
-    const newEvent = new Event({
-        name: req.body.name,
-        description: req.body.description,
-        date: req.body.date,
-        venue: req.body.venue,
-        // image: req.body.image,
-        category: req.body.category,
-        capacity: req.body.capacity,
-        summary: req.body.summary,
-        hostedBy: req.body.hostedBy,
-        createdBy: req.body.createdBy,
-        isPrivate: req.body.isPrivate,
-        password: req.body.password,
-        publishDate: req.body.publishDate
-    });
+    // const newEvent = new Event({
+    //     name: req.body.name,
+    //     description: req.body.description,
+    //     startDate: req.body.startDate,
+    //     endDate: req.body.endDate,
+    //     venue: req.body.venue,
+    //     category: req.body.category,
+    //     capacity: req.body.capacity,
+    //     summary: req.body.summary,
+    //     hostedBy: req.body.hostedBy,
+    //     isPrivate: req.body.isPrivate,
+    //     password: req.body.password,
+    //     publishDate: req.body.publishDate
+    // });
 
-    const message = "Event created successfully";
     if (req.file){
         newEvent.image = req.file.path;
     }
+    
+    const message = "Event created successfully";
     newEvent.save()
         .then(event => res.json({ event, message }))
         .catch(err => res.status(400).json(err));
