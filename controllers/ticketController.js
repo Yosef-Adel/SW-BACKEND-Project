@@ -61,7 +61,7 @@ const createTicket = async (req, res, next ) => {
         totalCapacity += ticket.capacity;
     }
     //check if the total capacity of the tickets is less than the event capacity
-    if (totalCapacity >= eventCapacity) {
+    if (totalCapacity > eventCapacity) {
         return res.status(400).json({ message: "The total capacity of the tickets is greater than the event capacity." });
     }
     if (req.body.description) {
