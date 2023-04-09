@@ -43,14 +43,15 @@ const TicketSchema = new Schema({
         default: 0
     },
 
-    minQuantityPerOrder:{
-        type: Number,
-        required: true
-    },
-    maxQuantityPerOrder:{
-        type: Number,
-        required: true
-    },
+    // minQuantityPerOrder:{
+    //     type: Number,
+    //     required: true
+    // },
+    
+    // maxQuantityPerOrder:{
+    //     type: Number,
+    //     required: true
+    // },
 
     salesStart:{
         type: Date,
@@ -60,6 +61,7 @@ const TicketSchema = new Schema({
         type: Date,
         required: true
     },
+
     description:{
         type: String,
         required: false

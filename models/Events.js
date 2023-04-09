@@ -55,6 +55,11 @@ const EventSchema = new Schema({
         ref: 'organizer'
     },
 
+    createdBy:{
+        type: Schema.Types.ObjectId,
+        ref: 'user'
+    },
+
     qrCode: {
         type: String,
         required: false
