@@ -136,12 +136,13 @@ exports.update =async (req, res) => {
     const event = await Event.findById(req.params.id);
     // this includes new updates only and removes older info, take care
     // consider this
-    // const updates = Object.keys(req.body);
-    // updates.forEach((element) => (event[element] = req.body[element]));
+    
+    const updates = Object.keys(req.body);
+    updates.forEach((element) => (event[element] = req.body[element]));
 
-    for (const key in req.body) {
-        event[key] = req.body[key];
-    }
+    // for (const key in req.body) {
+    //     event[key] = req.body[key];
+    // }
     
     if (req.file){
         event.image = req.file.path;
