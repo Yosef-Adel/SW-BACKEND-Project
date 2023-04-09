@@ -1,19 +1,6 @@
 const User = require('../models/User');
-
-
-// @route   GET api/users/test
-// @desc    Tests users route
-// @access  Public
-exports.test = (req, res) => {
-    res.json({ msg: 'Users Works' });
-}
-
-// @route   POST api/users/register
-// @desc    Register user
-// @access  Public
-exports.register = (req, res) => {
-    return res.json({ msg: 'Register Works' });
-}
+const uploadImage = require("../utils/uploadImage");
+const fs = require('fs');
 
 
 //a test to check if the user is authorized
@@ -28,3 +15,96 @@ exports.testAuthorization = (req, res) => {
 }
 
 
+exports.getUser = async(req, res) => {
+    try{
+        const user = await User.findById(req.params.id);
+        if (!user){
+            return res.status(400).json({message: "User not found"});
+        }
+
+        return res.status(200).json(user);
+    }
+
+    catch(err){
+        console.log(err.message);
+        return res.status(400).json({message: "Error in getting user"});
+    }
+};
+
+exports.editInfo = async(req, res) => {
+    try{
+        const user = await User.findById(req.params.id);
+        if (!user){
+            return res.status(400).json({message: "User not found"});
+        }
+
+        const updates = Object.keys(req.body);
+
+        updates.forEach((element) => (user[element] = req.body[element]));
+        
+        await user.save();
+        return res.status(200).json(user);
+
+    }
+    
+    catch(err){
+        console.log(err.message);
+        return res.status(400).json({message: "Error in editing user info"});
+    }
+}
+
+exports.changeToCreator = async(req,res) => {
+    try{
+        const user = await User.findById(req.params.id);
+        if (!user){
+            return res.status(400).json({message: "User not found"})
+        }
+        user.isCreator=true;
+        await user.save();
+        
+        return res.status(200).json(user);
+    }
+    
+    catch(err){
+        console.log(err.message);
+        return res.status(400).json({message: "Error in changing view"})
+    }
+}
+
+
+exports.changeToAttendee = async(req,res) => {
+    try{
+        const user = await User.findById(req.params.id);
+        if (!user){
+            return res.status(400).json({message: "User not found"})
+        }
+        user.isCreator=false;
+        await user.save();
+        
+        return res.status(200).json(user);
+    }
+    
+    catch(err){
+        console.log(err.message);
+        return res.status(400).json({message: "Error in changing view"})
+    }
+}
+
+exports.changeImage = async(req, res)=>{
+    try{
+        const user = await User.findById(req.params.id);
+        if (!user){
+            return res.status(400).json({message: "User not found"});
+        }
+        user.img.data= fs.readFileSync(path.join(_dirname + '/uploads/' + req.file.filename));
+        user.img.contentType = 'image/png';
+        
+        await user.save();
+
+        return res.status(200).json({message: "image uploaded successfully"});
+    }
+    catch(err){
+        console.log(err.message);
+        return res.status(400).json({message: "Error in changing image"});
+    }
+}
