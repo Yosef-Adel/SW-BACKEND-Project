@@ -51,7 +51,7 @@ exports.signUp= async (req, res) => {
         // return res.status(200).json({
         //     message: 'Check your email for verification.'}
         //     );
-        return res.redirect(301,"http://sw-project-10.s3-website-us-east-1.amazonaws.com/login");
+        return res.redirect(301,"https://sw-frnt-project.vercel.app/login");
     }
     
     catch (err) {
@@ -162,7 +162,7 @@ exports.forgotPassword = async (req, res) => {
         
         // testing
         user.forgotPasswordToken = await user.generateForgotPasswordToken();
-        const forgotPasswordEmailText = `Click on the link to reset your password http://sw-project-10.s3-website-us-east-1.amazonaws.com/forgetPassword/${user.forgotPasswordToken}\n`;
+        const forgotPasswordEmailText = `Click on the link to reset your password https://sw-frnt-project.vercel.app/forgetPassword/${user.forgotPasswordToken}\n`;
 
         await sendMail({
             email: req.body.emailAddress,
