@@ -63,6 +63,20 @@ const OrderSchema = new Schema({
     total:{
         type: Number,
         required: false
+    },
+
+    //the attendee details of this specific order
+    firstName:{
+        type: String,
+        required: true
+    },
+    lastName:{
+        type: String,
+        required: true
+    },
+    email:{
+        type: String,
+        required: true
     }
 
 }, {timestamps: true})

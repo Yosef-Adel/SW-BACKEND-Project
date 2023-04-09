@@ -25,25 +25,20 @@
             totalPrice: 16.5
         }  
     ]
-    const ticketTableBody = document.getElementById("ticket-table-body");
-    tickets.forEach(ticket => {
-        const row = document.createElement("tr");
-        const ticketType = document.createElement("td");
-        const quantity = document.createElement("td");
-        const price = document.createElement("td");
-        const fee = document.createElement("td");
-        const totalPrice = document.createElement("td");
-        ticketType.innerHTML = ticket.ticketType;
-        quantity.innerHTML = ticket.quantity;
-        price.innerHTML = ticket.price;
-        fee.innerHTML = ticket.fee;
-        totalPrice.innerHTML = ticket.totalPrice;
-        row.appendChild(ticketType);
-        row.appendChild(quantity);
-        row.appendChild(price);
-        row.appendChild(fee);
-        row.appendChild(totalPrice);
-        ticketTableBody.appendChild(row);
+
+    const tickettable=tickets.map(ticket => {
+        return (
+            <table>
+                <tr>
+                    <td>{ticket.ticketType}</td>
+                    <td>{ticket.quantity}</td>
+                    <td>{ticket.price}</td>
+                    <td>{ticket.fee}</td>
+                    <td>{ticket.totalPrice}</td>
+                </tr>
+
+            </table>
+        )
     })
 
     </script>
