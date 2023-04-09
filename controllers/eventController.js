@@ -1,8 +1,10 @@
 const Event = require('../models/Events');
 const Category = require('../models/Category');
 const Venue = require('../models/Venue');
+const User = require('../models/User');
 const axios = require('axios');
 const mongoose = require('mongoose');
+const Date = require('date.js');
 
 
 
@@ -26,27 +28,36 @@ exports.create = async (req, res) => {
     // }
 
     const missingFieldErrorMessage = "field is required";
-    const field = ["name", "description", "date", "location", "image", "category", "capacity", "summary", "hostedBy"];
+    const field = ["name", "description", "date", "location", "category", "capacity", "summary", "hostedBy", "createdBy"];
     for (let i = 0; i < field.length; i++) {
         if (!req.body[field[i]]) {
             return res.status(400).json({ message: field[i] + " " + missingFieldErrorMessage });
         }
     }
 
+    // consider this, easier
+    // const newEvent = await Event.create({...req.body});
     // Create event
     const newEvent = new Event({
         name: req.body.name,
         description: req.body.description,
         date: req.body.date,
         venue: req.body.location,
-        image: req.body.image,
+        // image: req.body.image,
         category: req.body.category,
         capacity: req.body.capacity,
         summary: req.body.summary,
         hostedBy: req.body.hostedBy,
+        createdBy: req.body.createdBy,
+        isPrivate: req.body.isPrivate,
+        password: req.body.password,
+        publishDate: req.body.publishDate
     });
-    const message = "Event created successfully";
 
+    const message = "Event created successfully";
+    if (req.file){
+        newEvent.image = req.file.path;
+    }
     newEvent.save()
         .then(event => res.json({ event, message }))
         .catch(err => res.status(400).json(err));
@@ -57,6 +68,15 @@ exports.create = async (req, res) => {
 // @desc    Get all events
 // @access  Public
 exports.getAll = (req, res) => {
+    Event.find({"isPrivate" : false}).populate('category')
+        .then(events => res.json(events))
+        .catch(err => res.status(400).json(err));
+}
+
+// @route   GET api/events?category=category_id&
+// @desc    Get all events
+// @access  Public
+exports.getAllEvents = (req, res) => {
     Event.find().populate('category')
         .then(events => res.json(events))
         .catch(err => res.status(400).json(err));
@@ -76,9 +96,19 @@ exports.getById = (req, res) => {
 // @access  Public
 exports.update =async (req, res) => {
     const event = await Event.findById(req.params.id);
+    // this includes new updates only and removes older info, take care
+    // consider this
+    // const updates = Object.keys(req.body);
+    // updates.forEach((element) => (event[element] = req.body[element]));
+
     for (const key in req.body) {
         event[key] = req.body[key];
     }
+    
+    if (req.file){
+        event.image = req.file.path;
+    }
+    
     await event.save()
         .then(event => res.json(event))
         .catch(err => res.status(400).json(err));
@@ -140,3 +170,84 @@ exports.getNearest = async (req, res) => {
     res.json({ city, events});
 }
 
+
+exports.getUserEvents = async(req,res) => {
+    try{
+        const user = await User.findById(req.params.userId);
+        if (!user){
+            return res.status(400).json({message: "User not found"})
+        }
+        const events = await Event.find({"createdBy": user});
+        if (events.length == 0){
+            return res.status(400).json({message: "No events created by this user"});
+        }
+
+        return res.status(200).json(events);
+    }
+
+    catch(err){
+        console.log(err.message);
+        return res.status(400).json({message: "Error in getting user events"})
+    }
+}
+
+exports.getUserPastEvents = async(req, res) => {
+    try{
+        console.log("hi");
+        const user = await User.findById(req.params.userId);
+        if (!user){
+            return res.status(400).json({message: "User not found"})
+        }
+        const events = await Event.find({"createdBy": user});
+        if (events.length == 0){
+            return res.status(400).json({message: "No events created by this user"});
+        }
+        var eventsResult =[];
+        const currDate = new Date();
+        for (let event of events){
+            if (event.date < currDate)
+            {
+                console.log(event);
+                eventsResult.push(event);
+            }
+        }
+        //events.forEach((event) => event if event.date < Date.now);;
+        return res.status(200).json(eventsResult);
+    }
+
+    catch(err){
+        console.log(err.message);
+        return res.status(400).json({message: "Error in filtering user events"})
+    }
+}
+
+
+exports.getUserUpcomingEvents = async(req, res) => {
+    try{
+        console.log("hi");
+        const user = await User.findById(req.params.userId);
+        if (!user){
+            return res.status(400).json({message: "User not found"})
+        }
+        const events = await Event.find({"createdBy": user});
+        if (events.length == 0){
+            return res.status(400).json({message: "No events created by this user"});
+        }
+        var eventsResult =[];
+        const currDate = new Date();
+        for (let event of events){
+            if (event.date > currDate)
+            {
+                console.log(event);
+                eventsResult.push(event);
+            }
+        }
+        //events.forEach((event) => event if event.date < Date.now);;
+        return res.status(200).json(eventsResult);
+    }
+
+    catch(err){
+        console.log(err.message);
+        return res.status(400).json({message: "Error in filtering user events"})
+    }
+}

@@ -10,9 +10,7 @@ authRouter.post('/sign-up', authController.signUp);
 authRouter.post('/login', authController.login);
 authRouter.post('/forgot-password', authController.forgotPassword);
 
-
 authRouter.patch('/reset-password/:token', authController.resetPassword);
-
 
 authRouter.get('/sign-up-verify/:token', authController.verification);
 authRouter.get('/google', passport.authenticate('google', { scope : ['profile', 'email'] }));
