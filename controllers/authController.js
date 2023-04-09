@@ -38,7 +38,7 @@ exports.signUp= async (req, res) => {
         //testing
         user.verifyEmailToken = await user.generateEmailVerificationToken();
         await user.save();
-        const verifyEmailText = `Please click on the link to complete the verification process http://localhost:3000/auth/sign-up-verify/${user.verifyEmailToken}\n`;
+        const verifyEmailText = `Please click on the link to complete the verification process https://sw-backend-project.vercel.app/auth/sign-up-verify/${user.verifyEmailToken}\n`;
         
         await sendMail({
         email: user.emailAddress,
@@ -161,7 +161,7 @@ exports.forgotPassword = async (req, res) => {
         
         // testing
         const forgotPasswordToken = await user.generateForgotPasswordToken();
-        const forgotPasswordEmailText = `Click on the link to reset your password http://localhost:3000/reset-password/${forgotPasswordToken}\n`;
+        const forgotPasswordEmailText = `Click on the link to reset your password httphttps://sw-backend-project.vercel.app/auth/reset-password/${forgotPasswordToken}\n`;
 
         await sendMail({
             email: req.body.emailAddress,
