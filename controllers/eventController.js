@@ -68,6 +68,15 @@ exports.create = async (req, res) => {
 // @desc    Get all events
 // @access  Public
 exports.getAll = (req, res) => {
+    Event.find({"isPrivate" : false}).populate('category')
+        .then(events => res.json(events))
+        .catch(err => res.status(400).json(err));
+}
+
+// @route   GET api/events?category=category_id&
+// @desc    Get all events
+// @access  Public
+exports.getAllEvents = (req, res) => {
     Event.find().populate('category')
         .then(events => res.json(events))
         .catch(err => res.status(400).json(err));

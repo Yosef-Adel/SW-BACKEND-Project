@@ -5,8 +5,9 @@ const multer = require('multer');
 const cloudinaryStorage = require("../config/cloudinary")
 const upload = new multer({storage: cloudinaryStorage.storage});
 
-
+//for front/cross teams
 router.get('/', eventController.getAll);
+router.get('/all-events', eventController.getAllEvents);
 router.get('/nearest', eventController.getNearest);
 router.get('/search', eventController.search);
 router.get('/:id', eventController.getById);
