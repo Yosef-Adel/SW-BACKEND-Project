@@ -161,7 +161,7 @@ exports.forgotPassword = async (req, res) => {
         
         // testing
         const forgotPasswordToken = await user.generateForgotPasswordToken();
-        const forgotPasswordEmailText = `Click on the link to reset your password httphttps://sw-backend-project.vercel.app/auth/reset-password/${forgotPasswordToken}\n`;
+        const forgotPasswordEmailText = `Click on the link to reset your password http://localhost:3000/reset-password/${forgotPasswordToken}\n`;
 
         await sendMail({
             email: req.body.emailAddress,

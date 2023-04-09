@@ -52,7 +52,7 @@ const createOrder=async (req, res ) => {
             ///////////////////////////////////Availablity Check/////////////////////////////////////
             //check if the ticket class is available
             //check on the start date and end date of ticket class
-            if(ticketClass.capacity < numberOfTicketsBought || ticketClass.salesStart > Date.now() || ticketClass.salesEnd < Date.now()){
+            if(ticketClass.capacity <= ticketClass.used || ticketClass.salesStart > Date.now() || ticketClass.salesEnd < Date.now()){
                 isTicketClassAvailable=false;
                 break;
             }
@@ -181,10 +181,10 @@ const createOrder=async (req, res ) => {
     //save the order
     try {
         await order.save();
-        //generate the qr code and send the email
+        //generate the qr code and send the email to the user with link to the event
 
         //plugin the deployed url
-        let eventURL="https://sw-backend-project.vercel.app/events/"+eventId;
+        let eventURL="http://ec2-3-219-197-102.compute-1.amazonaws.com/events/"+eventId;
         // let eventURL=process.env.CURRENTURL+"events/"+eventId;
         await generateQRCodeAndSendEmail(eventURL,req.user._id);
 
@@ -194,7 +194,8 @@ const createOrder=async (req, res ) => {
         
 
     } catch (err) {
-        res.status(500).json({message: "Order creation failed!"});
+        // console.log(err.message);
+        res.status(500).json({message: "Order Creation failed!"});
     }
 
 }
