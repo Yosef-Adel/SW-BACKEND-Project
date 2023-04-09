@@ -37,12 +37,12 @@ exports.create = async (req, res) => {
     //     "latitude": 30.123
     //     "capacity": 100
     // }
-    const venueFields = ["name", "city", "address1", "country", "postalCode", "longitude", "latitude", "capacity"];
-    for (let i = 0; i < venueFields.length; i++) {
-        if (!req.body.venue[venueFields[i]]) {
-            return res.status(400).json({ message: venueFields[i] + " " + missingFieldErrorMessage });
-        }
-    }
+    // const venueFields = ["name", "city", "address1", "country", "postalCode", "longitude", "latitude", "capacity"];
+    // for (let i = 0; i < venueFields.length; i++) {
+    //     if (!req.body.venue[venueFields[i]]) {
+    //         return res.status(400).json({ message: venueFields[i] + " " + missingFieldErrorMessage });
+    //     }
+    // }
 
     
 

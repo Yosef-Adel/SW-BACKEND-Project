@@ -85,54 +85,52 @@ const EventSchema = new Schema({
         required: false
     },
 
-    venue: {
-        name: {
-            type: String,
-            required: true
-        },
-        
-        capacity: {
-            type: Number,
-            required: false
-        },
+    venueName: {
+        type: String,
+        required: true
+    },
+    
+    venueCapacity: {
+        type: Number,
+        required: false
+    },
 
-        city: {
-            type: String,
-            required: true
-        },
+    city: {
+        type: String,
+        required: true
+    },
 
-        address1: {
-            type: String,
-            required: true
-        },
+    address1: {
+        type: String,
+        required: true
+    },
 
-        address2: {
-            type: String,
-            required: false
-        },
+    address2: {
+        type: String,
+        required: false
+    },
 
-        state: {
-            type: String,
-            required: false
-        },
-        country: {
-            type: String,
-            required: true
-        },
-        postalCode: {
-            type: String,
-            required: true
-        },
+    state: {
+        type: String,
+        required: false
+    },
+    country: {
+        type: String,
+        required: true
+    },
+    postalCode: {
+        type: String,
+        required: true
+    },
 
-        longitude: {
-            type: Number,
-            required: false
-        },
+    longitude: {
+        type: Number,
+        required: false
+    },
 
-        latitude: {
-            type: Number,
-            required: false
-        }
+    latitude: {
+        type: Number,
+        required: false
     }
 
 }, {timestamps: true})
