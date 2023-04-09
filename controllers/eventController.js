@@ -28,28 +28,36 @@ exports.create = async (req, res) => {
     // }
 
     const missingFieldErrorMessage = "field is required";
-    const field = ["name", "description", "date", "location", "image", "category", "capacity", "summary", "hostedBy", "createdBy"];
+    const field = ["name", "description", "date", "location", "category", "capacity", "summary", "hostedBy", "createdBy"];
     for (let i = 0; i < field.length; i++) {
         if (!req.body[field[i]]) {
             return res.status(400).json({ message: field[i] + " " + missingFieldErrorMessage });
         }
     }
 
+    // consider this, easier
+    // const newEvent = await Event.create({...req.body});
     // Create event
     const newEvent = new Event({
         name: req.body.name,
         description: req.body.description,
         date: req.body.date,
         venue: req.body.location,
-        image: req.body.image,
+        // image: req.body.image,
         category: req.body.category,
         capacity: req.body.capacity,
         summary: req.body.summary,
         hostedBy: req.body.hostedBy,
-        createdBy: req.body.createdBy
+        createdBy: req.body.createdBy,
+        isPrivate: req.body.isPrivate,
+        password: req.body.password,
+        publishDate: req.body.publishDate
     });
-    const message = "Event created successfully";
 
+    const message = "Event created successfully";
+    if (req.file){
+        newEvent.image = req.file.path;
+    }
     newEvent.save()
         .then(event => res.json({ event, message }))
         .catch(err => res.status(400).json(err));
@@ -79,9 +87,19 @@ exports.getById = (req, res) => {
 // @access  Public
 exports.update =async (req, res) => {
     const event = await Event.findById(req.params.id);
+    // this includes new updates only and removes older info, take care
+    // consider this
+    // const updates = Object.keys(req.body);
+    // updates.forEach((element) => (event[element] = req.body[element]));
+
     for (const key in req.body) {
         event[key] = req.body[key];
     }
+    
+    if (req.file){
+        event.image = req.file.path;
+    }
+    
     await event.save()
         .then(event => res.json(event))
         .catch(err => res.status(400).json(err));

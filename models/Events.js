@@ -66,6 +66,11 @@ const EventSchema = new Schema({
         default: false
     },
 
+    publishDate: {
+        type: Date,
+        required: false
+    },
+
     password: {
         type: String
     },

@@ -43,13 +43,8 @@ exports.signUp= async (req, res) => {
 
         const hashedPass = await bcrypt.hash(req.body.password, saltRounds);
 
-        const user = await User.create({
-        emailAddress: req.body.emailAddress,
-        firstName: req.body.firstName,
-        lastName: req.body.lastName,
-        password: hashedPass
-        });
-
+        const user = await User.create({...req.body});
+        user.password = hashedPass;
         
         //testing
         user.verifyEmailToken = await user.generateEmailVerificationToken();
