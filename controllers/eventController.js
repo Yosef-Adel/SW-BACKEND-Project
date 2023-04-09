@@ -142,8 +142,6 @@ exports.search = (req, res) => {
             }
         }
     ]).then(events => res.json(events)).catch(err => res.status(400).json(err));
-
-
 }
 
 // @route   GET api/events/nearest?lat=latitude&lng=longitude
