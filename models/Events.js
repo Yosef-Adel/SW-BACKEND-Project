@@ -54,7 +54,6 @@ const EventSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'organizer'
     },
-
     createdBy:{
         type: Schema.Types.ObjectId,
         ref: 'user',

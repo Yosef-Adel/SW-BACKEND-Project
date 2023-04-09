@@ -24,6 +24,9 @@ const TicketSchema = new Schema({
         required: true
     },
 
+    //fee is the fee per ticket 
+    //and it has a standard equation of calculation
+    //fee per ticket= (ticketPrice * 0.037)+(1.79)+(ticketPrice * 0.029)
     fee:{
         type: Number,
         required: true
@@ -33,15 +36,22 @@ const TicketSchema = new Schema({
         type: Number,
         required: true
     },
+    
+    sold:{
+        type: Number,
+        required: false,
+        default: 0
+    },
 
-    minQuantityPerOrder:{
-        type: Number,
-        required: true
-    },
-    maxQuantityPerOrder:{
-        type: Number,
-        required: true
-    },
+    // minQuantityPerOrder:{
+    //     type: Number,
+    //     required: true
+    // },
+    
+    // maxQuantityPerOrder:{
+    //     type: Number,
+    //     required: true
+    // },
 
     salesStart:{
         type: Date,
@@ -50,6 +60,11 @@ const TicketSchema = new Schema({
     salesEnd:{
         type: Date,
         required: true
+    },
+
+    description:{
+        type: String,
+        required: false
     }
 
 }, {timestamps: true})

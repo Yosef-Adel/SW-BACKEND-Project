@@ -42,15 +42,6 @@ app.use(bp.urlencoded({ extended: true }))
 
 passportConfig.googlePass(passport);
 
-
-
-
-// const uploadImage = async(req, res) => {
-//     return res.json({image: req.file.path})
-// }
-// app.post("/", upload.single("image"), uploadImage);
-
-
 app.use(session({
     secret: process.env.JWT_KEY,
     resave: false,
