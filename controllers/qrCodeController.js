@@ -27,10 +27,11 @@ const generateQRCodeAndSendEmail = async (url,userId) => {
     //create a string combining the environment variable and the QR code name
     const qr = process.env.CURRENTURL + qrImageName;
 
-    const template=fs.readFileSync('./views/email-template.html','utf8');
+    const template=fs.readFileSync('./views/emailTemplate2.html','utf8');
     const name = user.firstName;
     const personalizedTemplate = template.replace('{{name}}', name);
-
+    // personalizedTemplate = template.replace('{{tickets}}', tickets);
+    
 
     const image=fs.readFileSync('./public/' + qrImageName);
 

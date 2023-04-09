@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script>
+        const tickets = [
+        {
+            ticketType: "ticket class 1",
+            quantity: 2,
+            price: 20,
+            fee: 2,
+            totalPrice: 42
+        },
+        {
+            ticketType: "ticket class 2",
+            quantity: 1,
+            price: 10,
+            fee: 1,
+            totalPrice: 21
+        },
+        {
+            ticketType: "ticket class 3",
+            quantity: 3,
+            price: 5,
+            fee: 0.5,
+            totalPrice: 16.5
+        }  
+    ]
+    const ticketTableBody = document.getElementById("ticket-table-body");
+    tickets.forEach(ticket => {
+        const row = document.createElement("tr");
+        const ticketType = document.createElement("td");
+        const quantity = document.createElement("td");
+        const price = document.createElement("td");
+        const fee = document.createElement("td");
+        const totalPrice = document.createElement("td");
+        ticketType.innerHTML = ticket.ticketType;
+        quantity.innerHTML = ticket.quantity;
+        price.innerHTML = ticket.price;
+        fee.innerHTML = ticket.fee;
+        totalPrice.innerHTML = ticket.totalPrice;
+        row.appendChild(ticketType);
+        row.appendChild(quantity);
+        row.appendChild(price);
+        row.appendChild(fee);
+        row.appendChild(totalPrice);
+        ticketTableBody.appendChild(row);
+    })
+
+    </script>
+    <meta charset="UTF-8">
+    <title>Order Confirmation</title>
+    <style>
+    body {
+        font-family: Arial, sans-serif;
+        font-size: 16px;
+        color: #333;
+        background-color: #FFA500;
+    }
+    table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+    th, td {
+        text-align: left;
+        padding: 8px;
+        border-bottom: 1px solid #ddd;
+    }
+    th {
+        background-color: #FF8C00;
+        color: white;
+    }
+    .logo {
+        display: block;
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+    </style>
+</head>
+<body>
+    <h1>Order Confirmation</h1>
+    <p>Dear {{name}},</p>
+    <p>You've got tickets!</p>
+    <p>Here is the QR Code to your event!</p>
+
+    <img src="cid:image" alt="Image">
+    <table>
+    <thead>
+        <tr>
+        <th>Ticket Type</th>
+        <th>Quantity</th>
+        <th>Price</th>
+        <th>Fee</th>
+        <th>Total Price</th>
+        </tr>
+    </thead>
+    <tbody id="ticket-table-body">
+        
+    </tbody>
+    </table>
+    </script>
+    <img class="logo" src="../public/envie.svg" alt="Logo">
+</body>
+</html>
