@@ -9,12 +9,12 @@ const OrganizationSchema = new Schema({
 
     country: {
         type: String,
-        required: true
+        required: false
     },
 
     image: {
         type: String,
-        required: true
+        required: false
     },
 
     createdBy:{

@@ -12,16 +12,7 @@ const OrderSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'user'
     },
-
-    // numberOfTicketsBought:{
-    //     type: Number,
-    //     required: true
-    // },
-
-    // ticketClassBought:{
-    //     type: Schema.Types.ObjectId,
-    //     ref: 'ticket'
-    // },
+    
     ticketsBought:[{
         ticketClass:{
             type: Schema.Types.ObjectId,
@@ -57,12 +48,25 @@ const OrderSchema = new Schema({
         required: false
     },
     
-
     //total amount to be paid
     //which is the subtotal + fees - discountAmount
     total:{
         type: Number,
         required: false
+    },
+
+    //the attendee details of this specific order
+    firstName:{
+        type: String,
+        required: true
+    },
+    lastName:{
+        type: String,
+        required: true
+    },
+    email:{
+        type: String,
+        required: true
     }
 
 }, {timestamps: true})

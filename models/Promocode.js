@@ -21,7 +21,11 @@ const PromocodeSchema = new Schema({
     //the percent off the single ticket price
     percentOff: {
         type: Number,
-        required: true
+        required: false
+    },
+    amountOff: {
+        type: Number,
+        required: false
     },
 
     //the number of times the promocode can be used

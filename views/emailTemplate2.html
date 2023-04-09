@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Order Confirmation</title>
+    <style>
+    body {
+        font-family: Arial, sans-serif;
+        font-size: 16px;
+        color: #333;
+        background-color: #FFA500;
+    }
+    table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+    th, td {
+        text-align: left;
+        padding: 8px;
+        border-bottom: 1px solid #ddd;
+    }
+    th {
+        background-color: #FF8C00;
+        color: white;
+    }
+    .logo {
+        display: block;
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+    </style>
+</head>
+<body>
+    <h1>Order Confirmation</h1>
+    <p>Dear {{name}},</p>
+    <p>You've got tickets!</p>
+    <p>Here is the QR Code to your event!</p>
+
+    <img src="cid:image" alt="Image">
+    <table>
+    <thead>
+        <tr>
+        <th>Ticket Type</th>
+        <th>Quantity</th>
+        <th>Price</th>
+        <th>Fee</th>
+        <th>Total Price</th>
+        </tr>
+    </thead>
+    <tbody id="ticket-table-body">
+        
+    </tbody>
+    </table>
+    <script src="../controllers/tickets"></script>
+    <script>
+        const tbody = document.getElementById('ticket-details-body');
+
+        // Loop through the tickets array and generate a row for each ticket
+        for (let i = 0; i < tickets.length; i++) {
+        const tr = document.createElement('tr');
+
+        const tdTicketType = document.createElement('td');
+        tdTicketType.textContent = tickets[i].ticketType;
+        tr.appendChild(tdTicketType);
+
+        const tdQuantity = document.createElement('td');
+        tdQuantity.textContent = tickets[i].quantity;
+        tr.appendChild(tdQuantity);
+
+        const tdPrice = document.createElement('td');
+        tdPrice.textContent = tickets[i].price;
+        tr.appendChild(tdPrice);
+
+        const tdFee = document.createElement('td');
+        tdFee.textContent = tickets[i].fee;
+        tr.appendChild(tdFee);
+
+        tbody.appendChild(tr);
+        }
+    </script>
+    </script>
+    <img class="logo" src="../public/envie.svg" alt="Logo">
+</body>
+</html>
