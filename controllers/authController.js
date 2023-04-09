@@ -43,7 +43,7 @@ exports.signUp= async (req, res) => {
         await sendMail({
         email: user.emailAddress,
         subject: `Verify your email address with Eventbrite`,
-        message: "ay haga"
+        message: verifyEmailText
         });
         //testing
 
