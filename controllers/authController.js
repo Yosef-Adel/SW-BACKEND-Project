@@ -20,25 +20,21 @@ bcrypt.genSalt(saltRounds)
 
 exports.signUp= async (req, res) => {
     try{
+        if (!(req.body.emailAddress && req.body.password && req.body.firstName && req.body.lastName)) 
+        {
+            return res.status(400).send("Please fill all the required inputs.");
+        }
+
         const isDuplicate = await User.findOne({emailAddress: req.body.emailAddress})
 
         if (isDuplicate) {
             return res.status(400).json({message: 'User validation failed: expected emailAddress to be unique.'});
         }
 
-        if (!(req.body.emailAddress && req.body.password && req.body.firstName && req.body.lastName)) 
-        {
-            return res.status(400).send("Please fill all the required inputs.");
-        }
-
         const hashedPass = await bcrypt.hash(req.body.password, saltRounds);
 
-        const user = await User.create({
-        emailAddress: req.body.emailAddress,
-        firstName: req.body.firstName,
-        lastName: req.body.lastName,
-        password: hashedPass
-        });
+        const user = await User.create({...req.body});
+        user.password = hashedPass;
         
         //testing
         user.verifyEmailToken = await user.generateEmailVerificationToken();
