@@ -140,3 +140,22 @@ exports.getNearest = async (req, res) => {
     res.json({ city, events});
 }
 
+// @route   GET api/events/:id/attendees
+// @desc    Get attendees of an event
+// @access  Public
+exports.getAttendees = (req, res) => {
+    Event.findById(req.params.id).populate('attendees')
+        .then(event => res.json(event.attendees))
+        .catch(err => res.status(400).json(err));
+}
+
+// @route   POST api/events/:id/attendees
+// @desc    Add attendee to an event
+// @access  Public
+exports.addAttendee = async (req, res) => {
+    const event = req.params.id;
+    const ticketsBought = req.body.tickets;
+    
+
+}
+
