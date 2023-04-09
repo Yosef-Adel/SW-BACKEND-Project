@@ -161,7 +161,7 @@ exports.forgotPassword = async (req, res) => {
         
         // testing
         const forgotPasswordToken = await user.generateForgotPasswordToken();
-        const forgotPasswordEmailText = `Click on the link to reset your password http://ec2-3-219-197-102.compute-1.amazonaws.com/${forgotPasswordToken}\n`;
+        const forgotPasswordEmailText = `Click on the link to reset your password http://ec2-3-219-197-102.compute-1.amazonaws.com/auth/reset-password/${forgotPasswordToken}\n`;
 
         await sendMail({
             email: req.body.emailAddress,
