@@ -10,29 +10,6 @@ const User = require('../models/User');
 const {sendMailWithAttachment} = require('../utils/emailVerification');
 const fs = require('fs');
 
-const tickets = [
-    {
-        ticketType: "ticket class 1",
-        quantity: 2,
-        price: 20,
-        fee: 2,
-        totalPrice: 42
-    },
-    {
-        ticketType: "ticket class 2",
-        quantity: 1,
-        price: 10,
-        fee: 1,
-        totalPrice: 21
-    },
-    {
-        ticketType: "ticket class 3",
-        quantity: 3,
-        price: 5,
-        fee: 0.5,
-        totalPrice: 16.5
-    }  
-]
 
 
 //generate the QR code and send it to the user's email
@@ -82,4 +59,4 @@ const generateQRCodeAndSendEmail = async (url,userId) => {
 
 }
 
-module.exports = {generateQRCodeAndSendEmail, tickets};
+module.exports = {generateQRCodeAndSendEmail};

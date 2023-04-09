@@ -1,6 +1,51 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <script>
+        const tickets = [
+            {
+                ticketType: "ticket class 1",
+                quantity: 2,
+                price: 20,
+                fee: 2,
+                totalPrice: 42
+            },
+            {
+                ticketType: "ticket class 2",
+                quantity: 1,
+                price: 10,
+                fee: 1,
+                totalPrice: 21
+            },
+            {
+                ticketType: "ticket class 3",
+                quantity: 3,
+                price: 5,
+                fee: 0.5,
+                totalPrice: 16.5
+            }  
+        ]
+        const ticketTableBody = document.getElementById("ticket-table-body");
+        tickets.forEach(ticket => {
+            const row = document.createElement("tr");
+            const ticketType = document.createElement("td");
+            ticketType.textContent = ticket.ticketType;
+            const quantity = document.createElement("td");
+            quantity.textContent = ticket.quantity;
+            const price = document.createElement("td");
+            price.textContent = ticket.price;
+            const fee = document.createElement("td");
+            fee.innerHTML = ticket.fee;
+            const totalPrice = document.createElement("td");
+            totalPrice.textContent = ticket.totalPrice;
+            row.appendChild(ticketType);
+            row.appendChild(quantity);
+            row.appendChild(price);
+            row.appendChild(fee);
+            row.appendChild(totalPrice);
+            ticketTableBody.appendChild(row);
+        })
+    </script>
     <meta charset="UTF-8">
     <title>Order Confirmation</title>
     <style>
@@ -51,33 +96,6 @@
         
     </tbody>
     </table>
-    <script src="../controllers/tickets"></script>
-    <script>
-        const tbody = document.getElementById('ticket-details-body');
-
-        // Loop through the tickets array and generate a row for each ticket
-        for (let i = 0; i < tickets.length; i++) {
-        const tr = document.createElement('tr');
-
-        const tdTicketType = document.createElement('td');
-        tdTicketType.textContent = tickets[i].ticketType;
-        tr.appendChild(tdTicketType);
-
-        const tdQuantity = document.createElement('td');
-        tdQuantity.textContent = tickets[i].quantity;
-        tr.appendChild(tdQuantity);
-
-        const tdPrice = document.createElement('td');
-        tdPrice.textContent = tickets[i].price;
-        tr.appendChild(tdPrice);
-
-        const tdFee = document.createElement('td');
-        tdFee.textContent = tickets[i].fee;
-        tr.appendChild(tdFee);
-
-        tbody.appendChild(tr);
-        }
-    </script>
     </script>
     <img class="logo" src="../public/envie.svg" alt="Logo">
 </body>
