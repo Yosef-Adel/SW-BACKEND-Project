@@ -38,7 +38,7 @@ exports.signUp= async (req, res) => {
         //testing
         user.verifyEmailToken = await user.generateEmailVerificationToken();
         await user.save();
-        const verifyEmailText = `Please click on the link to complete the verification process http://ec2-3-219-197-102.compute-1.amazonaws.com/${user.verifyEmailToken}\n`;
+        const verifyEmailText = `Please click on the link to complete the verification process http://ec2-3-219-197-102.compute-1.amazonaws.com/auth/sign-up-verify/${user.verifyEmailToken}\n`;
         
         await sendMail({
         email: user.emailAddress,
@@ -161,7 +161,7 @@ exports.forgotPassword = async (req, res) => {
         
         // testing
         const forgotPasswordToken = await user.generateForgotPasswordToken();
-        const forgotPasswordEmailText = `Click on the link to reset your password http://ec2-3-219-197-102.compute-1.amazonaws.com/${forgotPasswordToken}\n`;
+        const forgotPasswordEmailText = `Click on the link to reset your password http://ec2-3-219-197-102.compute-1.amazonaws.com/auth/reset-password/${forgotPasswordToken}\n`;
 
         await sendMail({
             email: req.body.emailAddress,
