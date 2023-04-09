@@ -38,12 +38,12 @@ exports.signUp= async (req, res) => {
         //testing
         user.verifyEmailToken = await user.generateEmailVerificationToken();
         await user.save();
-        const verifyEmailText = `Please click on the link to complete the verification process ayhaga/${user.verifyEmailToken}\n`;
+        const verifyEmailText = `Please click on the link to complete the verification process http://ec2-3-219-197-102.compute-1.amazonaws.com/auth/sign-up-verify/${user.verifyEmailToken}\n`;
         
         await sendMail({
         email: user.emailAddress,
         subject: `Verify your email address with Eventbrite`,
-        message: verifyEmailText
+        message: "ay haga"
         });
         //testing
 
