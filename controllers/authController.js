@@ -38,6 +38,7 @@ exports.signUp= async (req, res) => {
         //testing
         user.verifyEmailToken = await user.generateEmailVerificationToken();
         await user.save();
+        
         const verifyEmailText = `Please click on the link to complete the verification process http://ec2-3-219-197-102.compute-1.amazonaws.com/auth/sign-up-verify/${user.verifyEmailToken}\n`;
         
         await sendMail({
@@ -48,9 +49,7 @@ exports.signUp= async (req, res) => {
         //testing
 
         await user.save();
-        return res.status(200).json({
-            message: 'Check your email for verification.'}
-            );
+        return res.redirect(301,"https://sw-frnt-project.vercel.app/login");
     }
     
     catch (err) {
@@ -161,7 +160,7 @@ exports.forgotPassword = async (req, res) => {
         
         // testing
         const forgotPasswordToken = await user.generateForgotPasswordToken();
-        const forgotPasswordEmailText = `Click on the link to reset your password http://ec2-3-219-197-102.compute-1.amazonaws.com/auth/reset-password/${forgotPasswordToken}\n`;
+        const forgotPasswordEmailText = `Click on the link to reset your password https://sw-frnt-project.vercel.app/forgetPassword/${user.forgotPasswordToken}\n`;
 
         await sendMail({
             email: req.body.emailAddress,
