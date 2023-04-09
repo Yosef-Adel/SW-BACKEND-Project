@@ -63,8 +63,11 @@ const createOrder=async (req, res ) => {
                 break;
             }
 
-            //update the capacity of the ticket class
-            ticketClass.capacity -= numberOfTicketsBought;
+            // //update the capacity of the ticket class
+            // ticketClass.capacity -= numberOfTicketsBought;
+
+            //update the number of tickets sold
+            ticketClass.sold += numberOfTicketsBought;
 
             //save the ticket class
             try {
@@ -95,7 +98,9 @@ const createOrder=async (req, res ) => {
             else{
                 //if the promocode is not found
                 //send a message that the promocode is not available
-                doesPromocodeExist=false;}
+                doesPromocodeExist=false;
+                break;
+            }
 
 
             if (doesPromocodeExist && isPromocodeAvailable){
