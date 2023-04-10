@@ -87,6 +87,13 @@ const createTicket = async (req, res, next ) => {
         description: ticketDescription
         });
         await ticket.save();
+        //add the ticket to the event
+        event.tickets.push(ticket);
+        //update the event price
+        if (event.price==-1 || event.price>ticket.price) {
+            event.price=ticket.price;
+        }
+        await event.save();
         res.status(201).json({ message: "Ticket created successfully!" });
     }
     

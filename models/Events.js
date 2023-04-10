@@ -25,7 +25,10 @@ const EventSchema = new Schema({
 
     price :{
         type: Number,
-        required: false
+        required: false,
+        //-1 means that the event price is undefined
+        //will be defined by the minimum ticket price
+        default:-1
     },
     
     summary: {
