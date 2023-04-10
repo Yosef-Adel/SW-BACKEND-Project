@@ -39,7 +39,7 @@ exports.signUp= async (req, res) => {
         user.verifyEmailToken = await user.generateEmailVerificationToken();
         await user.save();
         
-        const verifyEmailText = `Please click on the link to complete the verification process http://ec2-3-219-197-102.compute-1.amazonaws.com/auth/sign-up-verify/${user.verifyEmailToken}\n`;
+        const verifyEmailText = `Please click on the link to complete the verification process https://sw-backend-project.vercel.app/auth/sign-up-verify/${user.verifyEmailToken}\n`;
         
         await sendMail({
         email: user.emailAddress,
@@ -224,7 +224,7 @@ exports.resetPassword = async (req, res) => {
         });
     }
     catch(err){
-        console.log(err.message)
+        console.log(err.message);
         return res.status(400).json({ message: "Error in resetting password" });
     }
 };
