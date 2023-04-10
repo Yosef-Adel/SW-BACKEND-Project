@@ -166,7 +166,7 @@ const checkPromo= async (req, res) => {
         return res.status(400).json({ message: "User is not logged in." });
     }
     //take the promocode name from the body
-    const promocodeName = req.body.promocode;
+    const promocodeName = req.params.promocode_name;
     //find the promocode by name
     const promocode = await Promocode.findOne({name: promocodeName});
     //check if the promocode exists
