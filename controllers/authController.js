@@ -235,5 +235,15 @@ exports.resetPassword = async (req, res) => {
 /////////////////////////   sign in with google   /////////////////////////   
 
 exports.googleCallback = async (req,res) => {
-    res.status(200).json({message: "done"});
+    try{
+        const user = req.user;
+        const token = await user.generateAuthToken();
+        res.body={user, token};
+        return res.redirect(301,"https://sw-frnt-project.vercel.app/");
+    }    
+
+    catch(err){
+        console.log(err.message);
+        return res.status(400).json({message: "Error in redirecting to login page"});
+    }
 }
