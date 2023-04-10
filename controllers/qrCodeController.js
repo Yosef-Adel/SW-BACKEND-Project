@@ -72,6 +72,13 @@ const generateQRCodeAndSendEmail = async (url,userId,email,ticketArray) => {
                         email: userEmail,
                         subject: 'QR Code',
                         attachments: [
+                            // {
+                            //     filename: "envie.png",
+                            //     path: "./public/envie.png",
+                            //     contentType: 'image/png',
+                            //     content: image,
+                            //     cid: 'envie'             
+                            // }
                             {
                                 filename: qrImageName,
                                 path: "./public/" + qrImageName,
@@ -79,11 +86,13 @@ const generateQRCodeAndSendEmail = async (url,userId,email,ticketArray) => {
                                 content: image,
                                 cid: 'image'
                             }
+
                         ],
                         html: personalizedTemplate,
                     })
                     await user.save();
                     console.log("sent the email success")
+                    // console.log("./public/" + qrImageName)
                 
                     //delete the image file that was sent
                     fs.unlinkSync('./public/' + qrImageName);

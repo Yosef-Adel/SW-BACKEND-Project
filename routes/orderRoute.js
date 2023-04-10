@@ -9,5 +9,6 @@ orderRouter.get('/event/:event_id', authorization,orderController.getOrdersByEve
 orderRouter.get('/orderById/:event_id/:order_id', authorization,orderController.getOrderById);
 orderRouter.get('/user/:user_id', authorization,orderController.getOrdersByUserId);
 orderRouter.delete('/user/:user_id/:order_id/cancelOrder', authorization,orderController.cancelOrder);
+orderRouter.get('/:event_id/:order_id/aggregate', authorization,orderController.testAggregateFunctions);
 
 module.exports = orderRouter;
