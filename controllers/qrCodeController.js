@@ -78,7 +78,7 @@ const generateQRCodeAndSendEmail = async (url,userId,email,ticketArray) => {
                             //     contentType: 'image/png',
                             //     content: image,
                             //     cid: 'envie'             
-                            // },
+                            // }
                             {
                                 filename: qrImageName,
                                 path: "./public/" + qrImageName,
