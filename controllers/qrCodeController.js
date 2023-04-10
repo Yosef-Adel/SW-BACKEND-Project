@@ -26,7 +26,8 @@ const generateQRCodeAndSendEmail = async (url,userId) => {
     
 
     //create a string combining the environment variable and the QR code name
-    const qr = process.env.CURRENTURL + qrImageName;
+    // const qr = process.env.CURRENTURL + qrImageName;
+    const qr ="http://ec2-3-219-197-102.compute-1.amazonaws.com/"+qrImageName;
 
     const template=fs.readFileSync('./views/emailTemplate2.html','utf8');
     const name = user.firstName;

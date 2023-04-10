@@ -13,7 +13,12 @@ const EventSchema = new Schema({
         required: true
     },
 
-    date: {
+    startDate: {
+        type: Date,
+        required: true
+    },
+
+    endDate: {
         type: Date,
         required: true
     },
@@ -55,11 +60,11 @@ const EventSchema = new Schema({
         ref: 'organizer'
     },
     
-    createdBy:{
-        type: Schema.Types.ObjectId,
-        ref: 'user',
-        required: true
-    },
+    // createdBy:{
+    //     type: Schema.Types.ObjectId,
+    //     ref: 'user',
+    //     required: true
+    // },
 
     isPrivate: {
         type: Boolean,
@@ -80,9 +85,52 @@ const EventSchema = new Schema({
         required: false
     },
 
-    venue: {
-        type: Schema.Types.ObjectId,
-        ref: 'venue'
+    venueName: {
+        type: String,
+        required: true
+    },
+    
+    venueCapacity: {
+        type: Number,
+        required: false
+    },
+
+    city: {
+        type: String,
+        required: true
+    },
+
+    address1: {
+        type: String,
+        required: true
+    },
+
+    address2: {
+        type: String,
+        required: false
+    },
+
+    state: {
+        type: String,
+        required: false
+    },
+    country: {
+        type: String,
+        required: true
+    },
+    postalCode: {
+        type: String,
+        required: true
+    },
+
+    longitude: {
+        type: Number,
+        required: false
+    },
+
+    latitude: {
+        type: Number,
+        required: false
     }
 
 }, {timestamps: true})

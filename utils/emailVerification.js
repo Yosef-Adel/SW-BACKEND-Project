@@ -5,7 +5,7 @@ const sendMail = async options => {
   const transporter = nodemailer.createTransport({
     service:'gmail',
     host:'smtp.gmail.com',
-    port:'465',
+    port:'587',
     secure: true, // use SSL
     auth: {
       user: process.env.AUTH_EMAIL,
@@ -27,7 +27,7 @@ const sendMailWithAttachment = async options => {
   const transporter = nodemailer.createTransport({
     service:'gmail',
     host:'smtp.gmail.com',
-    port:'465',
+    port:'587',
     secure: true, // use SSL
     auth: {
       user: process.env.AUTH_EMAIL,
