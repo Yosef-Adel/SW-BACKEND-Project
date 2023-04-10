@@ -23,9 +23,10 @@ const EventSchema = new Schema({
         required: true
     },
 
-    created_date: {
-        type: Date,
-        default: Date.now
+    price :{
+        type: Number,
+        required: false,
+        default: 0
     },
     
     summary: {
