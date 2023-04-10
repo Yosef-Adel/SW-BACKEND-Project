@@ -49,6 +49,9 @@ exports.signUp= async (req, res) => {
         //testing
 
         await user.save();
+        // return res.status(200).json({
+        //     message: 'Check your email for verification.'}
+        //     );
         return res.redirect(301,"https://sw-frnt-project.vercel.app/login");
     }
     
@@ -159,7 +162,7 @@ exports.forgotPassword = async (req, res) => {
         }
         
         // testing
-        const forgotPasswordToken = await user.generateForgotPasswordToken();
+        user.forgotPasswordToken = await user.generateForgotPasswordToken();
         const forgotPasswordEmailText = `Click on the link to reset your password https://sw-frnt-project.vercel.app/forgetPassword/${user.forgotPasswordToken}\n`;
 
         await sendMail({
