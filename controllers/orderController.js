@@ -6,6 +6,8 @@ const Promocode = require('../models/Promocode');
 
 //require the function in the qr code controller 
 const {generateQRCodeAndSendEmail}=require('../controllers/qrCodeController');
+//require all the functions in the aggregateFunctions file
+const {getTicketsSold,getOrdersCount,getTotalCapacity,getTotalMoneyEarned,getTotalTicketsInOrder}=require('../controllers/aggregateFunctions');
 
 
 
@@ -133,29 +135,30 @@ const createOrder=async (req, res ) => {
                         }
                     
                 }
-                    //Update the total number of tickets
-                    ticketPriceDetail=ticketPrice;
-                    totalTickets += numberOfTicketsBought;
-                    //Update the subtotal
-                    subTotal += ticketPriceOriginal * numberOfTicketsBought;
-                    subTotal = parseFloat(subTotal.toFixed(2));
-                    //Update the total fees
-                    totalFees += ticketFee * numberOfTicketsBought;
-                    totalFees = parseFloat(totalFees.toFixed(2));
-                    //Update the total discount amount
-                    totalDiscountAmount += (ticketPriceOriginal - ticketPrice) * numberOfTicketsBought;
-                    totalDiscountAmount = parseFloat(totalDiscountAmount.toFixed(2));
 
-                    //push the ticket details to the array
-                    ticketDetails.push({
-                        ticketType: ticketClass.name,
-                        quantity: numberOfTicketsBought,
-                        price: ticketPriceDetail,
-                        fee: ticketFee,
-                        totalPrice: ticketPriceDetail * numberOfTicketsBought+ticketFee * numberOfTicketsBought
-                    });
             }
-        }     
+        }
+        //Update the total number of tickets
+        ticketPriceDetail=ticketPrice;
+        totalTickets += numberOfTicketsBought;
+        //Update the subtotal
+        subTotal += ticketPriceOriginal * numberOfTicketsBought;
+        subTotal = parseFloat(subTotal.toFixed(2));
+        //Update the total fees
+        totalFees += ticketFee * numberOfTicketsBought;
+        totalFees = parseFloat(totalFees.toFixed(2));
+        //Update the total discount amount
+        totalDiscountAmount += (ticketPriceOriginal - ticketPrice) * numberOfTicketsBought;
+        totalDiscountAmount = parseFloat(totalDiscountAmount.toFixed(2));
+        
+        //push the ticket details to the array
+        ticketDetails.push({
+            ticketType: ticketClass.name,
+            quantity: numberOfTicketsBought,
+            price: ticketPriceDetail,
+            fee: ticketFee,
+            totalPrice: ticketPriceDetail * numberOfTicketsBought+ticketFee * numberOfTicketsBought
+        });     
     }
 
     //check if promocode exists
@@ -331,4 +334,30 @@ const cancelOrder=async (req,res)=>{
     }
 };
 
-module.exports={createOrder,getOrdersByEventId,getOrderById,getOrdersByUserId,cancelOrder}
+
+//Just for testing
+
+//create a function to test all the aggregate functions in the aggregate.js file
+const testAggregateFunctions=async (req,res)=>{
+    //get the event id from the parameters
+    const eventId=req.params.event_id;
+    //get the order id from the parameters
+    const orderId=req.params.order_id;
+    //call the functions
+    const ticketsSold=await getTicketsSold(eventId);
+    const ordersCount=await getOrdersCount(eventId);
+    const totalCapacity=await getTotalCapacity(eventId);
+    const totalMoneyEarned=await getTotalMoneyEarned(eventId);
+    const totalTicketsInOrder=await getTotalTicketsInOrder(orderId,eventId);
+
+    //send the response
+    res.status(200).json({message: "Aggregates fetched successfully!",
+    ticketsSold: ticketsSold,
+    ordersCount: ordersCount,
+    totalCapacity: totalCapacity,
+    totalMoneyEarned: totalMoneyEarned,
+    totalTicketsInOrder: totalTicketsInOrder
+    });
+};
+
+module.exports={createOrder,getOrdersByEventId,getOrderById,getOrdersByUserId,cancelOrder,testAggregateFunctions}
