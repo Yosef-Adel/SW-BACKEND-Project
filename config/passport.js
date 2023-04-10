@@ -11,7 +11,7 @@ exports.googlePass = function(passport){
             {
                 clientID: process.env.GOOGLE_CLIENT_ID,
                 clientSecret: process.env.GOOGLE_APP_SECRET,
-                callbackURL: process.env.GOOGLE_CALLBACKURL
+                callbackURL: "https://sw-backend-project.vercel.app/auth/google/callback"
             },
         async function(accessToken, refreshToken, profile, done) {
             try {
