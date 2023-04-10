@@ -38,15 +38,16 @@ const generateQRCodeAndSendEmail = async (url,userId,email,ticketArray) => {
     // // personalizedTemplate = template.replace('{{tickets}}', tickets);
 
     //using ejs to render the template
-    ejs.renderFile('./views/email-template3.ejs', { ticketArray }, (err, html) => {
+    ejs.renderFile('./views/email-template3.ejs', { ticketArray }, async (err, html) => {
         if (err) 
         {
             console.log('Error rendering EJS file:', err);
         } 
         else 
         {
-            const outputPath = path.join(__dirname, 'views', 'email-template-final.html');
-            fs.writeFile(outputPath, html, (err) => 
+            const parentDir = path.dirname(__dirname);
+            const outputPath = path.join(parentDir, 'views', 'email-template-final.html');
+            await fs.writeFile(outputPath, html, async (err) => 
             {
                 if (err) 
                 {
@@ -55,39 +56,48 @@ const generateQRCodeAndSendEmail = async (url,userId,email,ticketArray) => {
             else 
             {
                     console.log('HTML output saved to file:', outputPath);
+                    //here I have the html file saved
+                    const template=fs.readFileSync('./views/email-template-final.html','utf8');
+                    console.log("read the html file success")
+                    const name = user.firstName;
+                    const personalizedTemplate = await template.replace('{{name}}', name);
+                    console.log("replaced the name success")
+                
+                    
+                
+                    const image=fs.readFileSync('./public/' + qrImageName);
+                
+                    //send the QR code to the user's email
+                    await sendMailWithAttachment({
+                        email: userEmail,
+                        subject: 'QR Code',
+                        attachments: [
+                            {
+                                filename: qrImageName,
+                                path: "./public/" + qrImageName,
+                                contentType: 'image/png',
+                                content: image,
+                                cid: 'image'
+                            }
+                        ],
+                        html: personalizedTemplate,
+                    })
+                    await user.save();
+                    console.log("sent the email success")
+                
+                    //delete the image file that was sent
+                    fs.unlinkSync('./public/' + qrImageName);
+                
+                    //delete the output html file
+                    fs.unlinkSync('./views/email-template-final.html');
+                    //return res.status(200).json({ message: "QR code sent successfully!" });
+
             }
         });
         }
     });
 
-    //here I have the html file saved
-    const template=fs.readFileSync('./views/email-template-final.html','utf8');
-    const name = user.firstName;
-    const personalizedTemplate = template.replace('{{name}}', name);
-    
 
-    const image=fs.readFileSync('./public/' + qrImageName);
-
-    //send the QR code to the user's email
-    await sendMailWithAttachment({
-        email: userEmail,
-        subject: 'QR Code',
-        attachments: [
-            {
-                filename: qrImageName,
-                path: "./public/" + qrImageName,
-                contentType: 'image/png',
-                content: image,
-                cid: 'image'
-            }
-        ],
-        html: personalizedTemplate,
-    })
-    await user.save();
-
-    //delete the image file that was sent
-    fs.unlinkSync('./public/' + qrImageName);
-    //return res.status(200).json({ message: "QR code sent successfully!" });
 
 }
 
