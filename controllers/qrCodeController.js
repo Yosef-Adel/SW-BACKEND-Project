@@ -9,17 +9,22 @@ const User = require('../models/User');
 //require the sendEmail function
 const {sendMailWithAttachment} = require('../utils/emailVerification');
 const fs = require('fs');
+const ejs = require('ejs');
+const path = require('path');
 
 
 
 //generate the QR code and send it to the user's email
 //the data is in the request body
 //trial
-const generateQRCodeAndSendEmail = async (url,userId) => {
+const generateQRCodeAndSendEmail = async (url,userId,email,ticketArray) => {
 
-    //find the user by id from the id in the request
+    // //find the user by id from the id in the request
     let user = await User.findById(userId);
-    let userEmail = user.emailAddress;
+    // let userEmail = user.emailAddress;
+
+    //sending the email to the one specified in the form instead
+    let userEmail = email;
 
     //generate the QR code
     const qrImageName = await createQR(url);
@@ -29,10 +34,36 @@ const generateQRCodeAndSendEmail = async (url,userId) => {
     // const qr = process.env.CURRENTURL + qrImageName;
     const qr ="http://ec2-3-219-197-102.compute-1.amazonaws.com/"+qrImageName;
 
-    const template=fs.readFileSync('./views/emailTemplate2.html','utf8');
+
+    // // personalizedTemplate = template.replace('{{tickets}}', tickets);
+
+    //using ejs to render the template
+    ejs.renderFile('./views/email-template3.ejs', { ticketArray }, (err, html) => {
+        if (err) 
+        {
+            console.log('Error rendering EJS file:', err);
+        } 
+        else 
+        {
+            const outputPath = path.join(__dirname, 'views', 'email-template-final.html');
+            fs.writeFile(outputPath, html, (err) => 
+            {
+                if (err) 
+                {
+                    console.log('Error saving HTML file:', err);
+            } 
+            else 
+            {
+                    console.log('HTML output saved to file:', outputPath);
+            }
+        });
+        }
+    });
+
+    //here I have the html file saved
+    const template=fs.readFileSync('./views/email-template-final.html','utf8');
     const name = user.firstName;
     const personalizedTemplate = template.replace('{{name}}', name);
-    // personalizedTemplate = template.replace('{{tickets}}', tickets);
     
 
     const image=fs.readFileSync('./public/' + qrImageName);

@@ -122,10 +122,12 @@ const createOrder=async (req, res ) => {
                         if(promocodeObject.amountOff==-1){
                             //then use the percent off not the amount off
                             ticketPrice = ticketPriceOriginal - (ticketPriceOriginal * (promocodeObject.percentOff/100));
+                            ticketPrice = parseFloat(ticketPrice.toFixed(2));
                         }
                         else if (promocodeObject.percentOff==-1){
                             //then use the amount off not the percent off
                             ticketPrice = ticketPriceOriginal - promocodeObject.amountOff;
+                            ticketPrice = parseFloat(ticketPrice.toFixed(2));
                         }
                     
                 }
@@ -133,10 +135,13 @@ const createOrder=async (req, res ) => {
                     totalTickets += numberOfTicketsBought;
                     //Update the subtotal
                     subTotal += ticketPriceOriginal * numberOfTicketsBought;
+                    subTotal = parseFloat(subTotal.toFixed(2));
                     //Update the total fees
                     totalFees += ticketFee * numberOfTicketsBought;
+                    totalFees = parseFloat(totalFees.toFixed(2));
                     //Update the total discount amount
                     totalDiscountAmount += (ticketPriceOriginal - ticketPrice) * numberOfTicketsBought;
+                    totalDiscountAmount = parseFloat(totalDiscountAmount.toFixed(2));
             }
         }     
     }
@@ -162,6 +167,8 @@ const createOrder=async (req, res ) => {
 
     //calculate the total
     total = subTotal + totalFees - totalDiscountAmount;
+    total = parseFloat(total.toFixed(2));
+    
 
     //create a new order
     const order = new Order({
@@ -183,10 +190,30 @@ const createOrder=async (req, res ) => {
         await order.save();
         //generate the qr code and send the email to the user with link to the event
 
+        //create an array of object storing the ticket details to be passed to the email template
+        let ticketDetails=[];
+        for(let i=0;i<ticketsBought.length;i++){
+            let ticketClassId=ticketsBought[i].ticketClass;
+            let numberOfTicketsBought=ticketsBought[i].number;
+
+            let ticketClass=await TicketClass.findById(ticketClassId);
+
+            let ticketDetail={
+                ticketType: ticketClass.name,
+                quantity: numberOfTicketsBought,
+                price: ticketClass.price,
+                fee: ticketClass.fee,
+                total: ticketClass.price*numberOfTicketsBought+ticketClass.fee*numberOfTicketsBought
+            }
+            ticketDetails.push(ticketDetail);
+        }  
+
         //plugin the deployed url
         let eventURL="http://ec2-3-219-197-102.compute-1.amazonaws.com/events/"+eventId;
         // let eventURL=process.env.CURRENTURL+"events/"+eventId;
-        await generateQRCodeAndSendEmail(eventURL,req.user._id);
+
+        //sending the mail to the email specified in the order form
+        await generateQRCodeAndSendEmail(eventURL,req.user._id,order.email,ticketDetails);
 
         res.status(201).json({message: "Order created successfully!",
         order: order
