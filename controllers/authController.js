@@ -49,10 +49,8 @@ exports.signUp= async (req, res) => {
         //testing
 
         await user.save();
-        // return res.status(200).json({
-        //     message: 'Check your email for verification.'}
-        //     );
-        return res.redirect(301,"https://sw-frnt-project.vercel.app/login");
+        return res.status(200).json({message: 'Check your email for verification.'});
+        // return res.redirect(301,"https://sw-frnt-project.vercel.app/login");
     }
     
     catch (err) {
@@ -68,8 +66,6 @@ exports.signUp= async (req, res) => {
 
 exports.verification = async (req, res) => {
     try{
-        //if (!req.params.token)  return res.status(400).json({message: "no email verification token found"})
-
         const user = await User.findOne({verifyEmailToken: req.params.token} );
         if (!user)  return res.status(400).json({message: "user not found"});
         
