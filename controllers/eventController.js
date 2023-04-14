@@ -106,7 +106,7 @@ exports.getAll = async (req, res) => {
         eventQuery.where('venue.city').equals(city);
     }
 
-    eventQuery.then(events => res.json(events))
+    eventQuery.then(events => res.json({ city, events}))
         .catch(err => res.status(400).json(err));
 
 }
