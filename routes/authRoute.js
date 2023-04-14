@@ -7,6 +7,7 @@ const authorization = require("../middleware/authorization.js");
 
 
 authRouter.post('/sign-up', authController.signUp);
+authRouter.post('/sign-up-app', authController.signUpApp);
 authRouter.post('/login', authController.login);
 authRouter.post('/forgot-password', authController.forgotPassword);
 

@@ -49,6 +49,48 @@ exports.signUp= async (req, res) => {
         //testing
 
         await user.save();
+        // return res.status(200).json({message: 'Check your email for verification.'});
+        return res.redirect(301,"https://sw-frnt-project.vercel.app/login");
+    }
+    
+    catch (err) {
+        console.log(err.message)
+        return res.status(400).json({ message: "Error in signing up" });
+    }
+};
+
+exports.signUpApp= async (req, res) => {
+    try{
+        if (!(req.body.emailAddress && req.body.password && req.body.firstName && req.body.lastName)) 
+        {
+            return res.status(400).send("Please fill all the required inputs.");
+        }
+
+        const isDuplicate = await User.findOne({emailAddress: req.body.emailAddress})
+
+        if (isDuplicate) {
+            return res.status(400).json({message: 'User validation failed: expected emailAddress to be unique.'});
+        }
+
+        const hashedPass = await bcrypt.hash(req.body.password, saltRounds);
+
+        const user = await User.create({...req.body});
+        user.password = hashedPass;
+        
+        //testing
+        user.verifyEmailToken = await user.generateEmailVerificationToken();
+        await user.save();
+        
+        const verifyEmailText = `Please click on the link to complete the verification process https://sw-backend-project.vercel.app/auth/sign-up-verify/${user.verifyEmailToken}\n`;
+        
+        await sendMail({
+        email: user.emailAddress,
+        subject: `Verify your email address with Eventbrite`,
+        message: verifyEmailText
+        });
+        //testing
+
+        await user.save();
         return res.status(200).json({message: 'Check your email for verification.'});
         // return res.redirect(301,"https://sw-frnt-project.vercel.app/login");
     }
@@ -58,7 +100,6 @@ exports.signUp= async (req, res) => {
         return res.status(400).json({ message: "Error in signing up" });
     }
 };
-
 
 
 
