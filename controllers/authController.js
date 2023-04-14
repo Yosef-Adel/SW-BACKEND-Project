@@ -244,7 +244,6 @@ exports.googleCallback = async (req,res) => {
     try{
         const user = req.user;
         const token = await user.generateAuthToken();
-        res.body={user, token};
         return res.status(200).json({message: "success", user, token});
     }    
 
