@@ -15,6 +15,7 @@ bcrypt.genSalt(saltRounds)
     }).catch(err => console.error(err.message));
 
 
+
 /////////////////////////   sign up + sending verification email   /////////////////////////   
 
 exports.signUp= async (req, res) => {
@@ -98,6 +99,7 @@ exports.verification = async (req, res) => {
 };
 
 
+
 /////////////////////////   login + generating a token   /////////////////////////   
 
 exports.login= async (req, res) => {
@@ -141,6 +143,7 @@ exports.login= async (req, res) => {
         return res.status(400).json({ message: "Error in logging in" });
     }
 };
+
 
 
 /////////////////////////   sending forgot password email with a token   /////////////////////////   
@@ -189,12 +192,15 @@ exports.forgotPassword = async (req, res) => {
 };
 
 
+
 /////////////////////////   reseting password via token   /////////////////////////   
 
 exports.resetPassword = async (req, res) => {
     try{
         // check for the required password field
-        if (!req.body.password) return next(new appError('No password found.'));
+        if (!req.body.password) {
+            return res.status(400).json({message: "no new password found."});
+        }
         
         // find the user associated with the password token
         const user = await User.findOne({forgotPasswordToken: req.params.token});
@@ -211,7 +217,7 @@ exports.resetPassword = async (req, res) => {
 
         // if not valid, return status 400
         if (!valid){
-            return res.status(401).json({message: 'Token has expired.'});
+            return res.status(401).json({message: 'Password token has expired'});
         }
         
         // encyrpt the new password
@@ -229,7 +235,6 @@ exports.resetPassword = async (req, res) => {
         return res.status(400).json({ message: "Error in resetting password" });
     }
 };
-
 
 
 
