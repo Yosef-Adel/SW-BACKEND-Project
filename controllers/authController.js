@@ -153,7 +153,6 @@ exports.forgotPassword = async (req, res) => {
         }
         // find user associated with email address
         const user = await User.findOne({emailAddress: req.body.emailAddress});
-
         if (!user)
         {
             return res.status(400).json({message: "user not found"});
@@ -177,7 +176,6 @@ exports.forgotPassword = async (req, res) => {
         //testing
         
         await user.save();
-
         return res.status(200).json({
             message: 'Password token sent to email'
         });
@@ -189,8 +187,6 @@ exports.forgotPassword = async (req, res) => {
     }
     
 };
-
-
 
 
 /////////////////////////   reseting password via token   /////////////////////////   
@@ -213,11 +209,12 @@ exports.resetPassword = async (req, res) => {
             }
         });
 
+        // if not valid, return status 400
         if (!valid){
             return res.status(401).json({message: 'Token has expired.'});
         }
         
-        
+        // encyrpt the new password
         const hashedPass = await bcrypt.hash(req.body.password, saltRounds);
         user.password= hashedPass;  
         user.forgotPasswordToken=undefined;
