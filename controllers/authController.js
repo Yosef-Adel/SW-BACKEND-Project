@@ -59,6 +59,7 @@ exports.signUp= async (req, res) => {
     }
 };
 
+
 exports.signUpApp= async (req, res) => {
     try{
         if (!(req.body.emailAddress && req.body.password && req.body.firstName && req.body.lastName)) 
@@ -187,6 +188,9 @@ exports.login= async (req, res) => {
 
 exports.forgotPassword = async (req, res) => {
     try{
+        if (!req.body.emailAddress) {
+            return res.status(400).json({message: "no email address found"});
+        }
         const user = await User.findOne({emailAddress: req.body.emailAddress});
 
         if (!user)
@@ -230,9 +234,7 @@ exports.forgotPassword = async (req, res) => {
 
 exports.resetPassword = async (req, res) => {
     try{
-        if (!req.params.token) return res.status(400).json({message: 'No email confirmation token found.'});
-
-        if (!req.body.password) return next(new appError('No email confirmation token found.'));
+        if (!req.body.password) return next(new appError('No password found.'));
         
         const user = await User.findOne({forgotPasswordToken: req.params.token});
         if (!user) return res.status(400).send("User not found");
