@@ -103,7 +103,7 @@ exports.getAll = async (req, res) => {
     }
 
     if (lat && lng) {
-        eventQuery.where('venue.city').equals(city);
+        eventQuery.where('city').equals(city);
     }
 
     eventQuery.then(events => res.json({ city, events}))
