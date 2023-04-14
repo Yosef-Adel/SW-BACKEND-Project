@@ -245,7 +245,7 @@ exports.googleCallback = async (req,res) => {
         const user = req.user;
         const token = await user.generateAuthToken();
         res.body={user, token};
-        return res.redirect(301,"https://sw-frnt-project.vercel.app/");
+        return res.status(200).json({message: "success", user, token});
     }    
 
     catch(err){
