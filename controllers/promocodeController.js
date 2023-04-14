@@ -161,10 +161,10 @@ const getPromocodes = async (req, res, next) => {
 };
 
 const checkPromo= async (req, res) => {
-    //check if the user is logged in
-    if (!(req.user)) {
-        return res.status(400).json({ message: "User is not logged in." });
-    }
+    // //check if the user is logged in
+    // if (!(req.user)) {
+    //     return res.status(400).json({ message: "User is not logged in." });
+    // }
     //take the promocode name from the body
     const promocodeName = req.params.promocode_name;
     //find the promocode by name

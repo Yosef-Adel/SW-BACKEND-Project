@@ -9,7 +9,7 @@ promocodeRouter.get('/:event_id/:promo_id/getPromocode', authorization, promocod
 promocodeRouter.put('/:event_id/:promo_id', authorization, promocodeController.updatePromocode);
 promocodeRouter.delete('/:event_id/:promo_id', authorization, promocodeController.deletePromocode);
 promocodeRouter.get('/:event_id', authorization, promocodeController.getPromocodes);
-promocodeRouter.get('/:event_id/:promocode_name/checkPromo', authorization, promocodeController.checkPromo);
+promocodeRouter.get('/:event_id/:promocode_name/checkPromo', promocodeController.checkPromo);
 
 
 

@@ -156,9 +156,9 @@ const deleteTicketById = async (req, res, next) => {
 //list the tickets of a certain event
 //all the tickets, available or unavailable
 const getAllTicketsByEventId = async (req, res, next) => {
-    if (!(req.user)) {
-        return res.status(400).json({ message: "User is not logged in." });
-    }
+    // if (!(req.user)) {
+    //     return res.status(400).json({ message: "User is not logged in." });
+    // }
 
     // //check if the user is a creator or not since only creators can view tickets
     // if (!req.isCreator) {
@@ -184,9 +184,9 @@ const getAllTicketsByEventId = async (req, res, next) => {
 //start date is before now
 //end date is after now
 const getAvailableTicketsByEventId = async (req, res, next) => {
-    if (!(req.user)) {
-        return res.status(400).json({ message: "User is not logged in." });
-    }
+    // if (!(req.user)) {
+    //     return res.status(400).json({ message: "User is not logged in." });
+    // }
 
     // //check if the user is a creator or not since only creators can view tickets
     // if (!req.isCreator) {
