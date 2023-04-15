@@ -51,18 +51,7 @@ const sendMailWithAttachment = async options => {
       }
     ]
 };
-  await new Promise((resolve, reject) => {
-    // send mail
-    transporter.sendMailWithAttachment(mailOptions, (err, info) => {
-        if (err) {
-            console.error(err);
-            reject(err);
-        } else {
-            console.log(info);
-            resolve(info);
-        }
-    });
-  });
+await transporter.sendMail(mailOptions);
 };
 
 module.exports = {sendMail, sendMailWithAttachment};
