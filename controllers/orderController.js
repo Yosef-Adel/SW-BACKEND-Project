@@ -325,9 +325,12 @@ const cancelOrder=async (req,res)=>{
     //     await promocode.save();
     // }
 
-    //delete the order
+    //set the order status to cancelled
     try{
-        await Order.findByIdAndDelete(orderId);
+        // await Order.findByIdAndDelete(orderId);
+        //set canceled boolean to true
+        order.canceled=true;
+        await order.save();
         res.status(200).json({message: "Order cancelled successfully!",
         order: order});
     }

@@ -6,6 +6,10 @@ const axios = require('axios');
 const mongoose = require('mongoose');
 const Date = require('date.js');
 
+const {getTicketsSold, getOrdersCount, getTotalCapacity, getTotalMoneyEarned, getTotalTicketsInOrder} = require('./aggregateFunctions');
+const Order = require('../models/Order');
+const Ticket = require('../models/Tickets');
+
 
 
 // @route   Create api/events/
@@ -288,3 +292,94 @@ exports.getUserUpcomingEvents = async(req, res) => {
         return res.status(400).json({message: "Error in filtering user events"})
     }
 }
+
+/////////////////////////////Dashboard Reports Functions/////////////////////////////
+
+//Attendee Report function
+//Here the the info about every ticket sold for an event 
+//and the info of the attendee that bought it
+//We assume that tickets of the same ticket type related to the same order have the same info 
+//so the report will contain details about every ticket type of an order in the event, not the actual single ticket
+exports.getAttendeeReport = async (req, res) => {
+    //event id in the request params
+    const eventId = req.params.eventId;
+    //check if the user is logged in
+    if (!req.user) {
+        return res.status(401).json({ message: "You are not logged in" });
+    }
+    //check that the user is a creator
+    if (req.user.isCreator == false) {
+        return res.status(401).json({ message: "You are not a creator" });
+    }
+
+    //get the order count
+    const orderCount = await getOrdersCount(eventId);
+
+    //get the total sold tickets count
+    //which is the number of attendees
+    const AttendeesCount = await getTicketsSold(eventId);
+
+    //setup the response object
+    const response = {
+        totalOrders: orderCount,
+        totalAttendees: AttendeesCount,
+        Report: [],
+    };
+
+    //loop through every order with the event id
+    //and get to the tickets array
+    //I want to see the number of tickets for each order and the type
+    const event = await Event.findById(eventId);
+    var attendeeStatus="";
+
+    const orders=await Order.find({event:eventId});
+    for (let order of orders) {
+        const canceled=order.canceled;
+        const user=await User.findById(order.user);
+        const tickets = order.ticketsBought;
+        //check on the date of the event
+        //if the event is in the future then the attendee is attending
+        const currentDate = new Date();
+        if(event.startDate > currentDate  && canceled==false){
+            attendeeStatus="Attending";
+        }
+        //if the event is in the past then the attendee is attended
+        else if(event.startDate < currentDate && canceled==false){
+            attendeeStatus="Attended";
+        }
+        //if the event is in the past and the order is canceled then the attendee is not attended
+        else if(canceled==true){
+            attendeeStatus="Not Attending";
+        }
+
+        for (let ticket of tickets) {
+            const ticketType = await Ticket.findById(ticket.ticketClass);
+            const ticketNum=ticket.number;
+            //push the info to the response object
+            response.Report.push({
+                orderNumber: order._id,
+                orderDate:order.createdAt,
+                attendeeStatus:attendeeStatus,
+                name: user.firstName+" "+user.lastName,
+                email: user.emailAddress,
+                eventName: event.name,
+                ticketQuantity: ticketNum,
+                ticketType: ticketType.name,
+                ticketPrice: ticketType.price,
+                BuyerName: order.firstName+" "+order.lastName,
+                BuyerEmail: order.email
+            });
+        }
+    }
+
+    //try to send the response
+    try {
+        res.status(200).json(response);
+    }
+    //catch any errors
+    catch (err) {
+        console.log(err.message);
+        res.status(400).json({ message: "Error in getting the attendee report" });
+    }
+
+};
