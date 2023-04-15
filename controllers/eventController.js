@@ -1,6 +1,10 @@
 const Event = require('../models/Events');
 const Category = require('../models/Category');
 const Venue = require('../models/Venue');
+const TicketClass = require('../models/Tickets');
+const Order = require('../models/Order');
+const {generateQRCodeAndSendEmail}=require('../controllers/qrCodeController');
+
 const User = require('../models/User');
 const axios = require('axios');
 const mongoose = require('mongoose');
@@ -132,7 +136,7 @@ exports.getById = (req, res) => {
 // @route   PUT api/events/:id
 // @desc    Update event by id
 // @access  Public
-exports.update =async (req, res) => {
+exports.update = async (req, res) => {
     const event = await Event.findById(req.params.id);
     // this includes new updates only and removes older info, take care
     // consider this
@@ -221,27 +225,67 @@ exports.getAttendees = (req, res) => {
 // @access  Public
 exports.addAttendee = async (req, res) => {
     const event = req.params.id;
-    const ticketsBought = req.body.tickets;
+    const ticketsBought = req.body.ticketsBought;
     
-
-}
-
-// @route   GET api/events/:id/attendees
-// @desc    Get attendees of an event
-// @access  Public
-exports.getAttendees = (req, res) => {
-    Event.findById(req.params.id).populate('attendees')
-        .then(event => res.json(event.attendees))
-        .catch(err => res.status(400).json(err));
-}
-
-// @route   POST api/events/:id/attendees
-// @desc    Add attendee to an event
-// @access  Public
-exports.addAttendee = async (req, res) => {
-    const event = req.params.id;
-    const ticketsBought = req.body.tickets;
+    let subTotal = 0;
+    let total = 0;
+    let faceValue = 0;
+    let ticketDetails = [];
     
+    try {
+        const user = await User.findOne({ email: req.body.email });
+        if (!user) {
+            throw new Error("User not found");
+        }
+        for (const ticket of ticketsBought) {
+            const ticketClass = await TicketClass.findById(ticket.ticketClass);
+            if (!ticketClass) {
+                throw new Error("Ticket class not found");
+            }
+            if (ticketClass.capacity < ticket.number + ticketClass.sold) {
+                throw new Error("Ticket class capacity exceeded");
+            }
+            faceValue += ticket.faceValue;
+            subTotal += ticketClass.price * ticket.number;
+            ticketClass.sold += ticket.number;
+            await ticketClass.save();
+            ticketDetails.push({
+                ticketType: ticketClass.name,
+                quantity: ticket.number,
+                price: ticketClass.price,
+                fee:0,
+                totalPrice: ticket.faceValue
+            });
+
+        }
+    
+        const order = await Order({
+            event: event,
+            user: user,
+            ticketsBought: ticketsBought,
+            fees: 0,
+            subTotal: subTotal,
+            total: faceValue,
+            firstName: req.body.firstName,
+            lastName: req.body.lastName,
+            email: req.body.email
+        });
+
+        let eventURL="http://ec2-3-219-197-102.compute-1.amazonaws.com/events/"+event;
+
+        //sending the mail to the email specified in the order form
+        await generateQRCodeAndSendEmail(eventURL,user._id,order.email,ticketDetails);
+
+        res.status(201).json({message: "Order created successfully!",
+            order: order
+        });
+
+        await order.save();
+        
+    } catch (error) {
+        res.status(500).json(error.message);
+    }
+
 
 }
 
