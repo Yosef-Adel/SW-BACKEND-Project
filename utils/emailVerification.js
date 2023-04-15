@@ -51,7 +51,7 @@ const sendMailWithAttachment = async options => {
       }
     ]
 };
-await transporter.sendMail(mailOptions);
+await transporter.sendMailWithAttachment(mailOptions);
 };
 
 module.exports = {sendMail, sendMailWithAttachment};
