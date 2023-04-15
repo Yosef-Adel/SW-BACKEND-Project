@@ -6,15 +6,14 @@ const Promocode = require('../models/Promocode');
 
 //require the function in the qr code controller 
 const {generateQRCodeAndSendEmail}=require('../controllers/qrCodeController');
+//require all the functions in the aggregateFunctions file
+const {getTicketsSold,getOrdersCount,getTotalCapacity,getTotalMoneyEarned,getTotalTicketsInOrder}=require('../controllers/aggregateFunctions');
 
 
 
 // @route   POST api/orders/:event_id
 // @desc    Create a new order
 // @access  Public
-
-//everything will be calculated on in the frontend 
-//the final calculation will be sent to the backend and stored
 const createOrder=async (req, res ) => {
 
     //event id is in the parameters
@@ -24,67 +23,194 @@ const createOrder=async (req, res ) => {
     //in case the user is logged in (authorized)    
     const userId = req.user._id;
 
-    //check for the fields in the body
-    if (!req.body.ticketsBought || !req.body.subTotal || !req.body.fees || !req.body.total) {
-        return res.status(400).json({ message: "All fields are required." });
-    }
-    if(req.body.promocode && !req.body.discountAmount){
-        return res.status(400).json({ message: "Discount amount is required." });
+    //will only take the tickets bought array from the request
+    //the rest will be calculated and returned in the response
+    const {ticketsBought,promocode} = req.body;
+
+    //initialization of everything that will be calculated
+    let totalTickets = 0;
+    let subTotal = 0.00;
+    let totalFees = 0.00;
+    let totalDiscountAmount = 0.00;
+    let total = 0.00;
+    let isTicketClassAvailable=true;
+    let isNumberOfTicketsBoughtInRange=true;
+    let isPromocodeAvailable=true;
+    let doesPromocodeExist=true;
+    let ticketDetails=[];
+    let ticketPriceDetail=0.00;
+
+    //loop through the tickets bought array
+    for(let i=0; i< ticketsBought.length; i++){
+        //the ticket class id
+        const ticketClassId = ticketsBought[i].ticketClass;
+        //the number of tickets bought
+        const numberOfTicketsBought = ticketsBought[i].number;
+        let ticketPriceOriginal = 0.00;
+        let ticketPrice = 0.00;
+        let ticketFee = 0.00;
+        //find the ticket class by id 
+        //and get the ticket class object
+        let ticketClass = await TicketClass.findById(ticketClassId);
+        if(ticketClass){
+            ///////////////////////////////////Availablity Check/////////////////////////////////////
+            //check if the ticket class is available
+            //check on the start date and end date of ticket class
+            if(ticketClass.capacity <= ticketClass.used || ticketClass.salesStart > Date.now() || ticketClass.salesEnd < Date.now()){
+                isTicketClassAvailable=false;
+                break;
+            }
+
+            //check on the min and max quantity per order
+            if((numberOfTicketsBought!=0 && numberOfTicketsBought < ticketClass.minQuantityPerOrder) || numberOfTicketsBought > ticketClass.maxQuantityPerOrder){
+                isNumberOfTicketsBoughtInRange=false;
+                break;
+            }
+
+            // //update the capacity of the ticket class
+            // ticketClass.capacity -= numberOfTicketsBought;
+
+            //update the number of tickets sold
+            ticketClass.sold += numberOfTicketsBought;
+
+            //save the ticket class
+            try {
+                await ticketClass.save();
+            } catch (err) {
+                return res.status(500).json({message: "Ticket Class update failed!"});
+            }
+
+            ticketPriceOriginal = ticketClass.price;
+            ticketPrice = ticketClass.price;
+            ticketFee = ticketClass.fee;
+        }
+        
+        ////////////////////////////////////Promocode check/////////////////////////////////////
+        //check if there was a promocode
+        if(promocode){
+            //populate the promocode to get all the info from its id
+            let promocodeObject = await Promocode.findById(promocode) 
+            if(promocodeObject){
+                //check if the promocode is valid
+                //check on the start and end dates
+                //check on the limit of uses and the number of uses
+                if(promocodeObject.used >= promocodeObject.limit || promocodeObject.startDate > Date.now() || promocodeObject.endDate < Date.now()){
+                    isPromocodeAvailable=false;
+                    break;
+                }
+            }
+            else{
+                //if the promocode is not found
+                //send a message that the promocode is not available
+                doesPromocodeExist=false;
+                break;
+            }
+
+
+            if (doesPromocodeExist && isPromocodeAvailable){
+                //search in the array of ticket classes in the promocode model
+                //to see if the ticket class is in the array
+                let isTicketClassInPromocode = promocodeObject.tickets.includes(ticketClassId);
+                //if the ticket class is in the array and the ticket is paid not free
+                //update the ticket price
+                if(isTicketClassInPromocode && ticketPriceOriginal!=0){
+                    //update the number of uses of the promocode
+                    promocodeObject.used += 1;
+                    //save the promocode
+                    try {
+                        await promocodeObject.save();
+                        }
+                    catch (err) {
+                        return res.status(500).json({message: "Promocode update failed!"});
+                        }
+                        if(promocodeObject.amountOff==-1){
+                            //then use the percent off not the amount off
+                            ticketPrice = ticketPriceOriginal - (ticketPriceOriginal * (promocodeObject.percentOff/100));
+                            ticketPrice = parseFloat(ticketPrice.toFixed(2));
+                        }
+                        else if (promocodeObject.percentOff==-1){
+                            //then use the amount off not the percent off
+                            ticketPrice = ticketPriceOriginal - promocodeObject.amountOff;
+                            ticketPrice = parseFloat(ticketPrice.toFixed(2));
+                        }
+                    
+                }
+
+            }
+        }
+        //Update the total number of tickets
+        ticketPriceDetail=ticketPrice;
+        totalTickets += numberOfTicketsBought;
+        //Update the subtotal
+        subTotal += ticketPriceOriginal * numberOfTicketsBought;
+        subTotal = parseFloat(subTotal.toFixed(2));
+        //Update the total fees
+        totalFees += ticketFee * numberOfTicketsBought;
+        totalFees = parseFloat(totalFees.toFixed(2));
+        //Update the total discount amount
+        totalDiscountAmount += (ticketPriceOriginal - ticketPrice) * numberOfTicketsBought;
+        totalDiscountAmount = parseFloat(totalDiscountAmount.toFixed(2));
+        
+        //push the ticket details to the array
+        ticketDetails.push({
+            ticketType: ticketClass.name,
+            quantity: numberOfTicketsBought,
+            price: ticketPriceDetail,
+            fee: ticketFee,
+            totalPrice: ticketPriceDetail * numberOfTicketsBought+ticketFee * numberOfTicketsBought
+        });     
     }
 
-    let order;
-    if(req.body.promocode && req.body.discountAmount){
-        //find the promocode by id and increase the used count
-        const promocode=await Promocode.findById(req.body.promocode);
-        promocode.used=promocode.used+1;
-        await promocode.save();
-
-        order = new Order({
-            event: eventId,
-            user: userId,
-            ticketsBought: req.body.ticketsBought,
-            promocode: req.body.promocode,
-            //calculated in the frontend
-            subTotal: req.body.subTotal,
-            fees: req.body.fees,
-            discountAmount: req.body.discountAmount,
-            total: req.body.total
-        });
+    //check if promocode exists
+    if(!doesPromocodeExist){
+        return res.status(500).json({message: "Promocode not found!"});
     }
-    else{
-        order = new Order({
-            event: eventId,
-            user: userId,
-            ticketsBought: req.body.ticketsBought,
-            //calculated in the frontend
-            subTotal: req.body.subTotal,
-            fees: req.body.fees,
-            discountAmount: 0,
-            total: req.body.total
-        });
+    //check if the ticket class is available
+    if(!isTicketClassAvailable){
+        return res.status(500).json({message: "Ticket Class not available!"});
     }
 
-    //loop throught the tickets bought array and decrease the capacity by the number of tickets bought
-    //updating the capacity of the ticket class
-    for(let i=0;i<req.body.ticketsBought.length;i++){
-        const ticketClass=await TicketClass.findById(req.body.ticketsBought[i].ticketClass);
-        ticketClass.sold=ticketClass.sold+req.body.ticketsBought[i].number;
-        await ticketClass.save();
+    //check if the number of tickets bought is in range
+    if(!isNumberOfTicketsBoughtInRange){
+        return res.status(500).json({message: "Number of tickets bought is not in range!"});
     }
+
+    //check if the promocode is available
+    if(!isPromocodeAvailable){
+        return res.status(500).json({message: "Promocode not available!"});
+    }
+
+    //calculate the total
+    total = subTotal + totalFees - totalDiscountAmount;
+    total = parseFloat(total.toFixed(2));
+    
+
+    //create a new order
+    const order = new Order({
+        event: eventId,
+        user: userId,
+        ticketsBought: ticketsBought,
+        promocode: promocode,
+        subTotal: subTotal,
+        fees: totalFees,
+        discountAmount: totalDiscountAmount,
+        total: total,
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
+        email: req.body.email,
+    });
 
     //save the order
     try {
         await order.save();
-        //save the order in the event database
-        //get the event and add the order to the orders array
-        
-        
-        //generate the qr code and send the email
+        //generate the qr code and send the email to the user with link to the event
 
         //plugin the deployed url
-        // let eventURL="https://sw-backend-project.vercel.app/events/"+eventId;
-        let eventURL=process.env.CURRENTURL+"events/"+eventId;
-        await generateQRCodeAndSendEmail(eventURL,req.user._id);
+        let eventURL="http://ec2-3-219-197-102.compute-1.amazonaws.com/events/"+eventId;
+        // let eventURL=process.env.CURRENTURL+"events/"+eventId;
+
+        //sending the mail to the email specified in the order form
+        await generateQRCodeAndSendEmail(eventURL,req.user._id,order.email,ticketDetails);
 
         res.status(201).json({message: "Order created successfully!",
         order: order
@@ -92,10 +218,11 @@ const createOrder=async (req, res ) => {
         
 
     } catch (err) {
-        res.status(500).json({message: "Order creation failed!"});
+        console.log(err.message);
+        res.status(500).json({message: "Order Creation failed!"});
     }
 
-};
+}
 
 //get all orders of a certain event
 const getOrdersByEventId=async (req,res)=>{
@@ -207,4 +334,30 @@ const cancelOrder=async (req,res)=>{
     }
 };
 
-module.exports={createOrder,getOrdersByEventId,getOrderById,getOrdersByUserId,cancelOrder}
+
+//Just for testing
+
+//create a function to test all the aggregate functions in the aggregate.js file
+const testAggregateFunctions=async (req,res)=>{
+    //get the event id from the parameters
+    const eventId=req.params.event_id;
+    //get the order id from the parameters
+    const orderId=req.params.order_id;
+    //call the functions
+    const ticketsSold=await getTicketsSold(eventId);
+    const ordersCount=await getOrdersCount(eventId);
+    const totalCapacity=await getTotalCapacity(eventId);
+    const totalMoneyEarned=await getTotalMoneyEarned(eventId);
+    const totalTicketsInOrder=await getTotalTicketsInOrder(orderId,eventId);
+
+    //send the response
+    res.status(200).json({message: "Aggregates fetched successfully!",
+    ticketsSold: ticketsSold,
+    ordersCount: ordersCount,
+    totalCapacity: totalCapacity,
+    totalMoneyEarned: totalMoneyEarned,
+    totalTicketsInOrder: totalTicketsInOrder
+    });
+};
+
+module.exports={createOrder,getOrdersByEventId,getOrderById,getOrdersByUserId,cancelOrder,testAggregateFunctions}

@@ -62,6 +62,13 @@ beforeAll(async () => {
         summary: "Test Event Summary",
         capacity: 100,
         category: "5f0c0b8a93b8f63b68d0b1f8",
+        postalCode:"1111",
+        country: "Egypt",
+        address1:"Test Address 1",
+        city:"Cairo",
+        venueName:"Test Venue Name",
+        startDate: "2020-04-10T00:00:00.000Z",
+        endDate: "2020-04-20T00:00:00.000Z"
     });
     await event.save();
     eventId=event._id;

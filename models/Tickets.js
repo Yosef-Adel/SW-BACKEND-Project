@@ -45,11 +45,12 @@ const TicketSchema = new Schema({
 
     minQuantityPerOrder:{
         type: Number,
-        required: true
+        required: false
     },
+    
     maxQuantityPerOrder:{
         type: Number,
-        required: true
+        required: false
     },
 
     salesStart:{
@@ -60,6 +61,7 @@ const TicketSchema = new Schema({
         type: Date,
         required: true
     },
+
     description:{
         type: String,
         required: false

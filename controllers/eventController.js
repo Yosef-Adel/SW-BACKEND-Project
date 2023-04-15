@@ -1,8 +1,10 @@
 const Event = require('../models/Events');
 const Category = require('../models/Category');
 const Venue = require('../models/Venue');
+const User = require('../models/User');
 const axios = require('axios');
 const mongoose = require('mongoose');
+const Date = require('date.js');
 
 
 
@@ -18,45 +20,101 @@ exports.create = async (req, res) => {
         return res.status(400).json({ message: "Category does not exist" });
     }
 
-    // TODO: Check if venue exists
-    // const venue = req.body.venue;
-    // const venueObject = await Venue.exists({ name: req.body.name });
-    // if (!venueObject) {
-    //     return res.status(400).json({ message: "Venue does not exist" });
-    // }
-
     const missingFieldErrorMessage = "field is required";
-    const field = ["name", "description", "date", "location", "image", "category", "capacity", "summary", "hostedBy"];
+    const field = ["name", "startDate", "endDate", "hostedBy", "category", "description", "summary"];
     for (let i = 0; i < field.length; i++) {
         if (!req.body[field[i]]) {
             return res.status(400).json({ message: field[i] + " " + missingFieldErrorMessage });
         }
     }
+    // {
+    //     "name": "Ola's venue",
+    //     "city": "Cairo",
+    //     "address1":"ay address 1 talet",
+    //     "country":"Egypt",
+    //     "postalCode":"111111",
+    //     "longitude": 30.123,
+    //     "latitude": 30.123
+    //     "capacity": 100
+    // }
+    // const venueFields = ["name", "city", "address1", "country", "postalCode", "longitude", "latitude", "capacity"];
+    // for (let i = 0; i < venueFields.length; i++) {
+    //     if (!req.body.venue[venueFields[i]]) {
+    //         return res.status(400).json({ message: venueFields[i] + " " + missingFieldErrorMessage });
+    //     }
+    // }
 
+    
+
+    const newEvent = await Event.create({...req.body});
     // Create event
-    const newEvent = new Event({
-        name: req.body.name,
-        description: req.body.description,
-        date: req.body.date,
-        venue: req.body.location,
-        image: req.body.image,
-        category: req.body.category,
-        capacity: req.body.capacity,
-        summary: req.body.summary,
-        hostedBy: req.body.hostedBy,
-    });
-    const message = "Event created successfully";
+    // const newEvent = new Event({
+    //     name: req.body.name,
+    //     description: req.body.description,
+    //     startDate: req.body.startDate,
+    //     endDate: req.body.endDate,
+    //     venue: req.body.venue,
+    //     category: req.body.category,
+    //     capacity: req.body.capacity,
+    //     summary: req.body.summary,
+    //     hostedBy: req.body.hostedBy,
+    //     isPrivate: req.body.isPrivate,
+    //     password: req.body.password,
+    //     publishDate: req.body.publishDate
+    // });
 
+    if (req.file){
+        newEvent.image = req.file.path;
+    }
+    
+    const message = "Event created successfully";
     newEvent.save()
         .then(event => res.json({ event, message }))
         .catch(err => res.status(400).json(err));
     
 }
 
+// @route   GET api/events?category=category_id&lat=lat&lng=lng
+// @desc    Get all events
+// @access  Public
+exports.getAll = async (req, res) => {
+    const category = req.query.category;
+    const lat = req.query.lat;
+    const lng = req.query.lng;
+
+
+    let city = "";
+
+    const mapboxtoken = process.env.MAPBOX_TOKEN;
+    const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${mapboxtoken}`;
+
+    const data = await axios.get(url);
+    const json = data.data;
+    for (const feature of json.features) {
+        if (feature.place_type[0] === "region") {
+            city = feature.text;
+            break;
+        }
+    }
+
+    const eventQuery = Event.find({isPrivate: false}).populate('category');
+    if (category) {
+        eventQuery.where('category').equals(category);
+    }
+
+    if (lat && lng) {
+        eventQuery.where('city').equals(city);
+    }
+
+    eventQuery.then(events => res.json({ city, events}))
+        .catch(err => res.status(400).json(err));
+
+}
+
 // @route   GET api/events?category=category_id&
 // @desc    Get all events
 // @access  Public
-exports.getAll = (req, res) => {
+exports.getAllEvents = (req, res) => {
     Event.find().populate('category')
         .then(events => res.json(events))
         .catch(err => res.status(400).json(err));
@@ -76,9 +134,20 @@ exports.getById = (req, res) => {
 // @access  Public
 exports.update =async (req, res) => {
     const event = await Event.findById(req.params.id);
-    for (const key in req.body) {
-        event[key] = req.body[key];
+    // this includes new updates only and removes older info, take care
+    // consider this
+    
+    const updates = Object.keys(req.body);
+    updates.forEach((element) => (event[element] = req.body[element]));
+
+    // for (const key in req.body) {
+    //     event[key] = req.body[key];
+    // }
+    
+    if (req.file){
+        event.image = req.file.path;
     }
+    
     await event.save()
         .then(event => res.json(event))
         .catch(err => res.status(400).json(err));
@@ -112,8 +181,6 @@ exports.search = (req, res) => {
             }
         }
     ]).then(events => res.json(events)).catch(err => res.status(400).json(err));
-
-
 }
 
 // @route   GET api/events/nearest?lat=latitude&lng=longitude
@@ -136,7 +203,7 @@ exports.getNearest = async (req, res) => {
         }
     }
     
-    const events = []
+    const events = await Event.find({ "venue.city": city, isPrivate: false }).populate('category');
     res.json({ city, events});
 }
 
@@ -159,3 +226,102 @@ exports.addAttendee = async (req, res) => {
 
 }
 
+// @route   GET api/events/:id/attendees
+// @desc    Get attendees of an event
+// @access  Public
+exports.getAttendees = (req, res) => {
+    Event.findById(req.params.id).populate('attendees')
+        .then(event => res.json(event.attendees))
+        .catch(err => res.status(400).json(err));
+}
+
+// @route   POST api/events/:id/attendees
+// @desc    Add attendee to an event
+// @access  Public
+exports.addAttendee = async (req, res) => {
+    const event = req.params.id;
+    const ticketsBought = req.body.tickets;
+    
+
+}
+
+exports.getUserEvents = async(req,res) => {
+    try{
+        const user = await User.findById(req.params.userId);
+        if (!user){
+            return res.status(400).json({message: "User not found"})
+        }
+        const events = await Event.find({"createdBy": user});
+        if (events.length == 0){
+            return res.status(400).json({message: "No events created by this user"});
+        }
+
+        return res.status(200).json(events);
+    }
+
+    catch(err){
+        console.log(err.message);
+        return res.status(400).json({message: "Error in getting user events"})
+    }
+}
+
+exports.getUserPastEvents = async(req, res) => {
+    try{
+        console.log("hi");
+        const user = await User.findById(req.params.userId);
+        if (!user){
+            return res.status(400).json({message: "User not found"})
+        }
+        const events = await Event.find({"createdBy": user});
+        if (events.length == 0){
+            return res.status(400).json({message: "No events created by this user"});
+        }
+        var eventsResult =[];
+        const currDate = new Date();
+        for (let event of events){
+            if (event.date < currDate)
+            {
+                console.log(event);
+                eventsResult.push(event);
+            }
+        }
+        //events.forEach((event) => event if event.date < Date.now);;
+        return res.status(200).json(eventsResult);
+    }
+
+    catch(err){
+        console.log(err.message);
+        return res.status(400).json({message: "Error in filtering user events"})
+    }
+}
+
+
+exports.getUserUpcomingEvents = async(req, res) => {
+    try{
+        console.log("hi");
+        const user = await User.findById(req.params.userId);
+        if (!user){
+            return res.status(400).json({message: "User not found"})
+        }
+        const events = await Event.find({"createdBy": user});
+        if (events.length == 0){
+            return res.status(400).json({message: "No events created by this user"});
+        }
+        var eventsResult =[];
+        const currDate = new Date();
+        for (let event of events){
+            if (event.date > currDate)
+            {
+                console.log(event);
+                eventsResult.push(event);
+            }
+        }
+        //events.forEach((event) => event if event.date < Date.now);;
+        return res.status(200).json(eventsResult);
+    }
+
+    catch(err){
+        console.log(err.message);
+        return res.status(400).json({message: "Error in filtering user events"})
+    }
+}

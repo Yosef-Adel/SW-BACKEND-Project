@@ -61,7 +61,7 @@ const createTicket = async (req, res, next ) => {
         totalCapacity += ticket.capacity;
     }
     //check if the total capacity of the tickets is less than the event capacity
-    if (totalCapacity >= eventCapacity) {
+    if (totalCapacity > eventCapacity) {
         return res.status(400).json({ message: "The total capacity of the tickets is greater than the event capacity." });
     }
     if (req.body.description) {
@@ -87,6 +87,13 @@ const createTicket = async (req, res, next ) => {
         description: ticketDescription
         });
         await ticket.save();
+        //add the ticket to the event
+        event.tickets.push(ticket);
+        //update the event price
+        if (event.price==-1 || event.price>ticket.price) {
+            event.price=ticket.price;
+        }
+        await event.save();
         res.status(201).json({ message: "Ticket created successfully!" });
     }
     
@@ -149,9 +156,9 @@ const deleteTicketById = async (req, res, next) => {
 //list the tickets of a certain event
 //all the tickets, available or unavailable
 const getAllTicketsByEventId = async (req, res, next) => {
-    if (!(req.user)) {
-        return res.status(400).json({ message: "User is not logged in." });
-    }
+    // if (!(req.user)) {
+    //     return res.status(400).json({ message: "User is not logged in." });
+    // }
 
     // //check if the user is a creator or not since only creators can view tickets
     // if (!req.isCreator) {
@@ -177,9 +184,9 @@ const getAllTicketsByEventId = async (req, res, next) => {
 //start date is before now
 //end date is after now
 const getAvailableTicketsByEventId = async (req, res, next) => {
-    if (!(req.user)) {
-        return res.status(400).json({ message: "User is not logged in." });
-    }
+    // if (!(req.user)) {
+    //     return res.status(400).json({ message: "User is not logged in." });
+    // }
 
     // //check if the user is a creator or not since only creators can view tickets
     // if (!req.isCreator) {
