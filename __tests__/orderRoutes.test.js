@@ -1,6 +1,11 @@
 //test 
 const supertest = require('supertest');
 const assert = require('assert');
+//require fs
+const fs = require('fs');
+//require path
+const path = require('path');
+const {promisify} = require('util');
 
 
 
@@ -17,6 +22,7 @@ const TicketClass = require('../models/Tickets');
 const Event = require('../models/Events');
 const Promocode = require('../models/Promocode');
 const User = require('../models/User');
+const { exist } = require('joi');
 
 //set timeout to 10 seconds
 jest.setTimeout(1000000);
@@ -47,7 +53,7 @@ beforeAll(async () => {
     const user = new User({
         firstName: "Ola",
         lastName: "Abouelhadid",
-        emailAddress:"abouelhadid.ola@gmail.com",
+        emailAddress:"EnvieTrial@gmail.com",
         isVerified: true,
         isCreator: true
     });
@@ -212,6 +218,13 @@ beforeAll(async () => {
 //     });
 // });
 
+//trial to mock the send email function so that it will not be included in the test
+//this will allow the testing of the place order without the sending email part
+jest.mock('../utils/emailVerification', () => ({
+    sendMailWithAttachment: jest.fn().mockResolvedValue()
+}));
+
+
 //Testing the place order function WITHOUT the QR code part
 //comment the generateQRCode function in the createOrder function for the test to pass
 describe('Place order', () => {
@@ -256,6 +269,8 @@ describe('Place order', () => {
                 }
             };
             await createOrder(req, res);
+            //call the send email function
+            // expect(sendMailWithAttachment).toHaveBeenCalled();
             assert.equal(res.statusCode, 201);
             assert.equal(res.data.message, "Order created successfully!");
         });
@@ -587,7 +602,28 @@ describe('Place order', () => {
 
 //close the connection to the database
 afterAll(async () => {
+    const timeoutId=setTimeout(async () => {
     await mongoose.connection.close();
+    //delete the files in the public folder whose names contain the string "QrCode"
+    const files = fs.readdirSync(path.join(__dirname, "../public"));
+    files.forEach(async file => {
+        if (file.includes("QrCode")) {
+            if(fs.existsSync(path.join(__dirname, "../public", file)))
+            {
+                const unlink=promisify(fs.unlink);
+                await Promise.all([unlink(path.join(__dirname, "../public", file))]);
+            }
+        }
+    });
+    //delete the email-template-final.html file in the views folder
+    if (fs.existsSync(path.join(__dirname, "../views", "email-template-final.html"))){
+        const unlink=promisify(fs.unlink);
+        await Promise.all([unlink(path.join(__dirname, "../views", "email-template-final.html"))]);
+    }
+    
+    }, 1000);
+    clearTimeout(timeoutId);
+    
 });
 
 
