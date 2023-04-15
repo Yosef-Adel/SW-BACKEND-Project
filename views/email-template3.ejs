@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Order Confirmation</title>
+    <style>
+    body {
+        font-family: Arial, sans-serif;
+        font-size: 16px;
+        color: #333;
+        background-color: #FFA500;
+    }
+    table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+    th, td {
+        text-align: left;
+        padding: 8px;
+        border-bottom: 1px solid #ddd;
+    }
+    th {
+        background-color: #FF8C00;
+        color: white;
+    }
+    p{
+        text-align: center;
+    }
+    h1{
+        text-align: center;
+    }
+    h2{
+        text-align: center;
+    }
+    img{
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    #logoDiv{
+        width: 5rem;
+    height: 5rem;    
+}
+    </style>
+</head>
+<body>
+    <h1>Order Confirmation</h1>
+    <h2>Dear {{name}},</h2>
+    <p>You've got tickets!</p>
+    <p>Here is the QR Code to your event!</p>
+
+    <img src="cid:image" alt="Image">
+    
+    <table>
+    <thead>
+        <tr>
+        <th>Ticket Type</th>
+        <th>Quantity</th>
+        <th>Price</th>
+        <th>Fee</th>
+        <th>Total Price</th>
+        </tr>
+    </thead>
+    <tbody>
+        <% ticketArray.forEach((item) => { %>
+            <tr>
+            <td><%= item.ticketType %></td>
+            <td><%= item.quantity %></td>
+            <td><%= item.price %></td>
+            <td><%= item.fee %></td>
+            <td><%= item.totalPrice%></td>
+            </tr>
+        <%}); %>
+    </tbody>
+    </table>
+    </script>
+    <div id="logoDiv" >
+        
+    </div>
+</body>
+</html>

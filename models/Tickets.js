@@ -12,7 +12,8 @@ const TicketSchema = new Schema({
         type: String,
         required: true
     },
-
+    
+    //free or paid
     type:{
         type: String,
         required: true
@@ -23,22 +24,33 @@ const TicketSchema = new Schema({
         required: true
     },
 
-    regularCapacity:{
+    //fee is the fee per ticket 
+    //and it has a standard equation of calculation
+    //fee per ticket= (ticketPrice * 0.037)+(1.79)+(ticketPrice * 0.029)
+    fee:{
         type: Number,
         required: true
     },
-    onHoldCapacity:{
+
+    capacity:{
         type: Number,
-        required: false
+        required: true
+    },
+    
+    sold:{
+        type: Number,
+        required: false,
+        default: 0
     },
 
     minQuantityPerOrder:{
         type: Number,
-        required: true
+        required: false
     },
+    
     maxQuantityPerOrder:{
         type: Number,
-        required: true
+        required: false
     },
 
     salesStart:{
@@ -49,9 +61,10 @@ const TicketSchema = new Schema({
         type: Date,
         required: true
     },
-    salesStatus:{
+
+    description:{
         type: String,
-        required: true
+        required: false
     }
 
 }, {timestamps: true})

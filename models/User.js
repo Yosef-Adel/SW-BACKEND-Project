@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 var uniqueValidator = require('mongoose-unique-validator');
 const jwt = require('jsonwebtoken');
-const crypto = require("crypto");
 const Schema = mongoose.Schema;
 
 const userSchema = new Schema({
@@ -35,7 +34,6 @@ const userSchema = new Schema({
         required: false
     },
     
-
     forgotPasswordToken: String,
 
     isCreator:{
@@ -45,8 +43,9 @@ const userSchema = new Schema({
     },
 
     facebookID: String,
+    
     googleID: String,
-
+    
     prefix: {
         type: String,
         required: false
@@ -90,6 +89,11 @@ const userSchema = new Schema({
     shippingAddress: {
         type: String,
         required: false
+    },
+
+    organization: {
+        type: Schema.Types.ObjectId,
+        ref: 'organization'
     }
 
 }, {timestamps: true});

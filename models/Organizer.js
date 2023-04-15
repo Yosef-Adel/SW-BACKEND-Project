@@ -2,31 +2,25 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const OrganizerSchema = new Schema({
-
-    organization: {
-        type: Schema.Types.ObjectId,
-        ref: 'organization'
-    },
-    
-    name:{
+    name: {
         type: String,
         required: true
     },
     image: {
         type: String,
-        required: true
+        required: false
     },
     url: {
         type: String,
-        required: true
+        required: false
     },
     bio: {
         type: String,
-        required: true
+        required: false
     },
     description: {
         type: String,
-        required: true
+        required: false
     },
     facebookUrl: {
         type: String,

@@ -23,7 +23,49 @@ const sendMail = async options => {
   await transporter.sendMail(mailOptions);
 };
 
-module.exports = sendMail;
+const sendMailWithAttachment = async options => {
+  const transporter = nodemailer.createTransport({
+    service:'gmail',
+    host:'smtp.gmail.com',
+    port:'465',
+    secure: true, // use SSL
+    auth: {
+      user: process.env.AUTH_EMAIL,
+      pass: process.env.AUTH_PASS
+    }
+  });
+
+
+  const mailOptions = {
+    from: 'Envie Support <support@envie.me>',
+    to: options.email,
+    subject: options.subject,
+    html: options.html,
+    attachments: [
+      {
+        filename: options.attachments[0].filename,
+        content: options.attachments[0].content,
+        contentType: options.attachments[0].contentType,
+        path: options.attachments[0].path,
+        cid:options.attachments[0].cid
+      }
+    ]
+};
+  await new Promise((resolve, reject) => {
+    // send mail
+    transporter.sendMailWithAttachment(mailOptions, (err, info) => {
+        if (err) {
+            console.error(err);
+            reject(err);
+        } else {
+            console.log(info);
+            resolve(info);
+        }
+    });
+  });
+};
+
+module.exports = {sendMail, sendMailWithAttachment};
 
 //testing transporter
 // transporter.verify((error, success)=> {
