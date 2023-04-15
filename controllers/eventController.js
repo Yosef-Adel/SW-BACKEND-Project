@@ -569,3 +569,51 @@ exports.getSalesByTicketTypeReport = async (req, res) => {
             res.status(400).json({ message: "Error in getting the sales by ticket type report" });
         }
 };
+
+//order summary report
+exports.getOrderSummaryReport = async (req, res) => {
+            //event id in the request params
+            const eventId = req.params.eventId;
+            //check if the user is logged in
+            if (!req.user) {
+                return res.status(401).json({ message: "You are not logged in" });
+            }
+            //check that the user is a creator
+            //and this user is the creator of the event
+            if (req.user.isCreator == false) {
+                return res.status(401).json({ message: "You are not a creator" });
+            }
+            //check if the event exists
+            if (!eventId) {
+                return res.status(400).json({ message: "Event doesn't exist" });
+            }
+            
+            const orders=await Order.find({event:eventId});
+            //initialize the response object
+            const response = {
+                Report: [],
+            };
+            for (let order of orders) {
+                const orderId=order._id;
+                const user=await User.findById(order.user);
+                const totalTickets=await getTotalTicketsInOrder(orderId,eventId);
+                //push the info to the response object
+                response.Report.push({
+                    orderNumber: order._id,
+                    name: user.firstName+" "+user.lastName,
+                    quantity:totalTickets,
+                    price:order.total,
+                    date:order.createdAt
+                });
+
+            }
+
+            //try to send the response
+            try {
+                res.status(200).json(response);
+            }
+            //catch any errors
+            catch (err) {
+                res.status(400).json({ message: "Error in getting the order summary report" });
+            }
+};
