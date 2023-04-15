@@ -218,10 +218,19 @@ beforeAll(async () => {
 //     });
 // });
 
-//trial to mock the send email function so that it will not be included in the test
-//this will allow the testing of the place order without the sending email part
+// //trial to mock the send email function so that it will not be included in the test
+// //this will allow the testing of the place order without the sending email part
 jest.mock('../utils/emailVerification', () => ({
     sendMailWithAttachment: jest.fn().mockResolvedValue()
+}));
+
+//also mock the generateQRCodeAndSendEmail function in the order controller so that it will not be included in the test
+//this will allow the testing of the place order without the QR code part,
+//but the create order function will still be tested
+jest.mock('../controllers/qrCodeController', () => ({
+    generateQRCodeAndSendEmail: jest.fn().mockResolvedValue(),
+    // createOrder: jest.requireActual('../controllers/orderController').createOrder
+
 }));
 
 
@@ -604,22 +613,26 @@ describe('Place order', () => {
 afterAll(async () => {
     const timeoutId=setTimeout(async () => {
     await mongoose.connection.close();
-    //delete the files in the public folder whose names contain the string "QrCode"
-    const files = fs.readdirSync(path.join(__dirname, "../public"));
-    files.forEach(async file => {
-        if (file.includes("QrCode")) {
-            if(fs.existsSync(path.join(__dirname, "../public", file)))
-            {
-                const unlink=promisify(fs.unlink);
-                await Promise.all([unlink(path.join(__dirname, "../public", file))]);
-            }
-        }
-    });
-    //delete the email-template-final.html file in the views folder
-    if (fs.existsSync(path.join(__dirname, "../views", "email-template-final.html"))){
-        const unlink=promisify(fs.unlink);
-        await Promise.all([unlink(path.join(__dirname, "../views", "email-template-final.html"))]);
-    }
+
+    //no need to do that, since the qr code and send mail function is disabled
+
+
+    // //delete the files in the public folder whose names contain the string "QrCode"
+    // const files = fs.readdirSync(path.join(__dirname, "../public"));
+    // files.forEach(async file => {
+    //     if (file.includes("QrCode")) {
+    //         if(fs.existsSync(path.join(__dirname, "../public", file)))
+    //         {
+    //             const unlink=promisify(fs.unlink);
+    //             await Promise.all([unlink(path.join(__dirname, "../public", file))]);
+    //         }
+    //     }
+    // });
+    // //delete the email-template-final.html file in the views folder
+    // if (fs.existsSync(path.join(__dirname, "../views", "email-template-final.html"))){
+    //     const unlink=promisify(fs.unlink);
+    //     await Promise.all([unlink(path.join(__dirname, "../views", "email-template-final.html"))]);
+    // }
     
     }, 1000);
     clearTimeout(timeoutId);
