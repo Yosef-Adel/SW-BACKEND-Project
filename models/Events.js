@@ -134,7 +134,12 @@ const EventSchema = new Schema({
     latitude: {
         type: Number,
         required: false
-    }
+    },
+
+    isOnline: {
+        type: Boolean,
+        required: false
+    },
 
 }, {timestamps: true})
 
