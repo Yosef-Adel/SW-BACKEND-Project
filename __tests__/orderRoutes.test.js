@@ -74,9 +74,6 @@ beforeAll(async () => {
     eventId=event._id;
 
     //create a new ticket class
-    //capacity is 100
-    //started 21/3
-    //will end 31/3
     const ticketClass1 = new TicketClass({
         event: event._id,
         name: "Test Ticket Class 1",
@@ -84,10 +81,11 @@ beforeAll(async () => {
         price: 10,
         fee: 1,
         capacity: 100,
+        sold: 0,
         minQuantityPerOrder: 2,
         maxQuantityPerOrder: 10,
-        salesStart: "2023-03-21T00:00:00.000Z",
-        salesEnd: "2023-03-31T00:00:00.000Z"
+        salesStart: "2022-03-21T00:00:00.000Z",
+        salesEnd: "2024-03-31T00:00:00.000Z"
     });
     await ticketClass1.save();
     ticketClass1Id=ticketClass1._id;
@@ -100,7 +98,8 @@ beforeAll(async () => {
         type: "paid",
         price: 20,
         fee: 2,
-        capacity: 0,
+        capacity: 100,
+        sold: 100,
         minQuantityPerOrder: 1,
         maxQuantityPerOrder: 5,
         salesStart: "2023-03-21T00:00:00.000Z",
@@ -123,8 +122,8 @@ beforeAll(async () => {
         capacity: 100,
         minQuantityPerOrder: 1,
         maxQuantityPerOrder: 5,
-        salesStart: "2023-04-01T00:00:00.000Z",
-        salesEnd: "2023-04-10T00:00:00.000Z"
+        salesStart: "2024-04-01T00:00:00.000Z",
+        salesEnd: "2025-04-10T00:00:00.000Z"
     });
     await ticketClass3.save();
     ticketClass3Id=ticketClass3._id;
@@ -140,8 +139,8 @@ beforeAll(async () => {
         capacity: 100,
         minQuantityPerOrder: 1,
         maxQuantityPerOrder: 5,
-        salesStart: "2023-03-21T00:00:00.000Z",
-        salesEnd: "2023-03-31T00:00:00.000Z"
+        salesStart: "2022-03-21T00:00:00.000Z",
+        salesEnd: "2024-03-31T00:00:00.000Z"
     });
     await ticketClass4.save();
     ticketClass4Id=ticketClass4._id;
@@ -156,16 +155,14 @@ beforeAll(async () => {
     //create a new promocode
     //normal promocode 
     //used is less than limit
-    //Started 21/3
-    //will end 31/3
     const promocode1 = new Promocode({
         event: event._id,
         name: "Test Promocode 1",
         percentOff: 10,
         limit: 10,
         used: 0,
-        startDate: "2023-03-21T00:00:00.000Z",
-        endDate: "2023-03-31T00:00:00.000Z"
+        startDate: "2022-03-21T00:00:00.000Z",
+        endDate: "2024-03-31T00:00:00.000Z"
     });
     //add ticket class 1 to the promocode ticket array
     promocode1.tickets.push(ticketClass1._id);
@@ -175,16 +172,14 @@ beforeAll(async () => {
     //create a new promocode
     //unavailable promocode
     //used equals limit
-    //Started 21/3
-    //will end 31/3
     const promocode2 = new Promocode({
         event: event._id,
         name: "Test Promocode 2",
         percentOff: 10,
         limit: 10,
         used: 10,
-        startDate: "2023-03-21T00:00:00.000Z",
-        endDate: "2023-03-31T00:00:00.000Z"
+        startDate: "2022-03-21T00:00:00.000Z",
+        endDate: "2024-03-31T00:00:00.000Z"
     });
     //add ticket class 1 to the promocode ticket array
     promocode2.tickets.push(ticketClass1._id);
@@ -194,16 +189,14 @@ beforeAll(async () => {
 
     //create a new promocode
     //unavailable promocode
-    //will start 1/4
-    //will end 10/4
     const promocode3 = new Promocode({
         event: event._id,
         name: "Test Promocode 3",
         percentOff: 10,
         limit: 10,
         used: 0,
-        startDate: "2023-04-01T00:00:00.000Z",
-        endDate: "2023-04-10T00:00:00.000Z"
+        startDate: "2024-04-01T00:00:00.000Z",
+        endDate: "2025-04-10T00:00:00.000Z"
     });
     //add ticket class 1 to the promocode ticket array
     promocode3.tickets.push(ticketClass1._id);
@@ -222,6 +215,9 @@ beforeAll(async () => {
 //Testing the place order function WITHOUT the QR code part
 //comment the generateQRCode function in the createOrder function for the test to pass
 describe('Place order', () => {
+    const firstName="Ola";
+    const lastName="Abouelhadid";
+    const email="abouelhadid.ola@gmail.com"
 
     describe('Case 1: Normal Case, tickets are available and the promocode is available', () => {
         it('should return 201', async () => {
@@ -243,7 +239,11 @@ describe('Place order', () => {
                 },
                 body: {
                     ticketsBought: ticketsBought,
-                    promocode: promocode
+                    promocode: promocode,
+                    firstName: firstName,
+                    lastName: lastName,
+                    email: email
+
                 }
             };
             const res = {
@@ -279,7 +279,10 @@ describe('Place order', () => {
                     _id: user_id
                 },
                 body: {
-                    ticketsBought: ticketsBought
+                    ticketsBought: ticketsBought,
+                    firstName: firstName,
+                    lastName: lastName,
+                    email: email
                 }
             };
             const res = {
@@ -316,7 +319,10 @@ describe('Place order', () => {
                     _id: user_id
                 },
                 body: {
-                    ticketsBought: ticketsBought
+                    ticketsBought: ticketsBought,
+                    firstName: firstName,
+                    lastName: lastName,
+                    email: email
                 }
             };
             const res = {
@@ -353,7 +359,10 @@ describe('Place order', () => {
                     _id: user_id
                 },
                 body: {
-                    ticketsBought: ticketsBought
+                    ticketsBought: ticketsBought,
+                    firstName: firstName,
+                    lastName: lastName,
+                    email: email
                 }
             };
             const res = {
@@ -390,7 +399,10 @@ describe('Place order', () => {
                     _id: user_id
                 },
                 body: {
-                    ticketsBought: ticketsBought
+                    ticketsBought: ticketsBought,
+                    firstName: firstName,
+                    lastName: lastName,
+                    email: email
                 }
             };
             const res = {
@@ -427,7 +439,10 @@ describe('Place order', () => {
                     _id: user_id
                 },
                 body: {
-                    ticketsBought: ticketsBought
+                    ticketsBought: ticketsBought,
+                    firstName: firstName,
+                    lastName: lastName,
+                    email: email
                 }
             };
             const res = {
@@ -465,7 +480,10 @@ describe('Place order', () => {
                 },
                 body: {
                     ticketsBought: ticketsBought,
-                    promocode: promocode
+                    promocode: promocode,
+                    firstName: firstName,
+                    lastName: lastName,
+                    email: email
                 }
             };
             const res = {
@@ -503,7 +521,10 @@ describe('Place order', () => {
                 },
                 body: {
                     ticketsBought: ticketsBought,
-                    promocode: promocode
+                    promocode: promocode,
+                    firstName: firstName,
+                    lastName: lastName,
+                    email: email
                 }
             };
             const res = {
@@ -540,7 +561,10 @@ describe('Place order', () => {
                     _id: user_id
                 },
                 body: {
-                    ticketsBought: ticketsBought
+                    ticketsBought: ticketsBought,
+                    firstName: firstName,
+                    lastName: lastName,
+                    email: email
                 }
             };
             const res = {

@@ -205,12 +205,14 @@ const createOrder=async (req, res ) => {
         await order.save();
         //generate the qr code and send the email to the user with link to the event
 
+        //testing
         //plugin the deployed url
         let eventURL="http://ec2-3-219-197-102.compute-1.amazonaws.com/events/"+eventId;
         // let eventURL=process.env.CURRENTURL+"events/"+eventId;
 
         //sending the mail to the email specified in the order form
         await generateQRCodeAndSendEmail(eventURL,req.user._id,order.email,ticketDetails);
+        //testing
 
         res.status(201).json({message: "Order created successfully!",
         order: order
