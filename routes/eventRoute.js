@@ -24,5 +24,6 @@ router.delete('/:id', eventController.delete);
 
 router.get('/:eventId/getAttendeeReport',authorization, eventController.getAttendeeReport);
 router.get('/:eventId/getSalesByTicketTypeReport',authorization, eventController.getSalesByTicketTypeReport);
+router.get('/:eventId/getOrderSummaryReport',authorization, eventController.getOrderSummaryReport);
 
 module.exports = router;
