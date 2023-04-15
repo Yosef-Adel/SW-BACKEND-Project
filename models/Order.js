@@ -67,12 +67,12 @@ const OrderSchema = new Schema({
     email:{
         type: String,
         required: true
+    },
+    canceled:{
+        type: Boolean,
+        required: false,
+        default: false
     }
-    // canceled:{
-    //     type: Boolean,
-    //     required: false,
-    //     default: false
-    // }
 
 }, {timestamps: true})
 

@@ -2,7 +2,8 @@ const eventController = require('../controllers/eventController');
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const cloudinaryStorage = require("../config/cloudinary")
+const cloudinaryStorage = require("../config/cloudinary");
+const authorization = require('../middleware/authorization');
 const upload = new multer({storage: cloudinaryStorage.storage});
 
 //for front/cross teams
@@ -21,4 +22,5 @@ router.put('/:id', upload.single("image"), eventController.update);
 
 router.delete('/:id', eventController.delete);
 
+router.get('/:eventId/getAttendeeReport',authorization, eventController.getAttendeeReport);
 module.exports = router;

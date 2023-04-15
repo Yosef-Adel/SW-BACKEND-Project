@@ -68,6 +68,7 @@ const getOrdersCount = async (event_id) => {
         ]);
 
         return result[0].ordersCount;
+
     }
     catch(err){
         return err.message;
