@@ -28,4 +28,6 @@ router.post('/:id/attendees', eventController.addAttendee);
 
 
 router.get('/:eventId/getAttendeeReport',authorization, eventController.getAttendeeReport);
+router.get('/:eventId/getSalesByTicketTypeReport',authorization, eventController.getSalesByTicketTypeReport);
+
 module.exports = router;

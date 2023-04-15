@@ -388,8 +388,13 @@ exports.getAttendeeReport = async (req, res) => {
         return res.status(401).json({ message: "You are not logged in" });
     }
     //check that the user is a creator
+    //and this user is the creator of the event
     if (req.user.isCreator == false) {
         return res.status(401).json({ message: "You are not a creator" });
+    }
+    //check if the event exists
+    if (!eventId) {
+        return res.status(400).json({ message: "Event doesn't exist" });
     }
 
     //get the order count
@@ -462,4 +467,105 @@ exports.getAttendeeReport = async (req, res) => {
         res.status(400).json({ message: "Error in getting the attendee report" });
     }
 
+};
+
+//sales report function
+//sales by ticket type
+exports.getSalesByTicketTypeReport = async (req, res) => {
+        //event id in the request params
+        const eventId = req.params.eventId;
+        //check if the user is logged in
+        if (!req.user) {
+            return res.status(401).json({ message: "You are not logged in" });
+        }
+        //check that the user is a creator
+        //and this user is the creator of the event
+        if (req.user.isCreator == false) {
+            return res.status(401).json({ message: "You are not a creator" });
+        }
+        //check if the event exists
+        if (!eventId) {
+            return res.status(400).json({ message: "Event doesn't exist" });
+        }
+
+        //get the order count
+        const orderCount = await getOrdersCount(eventId);
+
+        //get the total sold tickets count
+        //which is the number of attendees
+        const AttendeesCount = await getTicketsSold(eventId);
+
+        //total sales
+        const totalSales = await getTotalMoneyEarned(eventId);
+
+        //initialize the response object
+        const response = {
+            totalOrders: orderCount,
+            totalAttendees: AttendeesCount,
+            totalSales: totalSales,
+            Report: [],
+        };
+
+        //get the event
+        const event=await Event.findById(eventId);
+        var attendeeStatus="";
+        var orderType="";
+        //get order
+        const orders=await Order.find({event:eventId});
+        for (let order of orders) {
+            const canceled=order.canceled;
+            const tickets = order.ticketsBought;
+            const user=await User.findById(order.user);
+            //check on the date of the event
+            //if the event is in the future then the attendee is attending
+            const currentDate = new Date();
+            if(event.startDate > currentDate  && canceled==false){
+                attendeeStatus="Attending";
+            }
+            //if the event is in the past then the attendee is attended
+            else if(event.startDate < currentDate && canceled==false){
+                attendeeStatus="Attended";
+            }
+            //if the event is in the past and the order is canceled then the attendee is not attended
+            else if(canceled==true){
+                attendeeStatus="Not Attending";
+            }
+            if(order.total==0){
+                orderType="Free Order";
+            }
+            else{
+                orderType="Paid Order";
+            }
+
+            for (let ticket of tickets) {
+                const ticketType = await Ticket.findById(ticket.ticketClass);
+                const ticketNum=ticket.number;
+                //push the info to the response object
+                response.Report.push({
+                    orderNumber: order._id,
+                    orderDate:order.createdAt,
+                    firstName:order.firstName,
+                    lastName:order.lastName,
+                    email:order.email,
+                    quantity:ticketNum,
+                    ticketType:ticketType.name,
+                    attendeeNumber:user._id,
+                    orderType:orderType,
+                    orderCurrency:"EGP",
+                    totalPaid:ticketType.price*ticketNum,
+                    feesPaid:ticketType.fee*ticketNum,
+                    attendeeStatus:attendeeStatus,
+                });
+            }
+        }
+        
+        //try to send the response
+        try {
+            res.status(200).json(response);
+        }
+        //catch any errors
+        catch (err) {
+            console.log(err.message);
+            res.status(400).json({ message: "Error in getting the sales by ticket type report" });
+        }
 };
