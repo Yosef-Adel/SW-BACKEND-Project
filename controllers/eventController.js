@@ -330,7 +330,7 @@ exports.getAttendeeReport = async (req, res) => {
     //and get to the tickets array
     //I want to see the number of tickets for each order and the type
     const event = await Event.findById(eventId);
-    const attendeeStatus="";
+    var attendeeStatus="";
 
     const orders=await Order.find({event:eventId});
     for (let order of orders) {
@@ -339,11 +339,12 @@ exports.getAttendeeReport = async (req, res) => {
         const tickets = order.ticketsBought;
         //check on the date of the event
         //if the event is in the future then the attendee is attending
-        if(event.startDate>Date.now()  && canceled==false){
+        const currentDate = new Date();
+        if(event.startDate > currentDate  && canceled==false){
             attendeeStatus="Attending";
         }
         //if the event is in the past then the attendee is attended
-        else if(event.startDate<Date.now() && canceled==false){
+        else if(event.startDate < currentDate && canceled==false){
             attendeeStatus="Attended";
         }
         //if the event is in the past and the order is canceled then the attendee is not attended
