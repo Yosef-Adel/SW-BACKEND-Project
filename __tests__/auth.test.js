@@ -1,15 +1,16 @@
-const supertest = require('supertest');
-const assert = require('assert');
-
-const mongoose = require('mongoose');
-
-const {signUp, verification, login, forgotPassword, resetPassword} = require('../controllers/authController');
-
+const mongoose = require("mongoose");
+const request = require("supertest");
+const app = require("../app");
 const User = require('../models/User');
+const bcrypt = require("bcryptjs");
+// const assert = require('assert');
+
+// const {signUp, verification, login, forgotPassword, resetPassword} = require('../controllers/authController');
+
 
 console.log("start testing")
-
 jest.setTimeout(1000000);
+
 
 beforeAll(async() => {
     await mongoose.connect("mongodb+srv://Eventbrite-backend:envie_backend_2023@eventbrite-cluster.krn9ebx.mongodb.net/TestDB?retryWrites=true&w=majority", {
@@ -18,225 +19,149 @@ beforeAll(async() => {
     });
     
     await User.deleteMany({});
+    bcrypt.genSalt(10)
+    .then(salt => {
+    return bcrypt.hash("Admin@123", salt)
+    }).then(hash => {
+    }).catch(err => console.error(err.message));
+
     const user = new User({
         firstName: "Ola",
         lastName: "Abouelhadid",
         emailAddress:"abouelhadid.ola@gmail.com",
-        isVerified: true,
-        isCreator: true
+        password: await bcrypt.hash("ayhagasah", 10),
+        isVerified: true
     });
     await user.save();
 });
 
 
+function testFormat(res, statusCode, message){
+    expect(res.body).toHaveProperty('message');
+    expect(res.body.message).toEqual(message);
+    expect(res.statusCode).toEqual(statusCode);
+}
+
+
+
 describe('Sign up', () => {
     describe('Case1: signing up', () => {
-        it('it should return 200', async() => {
-            const req={
-                body:{
-                    firstName: "Mai",
-                    lastName: "Abdelhameed",
-                    emailAddress:"maiabdelhameed16@gmail.com",
-                    password: "ayhaga"
-                }
-            };
-
-            const res = {
-                status: function (status) {
-                    this.statusCode = status;
-                    return this;
-                },
-                json: function (data) {
-                    this.data = data;
-                }
-            };
-
-            await signUp(req, res);
-            assert.equal(res.statusCode, 200);
-            assert.equal(res.data.message, 'Check your email for verification.');
+        it('it should return 200 OK', async() => {
+            const res = await request(app).post("/auth/sign-up").send({
+                "firstName": "Mai",
+                "lastName": "Abdelhameed",
+                "emailAddress": "maiabdelhameed16@gmail.com",
+                "password":"ayhaga"
+            });
+            testFormat(res, 200, "Check your email for verification.");
         });
     });
 
     describe('Case2: signing up with duplicate emails', () => {
-        it('it should return 400', async() => {
-            const req={
-                body:{
-                    firstName: "Mai",
-                    lastName: "Abdelhameed",
-                    emailAddress:"maiabdelhameed16@gmail.com",
-                    password: "ayhaga"
-                }
-            };
-            const res = {
-                status: function (status) {
-                    this.statusCode = status;
-                    return this;
-                },
-                json: function (data) {
-                    this.data = data;
-                }
-            };
-            
-            await signUp(req, res);
-            assert.equal(res.statusCode, 400);
-            assert.equal(res.data.message, "users validation failed: emailAddress: Error, expected emailAddress to be unique.");
+        it('it should return 400 Error', async() => {
+            const res = await request(app).post("/auth/sign-up").send({
+                "firstName": "Mai",
+                "lastName": "Abdelhameed",
+                "emailAddress": "maiabdelhameed16@gmail.com",
+                "password":"ayhaga"
+            });
+            testFormat(res, 400, "users validation failed: emailAddress: Error, expected emailAddress to be unique.");
+        });
+    });
+});
+
+
+describe('Login', () => {
+    describe('Case1: not verified', () => {
+        it('it should return 400 Error', async() => {
+            const res = await request(app).post("/auth/login").send({
+                "emailAddress": "maiabdelhameed16@gmail.com",
+                "password":"ayhaga"
+            });
+            testFormat(res, 400, 'Please verify your email first.');
         });
     });
 
-})
-
-
-describe('login', () => {
-    describe('Case 1: log in', () => {
-        it('it should return 400', async() => {
-            const req={
-                body:{
-                    emailAddress:"maiabdelhameed16@gmail.com",
-                    password: "ayhaga"
-                }
-            };
-            const res = {
-                status: function (status) {
-                    this.statusCode = status;
-                    return this;
-                },
-                json: function (data) {
-                    this.data = data;
-                }
-            };
-            
-            await login(req, res);
-            assert.equal(res.statusCode, 400);
-            assert.equal(res.data.message, "Please verify your email first.");
+    describe('Case2: wrong password', () => {
+        it('it should return 400 Error', async() => {
+            const user = await User.findOne({emailAddress: "abouelhadid.ola@gmail.com"})
+            const res = await request(app).post("/auth/login").send({
+                "emailAddress": "abouelhadid.ola@gmail.com",
+                "password":"ayhagaghalat"
+            });
+            testFormat(res, 400, 'Password is incorrect');
         });
     });
 
-    describe('Case2: log in', () => {
-        it('it should return 400', async() => {
-            const req={
-                body:{
-                    "emailAddress": "mai@gmail.com",
-                    "password": "ayhaga"
-                }
-            };
+    describe('Case3: logging in successfully', () => {
+        it('it should return 200 OK', async() => {
+            const res = await request(app).post("/auth/login").send({
+                "emailAddress": "abouelhadid.ola@gmail.com",
+                "password":"ayhagasah"
+            });
+            console.log(res.body);
+            console.log(res.body.password);
+            expect(res.statusCode).toEqual(200);
+            expect(res.body).toHaveProperty('user');
+            expect(res.body.user.emailAddress).toEqual('abouelhadid.ola@gmail.com');
+            expect(res.body).toHaveProperty('token');
+        });
+    });
+});
 
-            const res = {
-                status: function (status) {
-                    this.statusCode = status;
-                    return this;
-                },
-                json: function (data) {
-                    this.data = data;
-                }
-            };
 
-            await login(req, res);
-            assert.equal(res.statusCode, 400);
-            assert.equal(res.data.message, "user not found");
+describe('Forget Password', () => {
+    describe('Case1: forgot password for unverified user', () => {
+        it('it should return 400 Error', async() => {
+            const res = await request(app).post("/auth/forgot-password").send({
+                "emailAddress": "maiabdelhameed16@gmail.com",
+            });
+            testFormat(res, 400, "Please verify your email first.");
         });
     });
 
-    describe('Case 3: log in', () => {
-        it('it should return 200', async() => {
-            const req={
-                body:{
-                    "emailAddress": "abouelhadid.ola@gmail.com",
-                    "password": "ayhaga"
-                }
-            };
-
-            const res = {
-                status: function (status) {
-                    this.statusCode = status;
-                    return this;
-                },
-                json: function (data) {
-                    this.data = data;
-                }
-            };
-
-            await login(req, res);
-            assert.equal(res.statusCode, 200);
-            assert.equal(res.data.message, "successfully logged in");
+    describe('Case2: forgot password with unregistered user', () => {
+        it('it should return 400 Error', async() => {
+            const res = await request(app).post("/auth/forgot-password").send({
+                "emailAddress": "maiabdelhameed@gmail.com"
+            });
+            testFormat(res, 400, "user not found");
         });
     });
 
+    describe('Case3: Forgot password successfully', () => {
+        it('it should return 200 OK', async() => {
+            const res = await request(app).post("/auth/forgot-password").send({
+                "emailAddress": "abouelhadid.ola@gmail.com"
+            });
+            request(app).a
+            testFormat(res, 200, "Password token sent to email");
+        });
+    });
+});
 
-})
+describe('Reset password', () => {
+    describe('Case1: reset password successfully', () => {
+        it('it should return 200 OK', async() => {
+            const user = await User.findOne({emailAddress: "abouelhadid.ola@gmail.com"});
+            const res = await request(app).patch(`/auth/reset-password/${user.forgotPasswordToken}`).send({
+                "password":"ayhaga"
+            });
 
-describe('forgot Password', () => {
-    describe('Case1: sending token', () => {
-        it('it should return 200', async() => {
-            const req={
-                body:{
-                    emailAddress:"abouelhadid.ola@gmail.com"
-                }
-            };
-
-            const res = {
-                status: function (status) {
-                    this.statusCode = status;
-                    return this;
-                },
-                json: function (data) {
-                    this.data = data;
-                }
-            };
-
-            await forgotPassword(req, res);
-            assert.equal(res.statusCode, 200);
-            assert.equal(res.data.message, 'Password token sent to email');
+            testFormat(res, 200, "password reset successfully");
         });
     });
 
-    describe('Case2: not finding user', () => {
-        it('it should return 400', async() => {
-            const req={
-                body:{
-                    emailAddress:"maiabdelhameed1@gmail.com",
-                }
-            };
-            const res = {
-                status: function (status) {
-                    this.statusCode = status;
-                    return this;
-                },
-                json: function (data) {
-                    this.data = data;
-                }
-            };
-            
-            await forgotPassword(req, res);
-            assert.equal(res.statusCode, 400);
-            assert.equal(res.data.message, "user not found");
+    describe('Case2: missing password', () => {
+        it('it should return 400 Error', async() => {
+            const user = await User.findOne({emailAddress: "abouelhadid.ola@gmail.com"});
+            console.log(user.forgotPasswordToken);
+            const res = await request(app).patch(`/auth/reset-password/${user.forgotPasswordToken}`);
+            console.log(res);
+            testFormat(res, 400, "no new password found.");
         });
     });
-
-    describe('Case 3: unverified email', () => {
-        it('it should return 400', async() => {
-            const req={
-                body:{
-                    emailAddress:"maiabdelhameed16@gmail.com",
-                }
-            };
-            const res = {
-                status: function (status) {
-                    this.statusCode = status;
-                    return this;
-                },
-                json: function (data) {
-                    this.data = data;
-                }
-            };
-            
-            await forgotPassword(req, res);
-            assert.equal(res.statusCode, 400);
-            assert.equal(res.data.message, "Please verify your email first.");
-        });
-    });
-
-})
-
+});
 
 
 //close the connection to the database
