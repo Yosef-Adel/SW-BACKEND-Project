@@ -22,5 +22,10 @@ router.put('/:id', upload.single("image"), eventController.update);
 
 router.delete('/:id', eventController.delete);
 
+router.get('/:id/attendees', eventController.getAttendees);
+router.post('/:id/attendees', eventController.addAttendee);
+// router.delete('/:id/attendees/:attendeeId', eventController.removeAttendee);
+
+
 router.get('/:eventId/getAttendeeReport',authorization, eventController.getAttendeeReport);
 module.exports = router;
