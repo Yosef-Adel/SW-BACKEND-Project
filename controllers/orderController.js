@@ -207,7 +207,7 @@ const createOrder=async (req, res ) => {
 
         //testing
         //plugin the deployed url
-        let eventURL="http://ec2-3-219-197-102.compute-1.amazonaws.com/events/"+eventId;
+        let eventURL="https://d1a3ozfbtcn1f.cloudfront.net/user/event/"+eventId;
         // let eventURL=process.env.CURRENTURL+"events/"+eventId;
 
         //sending the mail to the email specified in the order form
