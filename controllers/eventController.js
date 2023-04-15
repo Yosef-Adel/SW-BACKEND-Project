@@ -6,6 +6,8 @@ const axios = require('axios');
 const mongoose = require('mongoose');
 const Date = require('date.js');
 
+const {getTicketsSold, getOrdersCount, getTotalCapacity, getTotalMoneyEarned, getTotalTicketsInOrder} = require('./aggregateFunctions');
+
 
 
 // @route   Create api/events/
@@ -288,3 +290,32 @@ exports.getUserUpcomingEvents = async(req, res) => {
         return res.status(400).json({message: "Error in filtering user events"})
     }
 }
+
+/////////////////////////////Dashboard Reports Functions/////////////////////////////
+
+//Attendee Report function
+exports.getAttendeeReport = async (req, res) => {
+    //event id in the request params
+    const eventId = req.params.eventId;
+    //check if the user is logged in
+    if (!req.user) {
+        return res.status(401).json({ message: "You are not logged in" });
+    }
+    //check that the user is a creator
+    if (req.user.isCreator == false) {
+        return res.status(401).json({ message: "You are not a creator" });
+    }
+
+    //get the order count
+    const orderCount = await getOrdersCount(eventId);
+
+    //get the total sold tickets count
+    //which is the number of attendees
+    const AttendeesCount = await getTicketsSold(eventId);
+
+    //get all the orders for the event
+    
+    
+
+
+};
