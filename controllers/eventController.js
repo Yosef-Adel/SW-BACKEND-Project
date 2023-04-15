@@ -11,7 +11,6 @@ const mongoose = require('mongoose');
 const Date = require('date.js');
 
 const {getTicketsSold, getOrdersCount, getTotalCapacity, getTotalMoneyEarned, getTotalTicketsInOrder} = require('./aggregateFunctions');
-const Order = require('../models/Order');
 const Ticket = require('../models/Tickets');
 
 
