@@ -21,4 +21,8 @@ router.put('/:id', upload.single("image"), eventController.update);
 
 router.delete('/:id', eventController.delete);
 
+router.get('/:id/attendees', eventController.getAttendees);
+router.post('/:id/attendees', eventController.addAttendee);
+// router.delete('/:id/attendees/:attendeeId', eventController.removeAttendee);
+
 module.exports = router;
