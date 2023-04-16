@@ -55,15 +55,17 @@ beforeAll(async() => {
         isVerified: true,
         isCreator: false
     });
-
     await user1.save();
     const res1 = await request(app).post("/auth/login").send({
         "emailAddress": "maiabdelhameed16@gmail.com",
         "password":"ayhaga"
     });
-
     userId1 = res1.body.user._id;
     token1 = res1.body.token;
+
+    const res2 = await request(app).post('/organization/create/'+ userId).send({"name": "test organization"}).set('Authorization', 'Bearer ' + token);
+    organizationId = res2.body.organization._id;
+
 });
 
 
@@ -82,64 +84,17 @@ afterAll(async () => {
 
 
 
-describe('Creating organization', () => {
-    describe('Case 1: Organization created successfully.', () => {
+describe('Creating organizer', () => {
+    describe('Case 1: Organizer created successfully.', () => {
         it('it should return 200 OK', async() => {
-            const res = await request(app).post('/organization/create/'+ userId).send({
-                "name": "test organization"
+            const res = await request(app).post('/organization/' + organizationId + '/organizer/create').send({
+                "name": "test organizer"
             }).set('Authorization', 'Bearer ' + token);
-            organizationId=res.body.organization._id;
-            testFormat(res, 200, "Organization created successfully");
-            expect(res.body).toHaveProperty('organization');
-        });
-    });
-
-    describe('Case 2: Name field missing', () => {
-        it('it should return 400 Error', async() => {
-            const res = await request(app).post('/organization/create/' + userId).set('Authorization', 'Bearer ' + token);
-            testFormat(res,400,"Organization name is required.");
-        });
-    });
-
-    describe('Case 3: User not found', () => {
-        it('it should return 400 Error', async() => {
-            const res = await request(app).post('/organization/create/' + objectId).send({
-                "name": "test organization"
-            }).set('Authorization', 'Bearer ' + token);
-            testFormat(res, 400, 'User not found');
-        });
-    });
-
-    describe('Case 4: Invalid Token', () => {
-        it('it should return 400 Error', async() => {
-            const res = await request(app).post('/organization/create/' + objectId).send({
-                "name": "test organization"
-            });
-            testFormat(res, 401, 'No token provided!');
-        });
-    });
-
-    describe('Case 5: User not authorized', () => {
-        it('it should return 400 Error', async() => {
-            const res = await request(app).post('/organization/create/' + userId1).send({
-                "name": "test organization"
-            }).set('Authorization', 'Bearer ' + token1);
-            testFormat(res, 400, "You have to be a creator to create organization.");
-        });
-    });
-    
-});
-
-
-
-describe('Updating organization', () => {
-    describe('Case 1: Organization updating successfully.', () => {
-        it('it should return 200 OK', async() => {
-            const res = await request(app).put('/organization/edit/'+ organizationId).send({
-                "name": "test organization updated"
-            }).set('Authorization', 'Bearer ' + token);
-            testFormat(res, 200, "Organization info updated successfully");
-            expect(res.body).toHaveProperty('organization');
+            console.log(token);
+            console.log(userId);
+            console.log(res.body);
+            testFormat(res, 200, "Organizer created successfully");
+            expect(res.body).toHaveProperty('organizer');
         });
     });
 

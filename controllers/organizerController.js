@@ -37,7 +37,7 @@ exports.createOrganizer = async(req,res)=> {
         await organizer.save();
         organization.organizers.push(organizer._id);
         await organization.save();
-        return res.status(200).json(organizer);
+        return res.status(200).json({message: "Organizer created successfully" ,organizer});
     }
 
     catch(err){
