@@ -15,7 +15,7 @@ exports.create = async(req,res) => {
         
         const user = await User.findById(req.params.id);
         if(!user){
-            return res.status(400).json({message: "user not found"});
+            return res.status(400).json({message: "User not found"});
         }
         
         const organization = await Organization.create({...req.body});

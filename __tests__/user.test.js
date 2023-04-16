@@ -30,7 +30,7 @@ beforeAll(async() => {
         emailAddress:"maiabdelhameed@gmail.com",
         password: await bcrypt.hash("ayhaga", 10),
         isVerified: true,
-        icCreator: false
+        isCreator: false
     });
     await user.save();
     const res = await request(app).post("/auth/login").send({
