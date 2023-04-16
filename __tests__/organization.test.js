@@ -85,6 +85,8 @@ describe('Creating organization', () => {
             const res = await request(app).post('/organization/create/'+ userId).send({
                 "name": "test organization"
             }).set('Authorization', 'Bearer' + token);
+            console.log(token);
+            console.log(userId);
             console.log(res.body);
             testFormat(res, 200, "Organization created successfully");
             expect(res.body).toHaveProperty('organization');
