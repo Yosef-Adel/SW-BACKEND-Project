@@ -205,12 +205,14 @@ const createOrder=async (req, res ) => {
         await order.save();
         //generate the qr code and send the email to the user with link to the event
 
+        //testing
         //plugin the deployed url
-        let eventURL="http://ec2-3-219-197-102.compute-1.amazonaws.com/events/"+eventId;
+        let eventURL="https://d1a3ozfbtcn1f.cloudfront.net/user/event/"+eventId;
         // let eventURL=process.env.CURRENTURL+"events/"+eventId;
 
         //sending the mail to the email specified in the order form
         await generateQRCodeAndSendEmail(eventURL,req.user._id,order.email,ticketDetails);
+        //testing
 
         res.status(201).json({message: "Order created successfully!",
         order: order
@@ -323,9 +325,12 @@ const cancelOrder=async (req,res)=>{
     //     await promocode.save();
     // }
 
-    //delete the order
+    //set the order status to cancelled
     try{
-        await Order.findByIdAndDelete(orderId);
+        // await Order.findByIdAndDelete(orderId);
+        //set canceled boolean to true
+        order.canceled=true;
+        await order.save();
         res.status(200).json({message: "Order cancelled successfully!",
         order: order});
     }

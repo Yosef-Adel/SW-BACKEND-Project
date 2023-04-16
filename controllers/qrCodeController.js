@@ -55,13 +55,13 @@ const generateQRCodeAndSendEmail = async (url,userId,email,ticketArray) => {
             } 
             else 
             {
-                    console.log('HTML output saved to file:', outputPath);
+                    // console.log('HTML output saved to file:', outputPath);
                     //here I have the html file saved
                     const template=fs.readFileSync('./views/email-template-final.html','utf8');
-                    console.log("read the html file success")
+                    // console.log("read the html file success")
                     const name = user.firstName;
                     const personalizedTemplate = await template.replace('{{name}}', name);
-                    console.log("replaced the name success")
+                    // console.log("replaced the name success")
                 
                     
                 
@@ -91,7 +91,7 @@ const generateQRCodeAndSendEmail = async (url,userId,email,ticketArray) => {
                         html: personalizedTemplate,
                     })
                     await user.save();
-                    console.log("sent the email success")
+                    // console.log("sent the email success")
                     // console.log("./public/" + qrImageName)
                 
                     //delete the image file that was sent

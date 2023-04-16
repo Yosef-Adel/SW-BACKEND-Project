@@ -29,7 +29,7 @@ exports.signUp= async (req, res) => {
         const isDuplicate = await User.findOne({emailAddress: req.body.emailAddress})
 
         if (isDuplicate) {
-            return res.status(400).json({message: 'User validation failed: expected emailAddress to be unique.'});
+            return res.status(400).json({message: 'Users validation failed: expected emailAddress to be unique.'});
         }
         // encrypt password using bycrypt
         const hashedPass = await bcrypt.hash(req.body.password, saltRounds);

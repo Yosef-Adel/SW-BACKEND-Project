@@ -3,10 +3,15 @@ const Organization = require("../models/Organization");
 
 exports.createOrganizer = async(req,res)=> {
     try{
+
+        if (!req.isCreator){
+            return res.status(400).json({message: "You have to be a creator to create organization."});
+        }
+        
         if (!req.body.name){
             return res.status(400).json({message: "Organizer name is required"});
         }
-        
+
         const organization = await Organization.findById(req.params.orgId);
         if (!organization){
             return res.status(400).json({message: "Organization not found."});
@@ -43,6 +48,10 @@ exports.createOrganizer = async(req,res)=> {
 
 exports.editInfo = async(req,res)=>{
     try{
+        if (!req.isCreator){
+            return res.status(400).json({message: "You have to be a creator to create organization."});
+        }
+
         const organizer = await Organizer.findById(req.params.organizerId);
         if(!organizer){
             return res.status(400).json({message: "Organizer not found"});
@@ -68,6 +77,10 @@ exports.editInfo = async(req,res)=>{
 
 exports.getInfo = async(req,res) => {
     try{
+        if (!req.isCreator){
+            return res.status(400).json({message: "You have to be a creator to create organization."});
+        }
+
         const organizer = await Organizer.findById(req.params.organizerId);
         if (!organizer){
             return res.status(400).json({message: "Organizer not found"})
@@ -84,6 +97,9 @@ exports.getInfo = async(req,res) => {
 
 exports.deleteOrganizer = async(req, res) =>{
     try{
+        if (!req.isCreator){
+            return res.status(400).json({message: "You have to be a creator to create organization."});
+        }
         const org = await Organizer.findByIdAndDelete(req.params.organizerId);
         if(!org){
             return res.status(400).json({message: "Organizer not found"});

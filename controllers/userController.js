@@ -22,7 +22,7 @@ exports.getUser = async(req, res) => {
             return res.status(400).json({message: "User not found"});
         }
 
-        return res.status(200).json(user);
+        return res.status(200).json({message: "Success", user});
     }
 
     catch(err){
@@ -43,7 +43,7 @@ exports.editInfo = async(req, res) => {
         updates.forEach((element) => (user[element] = req.body[element]));
         
         await user.save();
-        return res.status(200).json(user);
+        return res.status(200).json({message : "Updated info successfully", user});
 
     }
     
