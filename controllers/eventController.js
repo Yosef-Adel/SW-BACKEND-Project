@@ -154,6 +154,46 @@ exports.getAll = async (req, res) => {
 
 }
 
+
+
+// @route   GET api/events?category=category_id&lat=lat&lng=lng
+// @desc    Get all events
+// @access  Public
+exports.getAllLocationCategory = async (req, res) => {
+    const category = req.query.category;
+    const lat = req.query.lat;
+    const lng = req.query.lng;
+
+
+    let city = "";
+
+    const mapboxtoken = process.env.MAPBOX_TOKEN;
+    const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${mapboxtoken}`;
+
+    const data = await axios.get(url);
+    const json = data.data;
+    for (const feature of json.features) {
+        if (feature.place_type[0] === "region") {
+            city = feature.text;
+            break;
+        }
+    }
+
+    const eventQuery = Event.find({isPrivate: false}).populate('category');
+    if (category) {
+        eventQuery.where('category').equals(category);
+    }
+
+    if (lat && lng) {
+        eventQuery.where('city').equals(city);
+    }
+
+    eventQuery.then(events => res.json({ city, events}))
+        .catch(err => res.status(400).json(err));
+
+}
+
+
 // @route   GET api/events?category=category_id&
 // @desc    Get all events
 // @access  Public
