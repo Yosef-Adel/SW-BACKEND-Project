@@ -3,11 +3,11 @@ const express = require('express');
 const authorization = require('../middleware/authorization');
 const router = express.Router();
 
-router.get('/:id', userController.getUser);
-router.get('/to-creator/:id', userController.changeToCreator);
-router.get('/to-attendee/:id', userController.changeToAttendee);
+router.get('/:id', authorization, userController.getUser);
+router.get('/to-creator/:id', authorization,userController.changeToCreator);
+router.get('/to-attendee/:id', authorization, userController.changeToAttendee);
 
-router.put('/edit/:id', userController.editInfo);
+router.put('/edit/:id', authorization, userController.editInfo);
 
 
 

@@ -3,13 +3,8 @@ const request = require("supertest");
 const app = require("../app");
 const User = require('../models/User');
 const bcrypt = require("bcryptjs");
-// const assert = require('assert');
 
-// const {signUp, verification, login, forgotPassword, resetPassword} = require('../controllers/authController');
-
-
-console.log("start testing")
-jest.setTimeout(1000000);
+jest.setTimeout(10000000000000);
 
 
 beforeAll(async() => {
@@ -72,7 +67,20 @@ describe('Sign up', () => {
 
 
 describe('Login', () => {
-    describe('Case1: not verified', () => {
+    describe('Case 1: logging in successfully', () => {
+        it('it should return 200 OK', async() => {
+            const res = await request(app).post("/auth/login").send({
+                "emailAddress": "abouelhadid.ola@gmail.com",
+                "password":"ayhagasah"
+            });
+            expect(res.statusCode).toEqual(200);
+            expect(res.body).toHaveProperty('user');
+            expect(res.body.user.emailAddress).toEqual('abouelhadid.ola@gmail.com');
+            expect(res.body).toHaveProperty('token');
+        });
+    });
+
+    describe('Case 2: not verified', () => {
         it('it should return 400 Error', async() => {
             const res = await request(app).post("/auth/login").send({
                 "emailAddress": "maiabdelhameed16@gmail.com",
@@ -82,9 +90,9 @@ describe('Login', () => {
         });
     });
 
-    describe('Case2: wrong password', () => {
+    describe('Case 3: wrong password', () => {
         it('it should return 400 Error', async() => {
-            const user = await User.findOne({emailAddress: "abouelhadid.ola@gmail.com"})
+            const user = await User.findOne({emailAddress: "abouelhadid.ola@gmail.com"});
             const res = await request(app).post("/auth/login").send({
                 "emailAddress": "abouelhadid.ola@gmail.com",
                 "password":"ayhagaghalat"
@@ -92,26 +100,11 @@ describe('Login', () => {
             testFormat(res, 400, 'Password is incorrect');
         });
     });
-
-    describe('Case3: logging in successfully', () => {
-        it('it should return 200 OK', async() => {
-            const res = await request(app).post("/auth/login").send({
-                "emailAddress": "abouelhadid.ola@gmail.com",
-                "password":"ayhagasah"
-            });
-            console.log(res.body);
-            console.log(res.body.password);
-            expect(res.statusCode).toEqual(200);
-            expect(res.body).toHaveProperty('user');
-            expect(res.body.user.emailAddress).toEqual('abouelhadid.ola@gmail.com');
-            expect(res.body).toHaveProperty('token');
-        });
-    });
 });
 
 
 describe('Forget Password', () => {
-    describe('Case1: forgot password for unverified user', () => {
+    describe('Case 1: forgot password for unverified user', () => {
         it('it should return 400 Error', async() => {
             const res = await request(app).post("/auth/forgot-password").send({
                 "emailAddress": "maiabdelhameed16@gmail.com",
@@ -120,7 +113,7 @@ describe('Forget Password', () => {
         });
     });
 
-    describe('Case2: forgot password with unregistered user', () => {
+    describe('Case 2: forgot password with unregistered user', () => {
         it('it should return 400 Error', async() => {
             const res = await request(app).post("/auth/forgot-password").send({
                 "emailAddress": "maiabdelhameed@gmail.com"
@@ -129,12 +122,11 @@ describe('Forget Password', () => {
         });
     });
 
-    describe('Case3: Forgot password successfully', () => {
+    describe('Case 3: Forgot password successfully', () => {
         it('it should return 200 OK', async() => {
             const res = await request(app).post("/auth/forgot-password").send({
                 "emailAddress": "abouelhadid.ola@gmail.com"
             });
-            request(app).a
             testFormat(res, 200, "Password token sent to email");
         });
     });
@@ -155,9 +147,7 @@ describe('Reset password', () => {
     describe('Case2: missing password', () => {
         it('it should return 400 Error', async() => {
             const user = await User.findOne({emailAddress: "abouelhadid.ola@gmail.com"});
-            console.log(user.forgotPasswordToken);
             const res = await request(app).patch(`/auth/reset-password/${user.forgotPasswordToken}`);
-            console.log(res);
             testFormat(res, 400, "no new password found.");
         });
     });
