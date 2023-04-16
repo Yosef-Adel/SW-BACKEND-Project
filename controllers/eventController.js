@@ -189,7 +189,7 @@ exports.getAllLocationCategory = async (req, res) => {
     }
 
     eventQuery.then(events => res.json({ city, events}))
-        .catch(err => res.status(400).json(err));
+        .catch(err => res.status(400).json(err.essage));
 
 }
 
