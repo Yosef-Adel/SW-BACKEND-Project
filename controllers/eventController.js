@@ -116,8 +116,8 @@ exports.getAll = async (req, res) => {
     }
 
     if (isOnline) {
-        const isOnline = true ? isOnline = "true" : isOnline = "false";
-        eventQuery.where('isOnline').equals(true);
+        const online = true ? isOnline === "true" : false;
+        eventQuery.where('isOnline').equals(online);
     }
 
     if (time) {
