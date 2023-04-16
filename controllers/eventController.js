@@ -88,7 +88,9 @@ exports.getAll = async (req, res) => {
     const category = req.query.category;
     const lat = req.query.lat;
     const lng = req.query.lng;
-
+    const isOnline = req.query.isOnline;
+    const time = req.query.time;
+    const free = req.query.free;
 
     let city = "";
 
@@ -112,6 +114,40 @@ exports.getAll = async (req, res) => {
     if (lat && lng) {
         eventQuery.where('city').equals(city);
     }
+
+    if (isOnline) {
+        const isOnline = true ? isOnline = "true" : isOnline = "false";
+        eventQuery.where('isOnline').equals(true);
+    }
+
+    if (time) {
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        if (time === "today") {
+            eventQuery.where('startDate').gte(today).lte(tomorrow);
+        }
+        else if (time == "tomorrow"){
+            eventQuery.where('startDate').gte(tomorrow).lte(tomorrow);
+        } else if (time === "week") {
+            const week = new Date(today);
+            week.setDate(week.getDate() + 7);
+            eventQuery.where('startDate').gte(today).lte(week);
+        } else if (time === "month") {
+            const month = new Date(today);
+            month.setDate(month.getDate() + 30);
+            eventQuery.where('startDate').gte(today).lte(month);
+        }
+    }
+
+    if (free) {
+        eventQuery.where('price').equals(0);
+    }
+
+
+
+
+
 
     eventQuery.then(events => res.json({ city, events}))
         .catch(err => res.status(400).json(err));
