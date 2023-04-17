@@ -12,10 +12,10 @@ const createTicket = async (req, res, next ) => {
         return res.status(400).json({ message: "User is not logged in." });
     }
 
-    // //check if the user is a creator or not since only creators can create tickets
-    // if (!req.isCreator) {
-    //     return res.status(400).json({ message: "User is not a creator." });
-    // }
+    // check if the user is authorized
+    if (!req.isCreator){
+        return res.status(400).json({message: "You are not a creator"});
+    }
 
 
     //check on all fields
@@ -109,10 +109,10 @@ const getTicketById = async (req, res, next) => {
         return res.status(400).json({ message: "User is not logged in." });
     }
 
-    // //check if the user is a creator or not since only creators can view tickets
-    // if (!req.isCreator) {
-    //     return res.status(400).json({ message: "User is not a creator." });
-    // }
+    // check if the user is authorized
+    if (!req.isCreator){
+        return res.status(400).json({message: "You are not a creator"});
+    }
 
     try {
         const ticket = await Ticket.findById(req.params.ticket_id);
@@ -133,10 +133,10 @@ const deleteTicketById = async (req, res, next) => {
         return res.status(400).json({ message: "User is not logged in." });
     }
 
-    // //check if the user is a creator or not since only creators can delete tickets
-    // if (!req.isCreator) {
-    //     return res.status(400).json({ message: "User is not a creator." });
-    // }
+    // check if the user is authorized
+    if (!req.isCreator){
+        return res.status(400).json({message: "You are not a creator"});
+    }
 
     try {
         const ticket = await Ticket.findById(req.params.ticket_id);
@@ -223,10 +223,10 @@ const editTicketById = async (req, res, next) => {
         return res.status(400).json({ message: "User is not logged in." });
     }
 
-    // //check if the user is a creator or not since only creators can edit tickets
-    // if (!req.isCreator) {
-    //     return res.status(400).json({ message: "User is not a creator." });
-    // }
+    // check if the user is authorized
+    if (!req.isCreator){
+        return res.status(400).json({message: "You are not a creator"});
+    }
 
     //find the ticket by id in parameters and only update the fields that are sent
     try {

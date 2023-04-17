@@ -1,6 +1,5 @@
 const Event = require('../models/Events');
 const Category = require('../models/Category');
-const Venue = require('../models/Venue');
 const TicketClass = require('../models/Tickets');
 const Order = require('../models/Order');
 const csv = require('csv-parser');
@@ -26,6 +25,10 @@ const Ticket = require('../models/Tickets');
 // @desc    Create event
 // @access  Public
 exports.create = async (req, res) => {
+    // check if the user is authorized
+    if (!req.isCreator){
+        return res.status(400).json({message: "You are not a creator"});
+    }
 
     // Check if category exists
     const category = req.body.category;
@@ -185,100 +188,6 @@ exports.getAll = async (req, res) => {
 
 }
 
-exports.getAllCross = async (req, res) => {
-    const category = req.query.category;
-    const lat = req.query.lat;
-    const lng = req.query.lng;
-    const isOnline = req.query.isOnline;
-    const time = req.query.time;
-    const free = req.query.free;
-
-    let city = "";
-
-    const mapboxtoken = process.env.MAPBOX_TOKEN;
-    const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${mapboxtoken}`;
-
-    const data = await axios.get(url);
-    const json = data.data;
-    for (const feature of json.features) {
-        if (feature.place_type[0] === "region") {
-            city = feature.text;
-            break;
-        }
-    }
-
-    const eventQuery = Event.find({isPrivate: false}).populate('category');
-    if (category) {
-        // const categoryID = await Category.findOne({name: category})
-        // console.log(category);
-        // console.log(categoryID);
-        // if (!categoryID) {
-        //     return res.status(400).json({ message: "Category does not exist" });
-        // }
-
-
-        eventQuery.where('category').equals(category);
-    }
-
-    if (lat && lng) {
-        eventQuery.where('city').equals(city);
-    }
-
-    if (isOnline) {
-        const online = true ? isOnline === "true" : false;
-        eventQuery.where('isOnline').equals(online);
-    }
-
-    if (time) {
-        const today = new Date();
-        let tomorrow =  new Date()
-        tomorrow.setDate(today.getDate() + 1)
-        let afterTomorrow = new Date()
-        afterTomorrow.setDate(today.getDate() + 2)
-        afterTomorrow.setUTCHours(0);
-        afterTomorrow.setUTCMinutes(0);
-        afterTomorrow.setUTCSeconds(0);
-        afterTomorrow.setUTCMilliseconds(0);
-
-        // Remove time from date
-        console.log(today);
-        today.setUTCHours(0);
-        today.setUTCMinutes(0);
-        today.setUTCSeconds(0);
-        today.setUTCMilliseconds(0);
-        tomorrow.setUTCHours(1);
-        tomorrow.setUTCMinutes(0);
-        tomorrow.setUTCSeconds(0);
-        tomorrow.setUTCMilliseconds(0);
-        if (time === "today") {
-            // Check events that start today
-            console.log(today);
-            console.log(tomorrow);
-
-            eventQuery.where('startDate').gte(today).lte(tomorrow);
-        }
-        else if (time == "tomorrow"){
-            eventQuery.where('startDate').gte(tomorrow).lte(afterTomorrow);
-        } else if (time === "week") {
-            const week = new Date(today);
-            week.setDate(week.getDate() + 7);
-            eventQuery.where('startDate').gte(today).lte(week);
-        } else if (time === "month") {
-            const month = new Date(today);
-            month.setDate(month.getDate() + 30);
-            eventQuery.where('startDate').gte(today).lte(month);
-        }
-    }
-
-    if (free) {
-        eventQuery.where('price').equals(0);
-    }
-
-    eventQuery.then(events => res.json({ city, events}))
-        .catch(err => res.status(400).json(err));
-
-}
-
 // @route   GET api/events?category=category_id&
 // @desc    Get all events
 // @access  Public
@@ -301,6 +210,11 @@ exports.getById = (req, res) => {
 // @desc    Update event by id
 // @access  Public
 exports.update = async (req, res) => {
+    // check if the user is authorized
+    if (!req.isCreator){
+        return res.status(400).json({message: "You are not a creator"});
+    }
+
     const event = await Event.findById(req.params.id);
     // this includes new updates only and removes older info, take care
     // consider this
@@ -324,10 +238,34 @@ exports.update = async (req, res) => {
 // @route   DELETE api/events/:id
 // @desc    Delete event by id
 // @access  Public
-exports.delete = (req, res) => {
-    Event.findByIdAndDelete(req.params.id)
-        .then(event => res.json(event))
-        .catch(err => res.status(400).json(err));
+exports.delete = async(req, res) => {
+    try{
+        // check if the user is authorized
+        if (!req.isCreator){
+            return res.status(400).json({message: "You are not a creator"});
+        }
+        const event = await Event.findById(req.params.id);
+        if (!event)
+        {
+            return res.status(400).json({message: "Event doesn't exist"});
+        }
+        const ticketsArray = event.tickets;
+        console.log(ticketsArray);
+        for (let i=0; i< ticketsArray.length; i++){
+            const ticket = await TicketClass.deleteOne(ticketsArray[i]);
+            if (!ticket){
+                return res.status(400).json({message: "Ticket not found"});
+            }
+        };
+        await Event.findByIdAndDelete(req.params.id);
+
+        return res.status(200).json({message: "Event deleted successfully", event})
+    }
+    
+    catch(err){
+        console.log(err.message);
+        return res.status(400).json({message: "Error in deleting event"})
+    }
 }
 
 // @route   GET api/events/search?q=keyword
@@ -379,6 +317,11 @@ exports.getNearest = async (req, res) => {
 // @desc    Get attendees of an event
 // @access  Public
 exports.getAttendees = (req, res) => {
+    // check if the user is authorized
+    if (!req.isCreator){
+        return res.status(400).json({message: "You are not a creator"});
+    }
+
     Event.findById(req.params.id).populate('attendees')
         .then(event => res.json(event.attendees))
         .catch(err => res.status(400).json(err));
@@ -388,6 +331,11 @@ exports.getAttendees = (req, res) => {
 // @desc    Add attendee to an event
 // @access  Public
 exports.addAttendee = async (req, res) => {
+    // check if the user is authorized
+    if (!req.isCreator){
+        return res.status(400).json({message: "You are not a creator"});
+    }
+
     const event = req.params.id;
     const ticketsBought = req.body.ticketsBought;
     
@@ -449,12 +397,14 @@ exports.addAttendee = async (req, res) => {
     } catch (error) {
         res.status(500).json(error.message);
     }
-
-
 }
 
 exports.downloadUserEvents = async(req,res) => {
     try{
+        // check if the user is authorized
+    if (!req.isCreator){
+        return res.status(400).json({message: "You are not a creator"});
+    }
         const user = await User.findById(req.params.userId);
         if (!user){
             return res.status(400).json({message: "User not found"});
@@ -475,6 +425,10 @@ exports.downloadUserEvents = async(req,res) => {
 
 exports.getUserEvents = async(req,res) => {
     try{
+        if (!req.isCreator){
+            return res.status(400).json({message: "You are not a creator"});
+        }
+
         const user = await User.findById(req.params.userId);
         if (!user){
             return res.status(400).json({message: "User not found"})
@@ -495,6 +449,9 @@ exports.getUserEvents = async(req,res) => {
 
 exports.getUserPastEvents = async(req, res) => {
     try{
+        if (!req.isCreator){
+            return res.status(400).json({message: "You are not a creator"});
+        }
         console.log("hi");
         const user = await User.findById(req.params.userId);
         if (!user){
@@ -507,7 +464,7 @@ exports.getUserPastEvents = async(req, res) => {
         var eventsResult =[];
         const currDate = new Date();
         for (let event of events){
-            if (event.date < currDate)
+            if (event.startDate < currDate)
             {
                 console.log(event);
                 eventsResult.push(event);
@@ -519,14 +476,16 @@ exports.getUserPastEvents = async(req, res) => {
 
     catch(err){
         console.log(err.message);
-        return res.status(400).json({message: "Error in filtering user events"})
+        return res.status(400).json({message: "Error in filtering user events"});
     }
 }
 
 
 exports.getUserUpcomingEvents = async(req, res) => {
     try{
-        console.log("hi");
+        if (!req.isCreator){
+            return res.status(400).json({message: "You are not a creator"});
+        }
         const user = await User.findById(req.params.userId);
         if (!user){
             return res.status(400).json({message: "User not found"})
@@ -538,7 +497,7 @@ exports.getUserUpcomingEvents = async(req, res) => {
         var eventsResult =[];
         const currDate = new Date();
         for (let event of events){
-            if (event.date > currDate)
+            if (event.startDate > currDate)
             {
                 console.log(event);
                 eventsResult.push(event);

@@ -22,7 +22,6 @@ const authRouter = require('./routes/authRoute');
 const orderRouter = require('./routes/orderRoute');
 const ticketRouter = require('./routes/ticketRoute');
 const promocodeRouter = require('./routes/promocodeRoute');
-const venueRouter = require('./routes/venueRoute');
 const qrCodeRouter = require('./routes/qrCodeRoute');
 const organizationRouter = require('./routes/organizationRoute');
 
@@ -73,10 +72,6 @@ app.use('/ticket', ticketRouter);
 
 //////////////promocode route //////////////
 app.use('/promocode', promocodeRouter);
-
-
-//////////////venue route //////////////
-app.use('/venue', venueRouter);
 
 
 //////////////qrCode route //////////////

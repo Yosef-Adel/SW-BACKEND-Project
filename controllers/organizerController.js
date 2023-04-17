@@ -3,7 +3,6 @@ const Organization = require("../models/Organization");
 
 exports.createOrganizer = async(req,res)=> {
     try{
-
         if (!req.isCreator){
             return res.status(400).json({message: "You have to be a creator to create organization."});
         }

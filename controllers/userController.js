@@ -78,6 +78,10 @@ exports.changeToAttendee = async(req,res) => {
         if (!user){
             return res.status(400).json({message: "User not found"})
         }
+        // check if the user is authorized
+        if (!req.isCreator){
+            return res.status(400).json({message: "You are not a creator"});
+        }
         user.isCreator=false;
         await user.save();
         
@@ -90,21 +94,21 @@ exports.changeToAttendee = async(req,res) => {
     }
 }
 
-exports.changeImage = async(req, res)=>{
-    try{
-        const user = await User.findById(req.params.id);
-        if (!user){
-            return res.status(400).json({message: "User not found"});
-        }
-        user.img.data= fs.readFileSync(path.join(_dirname + '/uploads/' + req.file.filename));
-        user.img.contentType = 'image/png';
+// exports.changeImage = async(req, res)=>{
+//     try{
+//         const user = await User.findById(req.params.id);
+//         if (!user){
+//             return res.status(400).json({message: "User not found"});
+//         }
+//         user.img.data= fs.readFileSync(path.join(_dirname + '/uploads/' + req.file.filename));
+//         user.img.contentType = 'image/png';
         
-        await user.save();
+//         await user.save();
 
-        return res.status(200).json({message: "image uploaded successfully"});
-    }
-    catch(err){
-        console.log(err.message);
-        return res.status(400).json({message: "Error in changing image"});
-    }
-}
+//         return res.status(200).json({message: "image uploaded successfully"});
+//     }
+//     catch(err){
+//         console.log(err.message);
+//         return res.status(400).json({message: "Error in changing image"});
+//     }
+// }

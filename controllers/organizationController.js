@@ -5,8 +5,9 @@ const Event = require('../models/Events');
 
 exports.create = async(req,res) => {
     try{
+        // check if the user is authorized
         if (!req.isCreator){
-            return res.status(400).json({message: "You have to be a creator to create organization."});
+            return res.status(400).json({message: "You are not a creator"});
         }
 
         if (!req.body.name){
