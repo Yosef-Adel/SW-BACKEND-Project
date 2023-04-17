@@ -173,105 +173,104 @@ exports.getAll = async (req, res) => {
         eventQuery.where('price').equals(0);
     }
 
-    eventQuery.then(events => res.json(events))
+    eventQuery.then(events => res.json({ city, events}))
         .catch(err => res.status(400).json(err));
 
 }
 
-// exports.getAllCross = async (req, res) => {
-//     const category = req.query.category;
-//     const lat = req.query.lat;
-//     const lng = req.query.lng;
-//     const isOnline = req.query.isOnline;
-//     const time = req.query.time;
-//     const free = req.query.free;
+exports.getAllCross = async (req, res) => {
+    const category = req.query.category;
+    const lat = req.query.lat;
+    const lng = req.query.lng;
+    const isOnline = req.query.isOnline;
+    const time = req.query.time;
+    const free = req.query.free;
 
-//     let city = "";
+    let city = "";
 
-//     const mapboxtoken = process.env.MAPBOX_TOKEN;
-//     const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${mapboxtoken}`;
+    const mapboxtoken = process.env.MAPBOX_TOKEN;
+    const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${mapboxtoken}`;
 
-//     const data = await axios.get(url);
-//     const json = data.data;
-//     for (const feature of json.features) {
-//         if (feature.place_type[0] === "region") {
-//             city = feature.text;
-//             break;
-//         }
-//     }
+    const data = await axios.get(url);
+    const json = data.data;
+    for (const feature of json.features) {
+        if (feature.place_type[0] === "region") {
+            city = feature.text;
+            break;
+        }
+    }
 
-//     const eventQuery = Event.find({isPrivate: false}).populate('category');
-//     if (category) {
-//         // const categoryID = await Category.findOne({name: category})
-//         // console.log(category);
-//         // console.log(categoryID);
-//         // if (!categoryID) {
-//         //     return res.status(400).json({ message: "Category does not exist" });
-//         // }
+    const eventQuery = Event.find({isPrivate: false}).populate('category');
+    if (category) {
+        // const categoryID = await Category.findOne({name: category})
+        // console.log(category);
+        // console.log(categoryID);
+        // if (!categoryID) {
+        //     return res.status(400).json({ message: "Category does not exist" });
+        // }
 
 
-//         eventQuery.where('category').equals(category);
-//     }
+        eventQuery.where('category').equals(category);
+    }
 
-//     if (lat && lng) {
-//         eventQuery.where('city').equals(city);
-//     }
+    if (lat && lng) {
+        eventQuery.where('city').equals(city);
+    }
 
-//     if (isOnline) {
-//         const online = true ? isOnline === "true" : false;
-//         eventQuery.where('isOnline').equals(online);
-//     }
+    if (isOnline) {
+        const online = true ? isOnline === "true" : false;
+        eventQuery.where('isOnline').equals(online);
+    }
 
-//     if (time) {
-//         const today = new Date();
-//         let tomorrow =  new Date()
-//         tomorrow.setDate(today.getDate() + 1)
-//         let afterTomorrow = new Date()
-//         afterTomorrow.setDate(today.getDate() + 2)
-//         afterTomorrow.setUTCHours(0);
-//         afterTomorrow.setUTCMinutes(0);
-//         afterTomorrow.setUTCSeconds(0);
-//         afterTomorrow.setUTCMilliseconds(0);
+    if (time) {
+        const today = new Date();
+        let tomorrow =  new Date()
+        tomorrow.setDate(today.getDate() + 1)
+        let afterTomorrow = new Date()
+        afterTomorrow.setDate(today.getDate() + 2)
+        afterTomorrow.setUTCHours(0);
+        afterTomorrow.setUTCMinutes(0);
+        afterTomorrow.setUTCSeconds(0);
+        afterTomorrow.setUTCMilliseconds(0);
 
-//         // Remove time from date
-//         console.log(today);
-//         today.setUTCHours(0);
-//         today.setUTCMinutes(0);
-//         today.setUTCSeconds(0);
-//         today.setUTCMilliseconds(0);
-//         tomorrow.setUTCHours(1);
-//         tomorrow.setUTCMinutes(0);
-//         tomorrow.setUTCSeconds(0);
-//         tomorrow.setUTCMilliseconds(0);
-//         if (time === "today") {
-//             // Check events that start today
-//             console.log(today);
-//             console.log(tomorrow);
+        // Remove time from date
+        console.log(today);
+        today.setUTCHours(0);
+        today.setUTCMinutes(0);
+        today.setUTCSeconds(0);
+        today.setUTCMilliseconds(0);
+        tomorrow.setUTCHours(1);
+        tomorrow.setUTCMinutes(0);
+        tomorrow.setUTCSeconds(0);
+        tomorrow.setUTCMilliseconds(0);
+        if (time === "today") {
+            // Check events that start today
+            console.log(today);
+            console.log(tomorrow);
 
-//             eventQuery.where('startDate').gte(today).lte(tomorrow);
-//         }
-//         else if (time == "tomorrow"){
-//             eventQuery.where('startDate').gte(tomorrow).lte(afterTomorrow);
-//         } else if (time === "week") {
-//             const week = new Date(today);
-//             week.setDate(week.getDate() + 7);
-//             eventQuery.where('startDate').gte(today).lte(week);
-//         } else if (time === "month") {
-//             const month = new Date(today);
-//             month.setDate(month.getDate() + 30);
-//             eventQuery.where('startDate').gte(today).lte(month);
-//         }
-//     }
+            eventQuery.where('startDate').gte(today).lte(tomorrow);
+        }
+        else if (time == "tomorrow"){
+            eventQuery.where('startDate').gte(tomorrow).lte(afterTomorrow);
+        } else if (time === "week") {
+            const week = new Date(today);
+            week.setDate(week.getDate() + 7);
+            eventQuery.where('startDate').gte(today).lte(week);
+        } else if (time === "month") {
+            const month = new Date(today);
+            month.setDate(month.getDate() + 30);
+            eventQuery.where('startDate').gte(today).lte(month);
+        }
+    }
 
-//     if (free) {
-//         eventQuery.where('price').equals(0);
-//     }
+    if (free) {
+        eventQuery.where('price').equals(0);
+    }
 
-//     eventQuery.then(events => res.json({ city, events}))
-//         .catch(err => res.status(400).json(err));
+    eventQuery.then(events => res.json({ city, events}))
+        .catch(err => res.status(400).json(err));
 
-// }
-
+}
 
 // @route   GET api/events?category=category_id&
 // @desc    Get all events
