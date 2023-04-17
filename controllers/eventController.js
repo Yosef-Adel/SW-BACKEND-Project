@@ -108,7 +108,15 @@ exports.getAll = async (req, res) => {
 
     const eventQuery = Event.find({isPrivate: false}).populate('category');
     if (category) {
-        eventQuery.where('category').equals(category);
+        const categoryID = await Category.findOne({name: category})
+        console.log(category);
+        console.log(categoryID);
+        if (!categoryID) {
+            return res.status(400).json({ message: "Category does not exist" });
+        }
+
+
+        eventQuery.where('category').equals(categoryID._id);
     }
 
     if (lat && lng) {
@@ -122,13 +130,34 @@ exports.getAll = async (req, res) => {
 
     if (time) {
         const today = new Date();
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1);
+        let tomorrow =  new Date()
+        tomorrow.setDate(today.getDate() + 1)
+        let afterTomorrow = new Date()
+        afterTomorrow.setDate(today.getDate() + 2)
+        afterTomorrow.setUTCHours(0);
+        afterTomorrow.setUTCMinutes(0);
+        afterTomorrow.setUTCSeconds(0);
+        afterTomorrow.setUTCMilliseconds(0);
+
+        // Remove time from date
+        console.log(today);
+        today.setUTCHours(0);
+        today.setUTCMinutes(0);
+        today.setUTCSeconds(0);
+        today.setUTCMilliseconds(0);
+        tomorrow.setUTCHours(1);
+        tomorrow.setUTCMinutes(0);
+        tomorrow.setUTCSeconds(0);
+        tomorrow.setUTCMilliseconds(0);
         if (time === "today") {
+            // Check events that start today
+            console.log(today);
+            console.log(tomorrow);
+
             eventQuery.where('startDate').gte(today).lte(tomorrow);
         }
         else if (time == "tomorrow"){
-            eventQuery.where('startDate').gte(tomorrow).lte(tomorrow);
+            eventQuery.where('startDate').gte(tomorrow).lte(afterTomorrow);
         } else if (time === "week") {
             const week = new Date(today);
             week.setDate(week.getDate() + 7);
@@ -143,11 +172,6 @@ exports.getAll = async (req, res) => {
     if (free) {
         eventQuery.where('price').equals(0);
     }
-
-
-
-
-
 
     eventQuery.then(events => res.json({ city, events}))
         .catch(err => res.status(400).json(err));
