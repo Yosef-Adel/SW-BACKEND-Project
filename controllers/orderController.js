@@ -231,6 +231,12 @@ const getOrdersByEventId=async (req,res)=>{
     if (!(req.user)) {
         return res.status(400).json({ message: "User is not logged in." });
     }
+    
+    // check if the user is authorized
+    if (!req.isCreator){
+        return res.status(400).json({message: "You are not a creator"});
+    }
+
     //get the event id from the parameters
     const eventId=req.params.event_id;
 

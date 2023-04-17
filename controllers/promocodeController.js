@@ -1,6 +1,6 @@
 //require promocode model
 const Promocode = require('../models/Promocode');
-
+const csv = require('csv-parser');
 
 //@route POST api/promocode/:event_id
 //@desc create a new promocode
@@ -193,8 +193,33 @@ const checkPromo= async (req, res) => {
 
 };
 
+const uploadPromocodes = async (req, res) => {
+    //check if the user is logged in
+    if (!(req.user)) {
+        return res.status(400).json({ message: "User is not logged in." });
+    }
+    //check if the user is a creator or not since only creators can create promocodes
+    if (!req.isCreator) {
+        return res.status(400).json({ message: "User is not a creator." });
+    }
+
+    try {
+        // Get uploaded csv file
+        const csvFile = req.files.file;
+        // Convert csv file to json
+        const csvData = await csv().fromString(csvFile.data.toString());
+        // Create new promocodes
+        const promocodes = await Promocode.insertMany(csvData);
+        res.status(200).json({ message: "Promocodes uploaded successfully!", promocodes: promocodes });
+
+    }
+    catch (err) {
+        return res.status(400).json({ message: err.message });
+    }
+
+}
 
 
-module.exports = {createPromocode, getPromocode, updatePromocode, deletePromocode, getPromocodes, checkPromo};
+module.exports = {createPromocode, getPromocode, updatePromocode, deletePromocode, getPromocodes, checkPromo,uploadPromocodes};
 
 

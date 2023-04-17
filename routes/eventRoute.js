@@ -6,24 +6,26 @@ const cloudinaryStorage = require("../config/cloudinary");
 const authorization = require('../middleware/authorization');
 const upload = new multer({storage: cloudinaryStorage.storage});
 
-//for front/cross teams
+
 router.get('/', eventController.getAll);
 router.get('/all-events', eventController.getAllEvents);
 router.get('/nearest', eventController.getNearest);
 router.get('/search', eventController.search);
 router.get('/:id', eventController.getById);
-router.get('/:userId/all-events', eventController.getUserEvents);
-router.get('/:userId/past-events', eventController.getUserPastEvents);
-router.get('/:userId/upcoming-events', eventController.getUserUpcomingEvents);
 
-router.post('/', upload.single("image"), eventController.create);
+router.get('/:userId/all-events', authorization, eventController.getUserEvents);
+router.get('/:userId/all-events/download', authorization, eventController.downloadUserEvents);
+router.get('/:userId/past-events', authorization, eventController.getUserPastEvents);
+router.get('/:userId/upcoming-events', authorization, eventController.getUserUpcomingEvents);
 
-router.put('/:id', upload.single("image"), eventController.update);
+router.post('/', upload.single("image"), authorization, eventController.create);
 
-router.delete('/:id', eventController.delete);
+router.put('/:id', upload.single("image"), authorization, eventController.update);
 
-router.get('/:id/attendees', eventController.getAttendees);
-router.post('/:id/attendees', eventController.addAttendee);
+router.delete('/:id', authorization, eventController.delete);
+
+router.get('/:id/attendees',authorization,  eventController.getAttendees);
+router.post('/:id/attendees', authorization, eventController.addAttendee);
 // router.delete('/:id/attendees/:attendeeId', eventController.removeAttendee);
 
 
