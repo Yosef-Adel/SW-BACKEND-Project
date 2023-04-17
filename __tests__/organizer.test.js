@@ -98,38 +98,37 @@ describe('Creating organizer', () => {
         });
     });
 
-    // describe('Case 2: Name field missing', () => {
-    //     it('it should return 400 Error', async() => {
-    //         const res = await request(app).post('/organization/create/' + userId).set('Authorization', 'Bearer ' + token);
-    //         testFormat(res,400,"Organization name is required.");
-    //     });
-    // });
+    describe('Case 2: Name field missing', () => {
+        it('it should return 400 Error', async() => {
+            const res = await request(app).post(`/organization/${organizationId}/create/organizer/create`).set('Authorization', 'Bearer ' + token);
+            testFormat(res,400, "Organizer name is required");
+        });
+    });
 
-    // describe('Case 3: User not found', () => {
-    //     it('it should return 400 Error', async() => {
-    //         const res = await request(app).post('/organization/create/' + objectId).send({
-    //             "name": "test organization"
-    //         }).set('Authorization', 'Bearer ' + token);
-    //         testFormat(res, 400, 'User not found');
-    //     });
-    // });
+    describe('Case 3: Organization not found', () => {
+        it('it should return 400 Error', async() => {
+            const res = await request(app).post(`/organization/${objectId}/create/organizer/create`).send({
+                "name": "test organizer"
+            }).set('Authorization', 'Bearer ' + token);
+            testFormat(res, 400, "Organization not found.");
+        });
+    });
 
-    // describe('Case 4: Invalid Token', () => {
-    //     it('it should return 400 Error', async() => {
-    //         const res = await request(app).post('/organization/create/' + objectId).send({
-    //             "name": "test organization"
-    //         });
-    //         testFormat(res, 401, 'No token provided!');
-    //     });
-    // });
+    describe('Case 4: Invalid Token', () => {
+        it('it should return 400 Error', async() => {
+            const res = await request(app).post(`/organization/${organizationId}/create/` + objectId).send({
+                "name": "test organizer"
+            });
+            testFormat(res, 401, 'No token provided!');
+        });
+    });
 
-    // describe('Case 5: User not authorized', () => {
-    //     it('it should return 400 Error', async() => {
-    //         const res = await request(app).post('/organization/create/' + userId1).send({
-    //             "name": "test organization"
-    //         }).set('Authorization', 'Bearer ' + token1);
-    //         testFormat(res, 400, "You have to be a creator to create organization.");
-    //     });
-    // });
-    
+    describe('Case 5: User not authorized', () => {
+        it('it should return 400 Error', async() => {
+            const res = await request(app).post(`/organization/${organizationId}/create/`).send({
+                "name": "test organization"
+            }).set('Authorization', 'Bearer ' + token1);
+            testFormat(res, 400, "You have to be a creator to create organizer.");
+        });
+    });
 });
