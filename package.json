@@ -7,7 +7,7 @@
     "build": "tsc",
     "test": "jest --detectOpenHandles --forceExit",
     "start": "nodemon server.js",
-    "seed":"npm seed/seed.js"
+    "seed": "nodemon seed/seed.js"
   },
   "repository": {
     "type": "git",

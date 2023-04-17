@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
-const populateTickets = require('./populateTickets');
+//require the populateTickets function in the controller in populateDb.js
+const {populateTickets} = require('../controllers/populateDb');
 // Connect to the database
-mongoose.connect('mongodb://localhost:27017/myapp', {
+mongoose.connect('mongodb+srv://Eventbrite-backend:envie_backend_2023@eventbrite-cluster.krn9ebx.mongodb.net/Eventbrite?retryWrites=true&w=majority', {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useCreateIndex: true
@@ -9,7 +10,7 @@ mongoose.connect('mongodb://localhost:27017/myapp', {
 
 // When successfully connected
 mongoose.connection.on('connected', async () => {
-    console.log('Mongoose default connection open to mongodb://localhost:27017/myapp');
+    console.log('Connected to DB');
 
     // populate tickets
     await populateTickets();

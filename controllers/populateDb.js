@@ -1,5 +1,5 @@
 //require all models
-const User = require('../models/userModel');
+const User = require('../models/User');
 const Event = require('../models/Events');
 const Ticket = require('../models/Tickets');
 const Order = require('../models/Order');
@@ -63,4 +63,6 @@ const populateTickets = async () => {
             }
         }     
     };
+
+module.exports = populateTickets;
 
