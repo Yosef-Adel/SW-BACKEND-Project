@@ -14,6 +14,7 @@ router.get('/nearest', eventController.getNearest);
 router.get('/search', eventController.search);
 router.get('/:id', eventController.getById);
 router.get('/:userId/all-events', eventController.getUserEvents);
+router.get('/:userId/all-events/download', eventController.downloadUserEvents);
 router.get('/:userId/past-events', eventController.getUserPastEvents);
 router.get('/:userId/upcoming-events', eventController.getUserUpcomingEvents);
 
