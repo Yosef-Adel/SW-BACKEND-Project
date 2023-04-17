@@ -74,7 +74,7 @@ exports.getInfo = async(req, res) => {
             return res.status(400).json({message: "Organization not found"});
         }
 
-        return res.status(200).json(organization);
+        return res.status(200).json({message: "Success", organization});
 
     }
     catch(err){
@@ -124,8 +124,12 @@ exports.getEvents = async(req, res) => {
             const event = await Event.findOne({"hostedBy" : organizersArray[i]})
             events.push(event);
         }
+        
+        if (events == null){
+            res.status(400).json({message: "No events to show."});
+        }
 
-        return res.status(200).json(events);
+        return res.status(200).json({message :"Success", events});
     }
     catch(err){
         console.log(err.message);
