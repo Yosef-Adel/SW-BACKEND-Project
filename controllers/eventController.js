@@ -324,7 +324,7 @@ exports.getUserEvents = async(req,res) => {
             return res.status(400).json({message: "No events created by this user"});
         }
         
-        return res.status(200).json(userEvents);
+        return res.status(200).json({message: "Success", userEvents});
     }
 
     catch(err){
@@ -368,10 +368,10 @@ exports.getUserPastEvents = async(req, res) => {
         }
         
         if (userEvents.length == 0){
-            return res.status(400).json({message: "No events created by this user"});
+            return res.status(400).json({message: "No past events created by this user"});
         }
         
-        return res.status(200).json(userEvents);
+        return res.status(200).json({message: "Success", userEvents});
     }
 
     catch(err){
@@ -415,10 +415,10 @@ exports.getUserUpcomingEvents = async(req, res) => {
         }
         
         if (userEvents.length == 0){
-            return res.status(400).json({message: "No events created by this user"});
+            return res.status(400).json({message: "No upcoming events created by this user"});
         }
         
-        return res.status(200).json(userEvents);
+        return res.status(200).json({message: "Success", userEvents});
     }
 
     catch(err){

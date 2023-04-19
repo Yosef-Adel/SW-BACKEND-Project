@@ -6,6 +6,7 @@ const Organization = require("../models/Organization");
 const Organizer = require("../models/Organizer");
 const Event = require('../models/Events');
 const bcrypt = require("bcryptjs");
+const Date = require('date.js');
 
 jest.setTimeout(1000000);
 
@@ -64,6 +65,42 @@ beforeAll(async() => {
 
     userId1 = res1.body.user._id;
     token1 = res1.body.token;
+
+    const event = new Event({
+        name: "test",
+        description: "test",
+        summary: "test",
+        startDate: new Date(),
+        endDate: new Date(),
+        capacity: 100,
+        venueName: "test",
+        city: "test",
+        address1: "test",
+        country: "test",
+        postalCode: 1454,
+        hostedBy: objectId,
+        category: objectId
+    });
+
+    await event.save();
+
+    const event1 = new Event({
+        name: "test",
+        description: "test",
+        summary: "test",
+        startDate: new Date("11/20/2014 04:11"),
+        endDate: new Date("11/20/2014 04:11"),
+        capacity: 100,
+        venueName: "test",
+        city: "test",
+        address1: "test",
+        country: "test",
+        postalCode: 1454,
+        hostedBy: objectId,
+        category: objectId
+    });
+
+    await event1.save();
 });
 
 
@@ -83,12 +120,16 @@ afterAll(async () => {
 
 
 describe('Creating organization', () => {
-    describe('Case 1: Organization created successfully.', () => {
+    describe('Case 1: Success', () => {
         it('it should return 200 OK', async() => {
             const res = await request(app).post('/organization/create/'+ userId).send({
-                "name": "test organization"
+                "name": "test organization",
+                "organizers": objectId
             }).set('Authorization', 'Bearer ' + token);
+            
             organizationId=res.body.organization._id;
+            // console.log(res.body.organization);
+
             testFormat(res, 200, "Organization created successfully");
             expect(res.body).toHaveProperty('organization');
         });
@@ -124,7 +165,7 @@ describe('Creating organization', () => {
             const res = await request(app).post('/organization/create/' + userId1).send({
                 "name": "test organization"
             }).set('Authorization', 'Bearer ' + token1);
-            testFormat(res, 400, "You have to be a creator to create organization.");
+            testFormat(res, 400, "You are not a creator");
         });
     });
     
@@ -132,44 +173,44 @@ describe('Creating organization', () => {
 
 
 
-// describe('Updating organization', () => {
-//     describe('Case 1: Organization updating successfully.', () => {
-//         it('it should return 200 OK', async() => {
-//             const res = await request(app).put('/organization/edit/'+ organizationId).send({
-//                 "name": "test organization updated"
-//             }).set('Authorization', 'Bearer ' + token);
-//             testFormat(res, 200, "Organization info updated successfully");
-//             expect(res.body).toHaveProperty('organization');
-//         });
-//     });
+describe('Updating organization', () => {
+    describe('Case 1: Success', () => {
+        it('it should return 200 OK', async() => {
+            const res = await request(app).put('/organization/edit/'+ organizationId).send({
+                "name": "test organization updated"
+            }).set('Authorization', 'Bearer ' + token);
+            testFormat(res, 200, "Organization info updated successfully");
+            expect(res.body).toHaveProperty('organization');
+        });
+    });
 
-//     describe('Case 2: User not found', () => {
-//         it('it should return 400 Error', async() => {
-//             const res = await request(app).put('/organization/edit/'+ objectId).send({
-//                 "name": "test organization"
-//             }).set('Authorization', 'Bearer ' + token);
-//             testFormat(res, 400, "Organization not found");
-//         });
-//     });
+    describe('Case 2: User not found', () => {
+        it('it should return 400 Error', async() => {
+            const res = await request(app).put('/organization/edit/'+ objectId).send({
+                "name": "test organization"
+            }).set('Authorization', 'Bearer ' + token);
+            testFormat(res, 400, "Organization not found");
+        });
+    });
 
-//     describe('Case 3: Invalid Token', () => {
-//         it('it should return 400 Error', async() => {
-//             const res = await request(app).put('/organization/edit/'+ organizationId).send({
-//                 "name": "test organization"
-//             });
-//             testFormat(res, 401, 'No token provided!');
-//         });
-//     });
+    describe('Case 3: Invalid Token', () => {
+        it('it should return 400 Error', async() => {
+            const res = await request(app).put('/organization/edit/'+ organizationId).send({
+                "name": "test organization"
+            });
+            testFormat(res, 401, 'No token provided!');
+        });
+    });
 
-//     describe('Case 4: User not authorized', () => {
-//         it('it should return 400 Error', async() => {
-//             const res = await request(app).put('/organization/edit/'+ organizationId).send({
-//                 "name": "test organization"
-//             }).set('Authorization', 'Bearer ' + token1);
-//             testFormat(res, 400, "You have to be a creator to create organization.");
-//         });
-//     });
-// });
+    describe('Case 4: User not authorized', () => {
+        it('it should return 400 Error', async() => {
+            const res = await request(app).put('/organization/edit/'+ organizationId).send({
+                "name": "test organization"
+            }).set('Authorization', 'Bearer ' + token1);
+            testFormat(res, 400, "You are not a creator");
+        });
+    });
+});
 
 
 describe('Getting organization', () => {
@@ -190,7 +231,7 @@ describe('Getting organization', () => {
     describe('Case 3: Unauthorized user', () => {
         it('it should return 400 Error', async() => {
             const res = await request(app).get(`/organization/${organizationId}`).set('Authorization', 'Bearer ' + token1);
-            testFormat(res, 400, "You have to be a creator to create organization.");
+            testFormat(res, 400, "You are not a creator");
         });
     }) ;
 
@@ -201,6 +242,69 @@ describe('Getting organization', () => {
         });
     }) ;
 });
+
+
+describe('Getting events of an organization', () => {
+    describe('Case 1: Success', () => {
+        it('it should return 200 OK', async() => {
+            const res = await request(app).get(`/organization/${organizationId}/events`).set('Authorization', 'Bearer ' + token);
+            testFormat(res, 200, "Success");
+        });
+    }) ;
+
+    describe('Case 2: Organization not found', () => {
+        it('it should return 400 Error', async() => {
+            const res = await request(app).get(`/organization/${objectId}/events`).set('Authorization', 'Bearer ' + token);
+            testFormat(res, 400, "Organization not found");
+        });
+    }) ;
+
+    describe('Case 3: Unauthorized user', () => {
+        it('it should return 400 Error', async() => {
+            const res = await request(app).get(`/organization/${organizationId}/events`).set('Authorization', 'Bearer ' + token1);
+            testFormat(res, 400, "You are not a creator");
+        });
+    }) ;
+
+    describe('Case 4: Invalid token', () => {
+        it('it should return 400 Error', async() => {
+            const res = await request(app).get(`/organization/${organizationId}/events`);
+            testFormat(res, 401, "No token provided!");
+        });
+    });
+});
+
+
+describe('Getting upcoming events of an organization', () => {
+    // describe('Case 1: Success', () => {
+    //     it('it should return 200 OK', async() => {
+    //         const res = await request(app).get(`/api/events/${userId}/upcoming-events`).set('Authorization', 'Bearer ' + token);
+    //         testFormat(res, 200, "Success");
+    //     });
+    // }) ;
+
+    describe('Case 1: User not found', () => {
+        it('it should return 400 Error', async() => {
+            const res = await request(app).get(`/api/events/${objectId}/upcoming-events`).set('Authorization', 'Bearer ' + token);
+            testFormat(res, 400, "This user doesn't have an organization.");
+        });
+    });
+
+    describe('Case 2: Unauthorized user', () => {
+        it('it should return 400 Error', async() => {
+            const res = await request(app).get(`/api/events/${userId}/upcoming-events`).set('Authorization', 'Bearer ' + token1);
+            testFormat(res, 400, "You are not a creator");
+        });
+    }) ;
+
+    describe('Case 3: Invalid token', () => {
+        it('it should return 400 Error', async() => {
+            const res = await request(app).get(`/api/events/${userId}/upcoming-events`);
+            testFormat(res, 401, "No token provided!");
+        });
+    });
+});
+
 
 
 describe('Deleting organization', () => {
@@ -218,35 +322,3 @@ describe('Deleting organization', () => {
         });
     }) ;
 });
-
-
-
-// describe('Getting events of an organization', () => {
-//     describe('Case 1: Success', () => {
-//         it('it should return 200 OK', async() => {
-//             const res = await request(app).get(`/organization/${organizationId}/events`).set('Authorization', 'Bearer ' + token);
-//             testFormat(res, 200, "Success");
-//         });
-//     }) ;
-
-//     describe('Case 2: Organization not found', () => {
-//         it('it should return 400 Error', async() => {
-//             const res = await request(app).get(`/organization/${objectId}/events`).set('Authorization', 'Bearer ' + token);
-//             testFormat(res, 400, "Organization not found");
-//         });
-//     }) ;
-
-//     describe('Case 3: Unauthorized user', () => {
-//         it('it should return 400 Error', async() => {
-//             const res = await request(app).get(`/organization/${organizationId}/events`).set('Authorization', 'Bearer ' + token1);
-//             testFormat(res, 400, "You have to be a creator to create organization.");
-//         });
-//     }) ;
-
-//     describe('Case 4: Invalid token', () => {
-//         it('it should return 400 Error', async() => {
-//             const res = await request(app).get(`/organization/${organizationId}/events`);
-//             testFormat(res, 401, "No token provided!");
-//         });
-//     }) ;
-// });

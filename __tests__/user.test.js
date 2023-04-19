@@ -42,6 +42,11 @@ beforeAll(async() => {
 });
 
 
+//close the connection to the database
+afterAll(async () => {
+    await mongoose.connection.close();
+})
+
 
 function testFormat(res, statusCode, message){
     expect(res.body).toHaveProperty('message');
@@ -52,7 +57,7 @@ function testFormat(res, statusCode, message){
 
 
 describe('Get Info', () => {
-    describe('Case 1: getting info successfully', () => {
+    describe('Case 1: Success', () => {
         it('it should return 200 OK', async() => {
             const res = await request(app).get('/user/'+ userId).set("Authorization", "Bearer " + token);
             testFormat(res, 200, "Success");
@@ -77,7 +82,7 @@ describe('Get Info', () => {
 
 
 describe('Updating Info', () => {
-    describe('Case 1: Updating info successfully', () => {
+    describe('Case 1: Success', () => {
         it('it should return 200 OK', async() => {
             const res = await request(app).put('/user/edit/'+ userId).send({
                 "firstName": "Maii"
@@ -110,7 +115,7 @@ describe('Updating Info', () => {
 
 
 describe('Changing attendee view to creator view', () => {
-    describe('Case 1: Changing view successfully', () => {
+    describe('Case 1: Success', () => {
         it('it should return 200 OK', async() => {
             const res = await request(app).get('/user/to-creator/' + userId).set("Authorization", "Bearer " + token);
             expect(res.statusCode).toEqual(200);
@@ -136,7 +141,7 @@ describe('Changing attendee view to creator view', () => {
 
 
 describe('Changing creator view to attendee view', () => {
-    describe('Case 1: Changing view successfully', () => {
+    describe('Case 1: Success', () => {
         it('it should return 200 OK', async() => {
             const res = await request(app).get('/user/to-attendee/' + userId).set("Authorization", "Bearer " + token);
             expect(res.statusCode).toEqual(200);
@@ -158,9 +163,3 @@ describe('Changing creator view to attendee view', () => {
         })
     });
 });
-
-
-//close the connection to the database
-afterAll(async () => {
-    await mongoose.connection.close();
-})

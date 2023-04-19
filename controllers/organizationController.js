@@ -6,7 +6,7 @@ const Event = require('../models/Events');
 exports.create = async(req,res) => {
     try{
         if (!req.isCreator){
-            return res.status(400).json({message: "You have to be a creator to create organization."});
+            return res.status(400).json({message: "You are not a creator"});
         }
 
         if (!req.body.name){
@@ -39,7 +39,7 @@ exports.create = async(req,res) => {
 exports.editInfo = async(req, res) => {
     try{
         if (!req.isCreator){
-            return res.status(400).json({message: "You have to be a creator to create organization."});
+            return res.status(400).json({message: "You are not a creator"});
         }
         const organization = await Organization.findById(req.params.orgId);
         if(!organization){
@@ -67,7 +67,7 @@ exports.editInfo = async(req, res) => {
 exports.getInfo = async(req, res) => {
     try{
         if (!req.isCreator){
-            return res.status(400).json({message: "You have to be a creator to create organization."});
+            return res.status(400).json({message: "You are not a creator"});
         }
         const organization = await Organization.findById(req.params.orgId);
         if(!organization){
@@ -110,7 +110,7 @@ exports.deleteOrganization = async(req, res) => {
 exports.getEvents = async(req, res) => {
     try{
         if (!req.isCreator){
-            return res.status(400).json({message: "You have to be a creator to create organization."});
+            return res.status(400).json({message: "You are not a creator"});
         }
         
         const organization = await Organization.findById(req.params.orgId);
