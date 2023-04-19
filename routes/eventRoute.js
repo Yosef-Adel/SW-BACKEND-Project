@@ -12,9 +12,9 @@ router.get('/all-events', eventController.getAllEvents);
 router.get('/nearest', eventController.getNearest);
 router.get('/search', eventController.search);
 router.get('/:id', eventController.getById);
-router.get('/:userId/all-events', eventController.getUserEvents);
-router.get('/:userId/past-events', eventController.getUserPastEvents);
-router.get('/:userId/upcoming-events', eventController.getUserUpcomingEvents);
+router.get('/:userId/all-events', authorization, eventController.getUserEvents);
+router.get('/:userId/past-events', authorization, eventController.getUserPastEvents);
+router.get('/:userId/upcoming-events', authorization, eventController.getUserUpcomingEvents);
 
 router.post('/', upload.single("image"), eventController.create);
 

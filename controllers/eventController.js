@@ -12,6 +12,7 @@ const Date = require('date.js');
 
 const {getTicketsSold, getOrdersCount, getTotalCapacity, getTotalMoneyEarned, getTotalTicketsInOrder} = require('./aggregateFunctions');
 const Ticket = require('../models/Tickets');
+const Organization = require('../models/Organization');
 
 
 
@@ -294,16 +295,36 @@ exports.addAttendee = async (req, res) => {
 
 exports.getUserEvents = async(req,res) => {
     try{
-        const user = await User.findById(req.params.userId);
-        if (!user){
-            return res.status(400).json({message: "User not found"})
+        if (!req.isCreator)
+        {
+            return res.status(400).json({message: "You are not a creator"})
         }
-        const events = await Event.find({"createdBy": user});
-        if (events.length == 0){
+        const user = mongoose.Types.ObjectId(req.params.userId);
+
+        const userOrganization = await Organization.findOne({"createdBy": user})
+        if (!userOrganization){
+            return res.status(400).json({message: "This user doesn't have an organization."})
+        }
+        const organizersArray = userOrganization.organizers;
+
+        if (!organizersArray){
+            return res.status(400).json({message: "This organization doesn't have any organizers."})
+        }
+        
+        const userEvents = [];
+        for (let i=0; i< organizersArray.length; i++){
+            const events = await Event.find({"hostedBy": organizersArray[i]});
+            for (let event of events)
+            {
+                userEvents.push(event);
+            }
+        }
+        
+        if (userEvents.length == 0){
             return res.status(400).json({message: "No events created by this user"});
         }
-
-        return res.status(200).json(events);
+        
+        return res.status(200).json(userEvents);
     }
 
     catch(err){
@@ -314,26 +335,43 @@ exports.getUserEvents = async(req,res) => {
 
 exports.getUserPastEvents = async(req, res) => {
     try{
-        console.log("hi");
-        const user = await User.findById(req.params.userId);
-        if (!user){
-            return res.status(400).json({message: "User not found"})
+        if (!req.isCreator)
+        {
+            return res.status(400).json({message: "You are not a creator"})
         }
-        const events = await Event.find({"createdBy": user});
-        if (events.length == 0){
-            return res.status(400).json({message: "No events created by this user"});
+
+        const user = mongoose.Types.ObjectId(req.params.userId);
+
+        const userOrganization = await Organization.findOne({"createdBy": user})
+        if (!userOrganization){
+            return res.status(400).json({message: "This user doesn't have an organization."})
         }
-        var eventsResult =[];
+        const organizersArray = userOrganization.organizers;
+
+        if (!organizersArray){
+            return res.status(400).json({message: "This organization doesn't have any organizers."})
+        }
+        
+        const userEvents = [];
         const currDate = new Date();
-        for (let event of events){
-            if (event.date < currDate)
+        for (let i=0; i< organizersArray.length; i++){
+            const events = await Event.find({"hostedBy": organizersArray[i]});
+            // console.log(events);
+            for (let event of events)
             {
                 console.log(event);
-                eventsResult.push(event);
+                if (event.startDate < currDate)
+                {
+                    userEvents.push(event);
+                }
             }
         }
-        //events.forEach((event) => event if event.date < Date.now);;
-        return res.status(200).json(eventsResult);
+        
+        if (userEvents.length == 0){
+            return res.status(400).json({message: "No events created by this user"});
+        }
+        
+        return res.status(200).json(userEvents);
     }
 
     catch(err){
@@ -345,26 +383,42 @@ exports.getUserPastEvents = async(req, res) => {
 
 exports.getUserUpcomingEvents = async(req, res) => {
     try{
-        console.log("hi");
-        const user = await User.findById(req.params.userId);
-        if (!user){
-            return res.status(400).json({message: "User not found"})
+        if (!req.isCreator)
+        {
+            return res.status(400).json({message: "You are not a creator"})
         }
-        const events = await Event.find({"createdBy": user});
-        if (events.length == 0){
-            return res.status(400).json({message: "No events created by this user"});
+        const user = mongoose.Types.ObjectId(req.params.userId);
+
+        const userOrganization = await Organization.findOne({"createdBy": user})
+        if (!userOrganization){
+            return res.status(400).json({message: "This user doesn't have an organization."})
         }
-        var eventsResult =[];
+        const organizersArray = userOrganization.organizers;
+
+        if (!organizersArray){
+            return res.status(400).json({message: "This organization doesn't have any organizers."})
+        }
+        
+        const userEvents = [];
         const currDate = new Date();
-        for (let event of events){
-            if (event.date > currDate)
+        for (let i=0; i< organizersArray.length; i++){
+            const events = await Event.find({"hostedBy": organizersArray[i]});
+            // console.log(events);
+            for (let event of events)
             {
                 console.log(event);
-                eventsResult.push(event);
+                if (event.startDate > currDate)
+                {
+                    userEvents.push(event);
+                }
             }
         }
-        //events.forEach((event) => event if event.date < Date.now);;
-        return res.status(200).json(eventsResult);
+        
+        if (userEvents.length == 0){
+            return res.status(400).json({message: "No events created by this user"});
+        }
+        
+        return res.status(200).json(userEvents);
     }
 
     catch(err){
