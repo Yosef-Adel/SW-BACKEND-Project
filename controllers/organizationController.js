@@ -5,7 +5,6 @@ const Event = require('../models/Events');
 
 exports.create = async(req,res) => {
     try{
-        // check if the user is authorized
         if (!req.isCreator){
             return res.status(400).json({message: "You are not a creator"});
         }
