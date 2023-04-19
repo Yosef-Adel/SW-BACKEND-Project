@@ -6,8 +6,8 @@ const router = express.Router();
 router.get('/:id', userController.getUser);
 router.get('/to-creator/:id', userController.changeToCreator);
 router.get('/to-attendee/:id', userController.changeToAttendee);
-
 router.put('/edit/:id', userController.editInfo);
+router.post('/notification', userController.assingNotification)
 
 
 

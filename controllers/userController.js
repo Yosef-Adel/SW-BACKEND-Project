@@ -108,3 +108,12 @@ exports.changeImage = async(req, res)=>{
         return res.status(400).json({message: "Error in changing image"});
     }
 }
+
+exports.assingNotification = async(req,res) => {
+    const registrationToken = req.body.registrationToken
+    const userId = req.user._id;
+    const user = await User.findById(userId);
+    user.firebaseRegistrationToken.push(registrationToken);
+    await user.save();
+    return res.status(200).json({message: "notification assigned successfully"});
+}

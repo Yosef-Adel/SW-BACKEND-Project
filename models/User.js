@@ -94,7 +94,14 @@ const userSchema = new Schema({
     organization: {
         type: Schema.Types.ObjectId,
         ref: 'organization'
-    }
+    },
+
+    firebaseRegistrationToken: [
+        {
+            type: String,
+            required: false
+        }
+    ]
 
 }, {timestamps: true});
 
