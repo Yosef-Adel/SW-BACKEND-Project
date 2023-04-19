@@ -610,7 +610,7 @@ exports.getAttendeeReport = async (req, res) => {
         if(!user){
             continue;
         }
-        console.log(order);
+        // console.log(order);
         const tickets = order.ticketsBought;
         //check on the date of the event
         //if the event is in the future then the attendee is attending
@@ -701,6 +701,9 @@ exports.downloadAttendeeReport = async (req, res) => {
     for (let order of orders) {
         const canceled=order.canceled;
         const user=await User.findById(order.user);
+        if(!user){
+            continue;
+        }
         const tickets = order.ticketsBought;
         //check on the date of the event
         //if the event is in the future then the attendee is attending
@@ -741,7 +744,7 @@ exports.downloadAttendeeReport = async (req, res) => {
     
     //try to send the response
     try {
-        const header = Object.keys(response.Report[0].toJSON());
+        const header = Object.keys(response.Report[0]);
 
         return downloadResource(res, 'attendee.csv', header, response.Report);
     }
@@ -800,6 +803,9 @@ exports.getSalesByTicketTypeReport = async (req, res) => {
             const canceled=order.canceled;
             const tickets = order.ticketsBought;
             const user=await User.findById(order.user);
+            if(!user){
+                continue;
+            }
             //check on the date of the event
             //if the event is in the future then the attendee is attending
             const currentDate = new Date();
@@ -880,6 +886,9 @@ exports.getOrderSummaryReport = async (req, res) => {
             for (let order of orders) {
                 const orderId=order._id;
                 const user=await User.findById(order.user);
+                if(!user){
+                    continue;
+                }
                 const totalTickets=await getTotalTicketsInOrder(orderId,eventId);
                 //push the info to the response object
                 response.Report.push({
