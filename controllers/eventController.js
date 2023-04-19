@@ -403,9 +403,9 @@ exports.addAttendee = async (req, res) => {
 exports.downloadUserEvents = async(req,res) => {
     try{
         // check if the user is authorized
-    if (!req.isCreator){
-        return res.status(400).json({message: "You are not a creator"});
-    }
+    // if (!req.isCreator){
+    //     return res.status(400).json({message: "You are not a creator"});
+    // }
         const user = await User.findById(req.params.userId);
         if (!user){
             return res.status(400).json({message: "User not found"});
@@ -642,9 +642,103 @@ exports.getAttendeeReport = async (req, res) => {
         }
     }
 
+    
+
     //try to send the response
     try {
         res.status(200).json(response);
+    }
+    //catch any errors
+    catch (err) {
+        console.log(err.message);
+        res.status(400).json({ message: "Error in getting the attendee report" });
+    }
+
+};
+exports.downloadAttendeeReport = async (req, res) => {
+    //event id in the request params
+    const eventId = req.params.eventId;
+    //check if the user is logged in
+    if (!req.user) {
+        return res.status(401).json({ message: "You are not logged in" });
+    }
+    //check that the user is a creator
+    //and this user is the creator of the event
+    if (req.user.isCreator == false) {
+        return res.status(401).json({ message: "You are not a creator" });
+    }
+    //check if the event exists
+    if (!eventId) {
+        return res.status(400).json({ message: "Event doesn't exist" });
+    }
+
+    //get the order count
+    const orderCount = await getOrdersCount(eventId);
+
+    //get the total sold tickets count
+    //which is the number of attendees
+    const AttendeesCount = await getTicketsSold(eventId);
+
+    //setup the response object
+    const response = {
+        totalOrders: orderCount,
+        totalAttendees: AttendeesCount,
+        Report: [],
+    };
+
+    //loop through every order with the event id
+    //and get to the tickets array
+    //I want to see the number of tickets for each order and the type
+    const event = await Event.findById(eventId);
+    var attendeeStatus="";
+
+    const orders=await Order.find({event:eventId});
+    for (let order of orders) {
+        const canceled=order.canceled;
+        const user=await User.findById(order.user);
+        const tickets = order.ticketsBought;
+        //check on the date of the event
+        //if the event is in the future then the attendee is attending
+        const currentDate = new Date();
+        if(event.startDate > currentDate  && canceled==false){
+            attendeeStatus="Attending";
+        }
+        //if the event is in the past then the attendee is attended
+        else if(event.startDate < currentDate && canceled==false){
+            attendeeStatus="Attended";
+        }
+        //if the event is in the past and the order is canceled then the attendee is not attended
+        else if(canceled==true){
+            attendeeStatus="Not Attending";
+        }
+
+        for (let ticket of tickets) {
+            const ticketType = await Ticket.findById(ticket.ticketClass);
+            const ticketNum=ticket.number;
+            //push the info to the response object
+            response.Report.push({
+                orderNumber: order._id,
+                orderDate:order.createdAt,
+                attendeeStatus:attendeeStatus,
+                name: user.firstName+" "+user.lastName,
+                email: user.emailAddress,
+                eventName: event.name,
+                ticketQuantity: ticketNum,
+                ticketType: ticketType.name,
+                ticketPrice: ticketType.price,
+                BuyerName: order.firstName+" "+order.lastName,
+                BuyerEmail: order.email
+            });
+        }
+    }
+
+
+    
+    //try to send the response
+    try {
+        const header = Object.keys(response.Report[0].toJSON());
+
+        return downloadResource(res, 'attendee.csv', header, response.Report);
     }
     //catch any errors
     catch (err) {
