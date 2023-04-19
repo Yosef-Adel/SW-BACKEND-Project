@@ -91,6 +91,8 @@ describe("Events", () => {
             const {categoryID} = await createCategory();
             const token = await getToken();
             console.log(token);
+            // Send a POST request to with form data
+
             const event = await request(app).post("/api/events").send({
                 "name": "Aly event",
                 "capacity": 1000,
@@ -117,120 +119,120 @@ describe("Events", () => {
         });
     });
 
-    // describe("POST /events", () => {
-    //     beforeEach(async () => {
-    //         await Event.deleteMany({});
-    //         await Category.deleteMany({});
-    //         await User.deleteMany({});
-    //     });
-    //     it("should return 200 OK",async () => {
-    //         const {categoryID} = await createCategory();
-    //         const token = await getToken();
-    //         const res = await request(app).post("/api/events").send({
-    //             "name": "Aly event",
-    //             "capacity": 1000,
-    //             "description": "Aly eventAly eventAly eventAly eventAly eventAly event",
-    //             "summary": "Aly eventAly eventAly eventAly eventAly eventAly event",
-    //             "date":"2015-05-02",
-    //             "organizer": "178c938efc5c9b18a400de22",
-    //             "category": categoryID,
-    //             "venueName": "Aly venue",
-    //             "city": "Aly venue",
-    //             "address1": "Aly venue",
-    //             "country": "Aly venue",
-    //             "isOnline": "true",
-    //             "image":"htyppat",
-    //             "hostedBy":"178c938efc5c9b18a400de22",
-    //             "startDate":"2023-04-18T19:00",
-    //             "endDate":"2023-04-18T19:00",
-    //         }).set('Authorization', 'Bearer ' + token);
-    //         testFormat(res, 200, "Event created successfully");
-    //         expect(res.body).toHaveProperty('event');
-    //         expect(res.body.event).toHaveProperty('name');
-    //         expect(res.body.event.name).toEqual('Aly event');
-    //     });
+    describe("POST /events", () => {
+        beforeEach(async () => {
+            await Event.deleteMany({});
+            await Category.deleteMany({});
+            await User.deleteMany({});
+        });
+        it("should return 200 OK",async () => {
+            const {categoryID} = await createCategory();
+            const token = await getToken();
+            const res = await request(app).post("/api/events").send({
+                "name": "Aly event",
+                "capacity": 1000,
+                "description": "Aly eventAly eventAly eventAly eventAly eventAly event",
+                "summary": "Aly eventAly eventAly eventAly eventAly eventAly event",
+                "date":"2015-05-02",
+                "organizer": "178c938efc5c9b18a400de22",
+                "category": categoryID,
+                "venueName": "Aly venue",
+                "city": "Aly venue",
+                "address1": "Aly venue",
+                "country": "Aly venue",
+                "isOnline": "true",
+                "image":"htyppat",
+                "hostedBy":"178c938efc5c9b18a400de22",
+                "startDate":"2023-04-18T19:00",
+                "endDate":"2023-04-18T19:00",
+            }).set('Authorization', 'Bearer ' + token);
+            testFormat(res, 200, "Event created successfully");
+            expect(res.body).toHaveProperty('event');
+            expect(res.body.event).toHaveProperty('name');
+            expect(res.body.event.name).toEqual('Aly event');
+        });
 
-    //     it("should return 400 Bad Request due to missing name field",async () => {
-    //         const {categoryID} = await createCategory();
-    //         const token = await getToken();
-    //         const res = await request(app).post("/api/events").send({
-    //             "capacity": 1000,
-    //             "description": "Aly eventAly eventAly eventAly eventAly eventAly event",
-    //             "category": categoryID
-    //         }).set('Authorization', 'Bearer ' + token);
-    //         testFormat(res, 400, "name field is required");
-    //     });
+        it("should return 400 Bad Request due to missing name field",async () => {
+            const {categoryID} = await createCategory();
+            const token = await getToken();
+            const res = await request(app).post("/api/events").send({
+                "capacity": 1000,
+                "description": "Aly eventAly eventAly eventAly eventAly eventAly event",
+                "category": categoryID
+            }).set('Authorization', 'Bearer ' + token);
+            testFormat(res, 400, "name field is required");
+        });
 
-    // });
+    });
 
-    // describe("GET /events/nearest", () => {
-    //     it("should return 200 OK",async () => {
-    //         const res = await request(app).get("/api/events/nearest?lat=30.4288393&lng=31.2912463");
-    //         expect(res.statusCode).toEqual(200);
-    //         expect(res.body).toHaveProperty('city');
-    //         expect(res.body.city).toEqual('Qalyubia');
-    //         expect(res.body).toHaveProperty('events');
-    //     });
-    // });
+    describe("GET /events/nearest", () => {
+        it("should return 200 OK",async () => {
+            const res = await request(app).get("/api/events/nearest?lat=30.4288393&lng=31.2912463");
+            expect(res.statusCode).toEqual(200);
+            expect(res.body).toHaveProperty('city');
+            expect(res.body.city).toEqual('Qalyubia');
+            expect(res.body).toHaveProperty('events');
+        });
+    });
 
-    // describe("GET /events/ filter location", () => {
-    //     it("should return 200 OK",async () => {
-    //         const {categoryID} = await createCategory();
-    //         const token = await getToken();
-    //         const events = await request(app).post("/api/events").send({
-    //             "name": "Aly event",
-    //             "capacity": 1000,
-    //             "description": "Aly eventAly eventAly eventAly eventAly eventAly event",
-    //             "summary": "Aly eventAly eventAly eventAly eventAly eventAly event",
-    //             "date":"2015-05-02",
-    //             "organizer": "178c938efc5c9b18a400de22",
-    //             "category": categoryID,
-    //             "venueName": "Aly venue",
-    //             "city": "Giza",
-    //             "address1": "Aly venue",
-    //             "country": "Aly venue",
-    //             "isOnline": "true",
-    //             "image":"htyppat",
-    //             "hostedBy":"178c938efc5c9b18a400de22",
-    //             "startDate":"2023-04-18T19:00",
-    //             "endDate":"2023-04-18T19:00",
-    //         }).set('Authorization', 'Bearer ' + token);
-    //         const res = await request(app).get("/api/events?lat=29.998481&lng=31.161729");
-    //         expect(res.statusCode).toEqual(200);
-    //         expect(res.body).toHaveProperty('city');
-    //         expect(res.body.city).toEqual('Giza');
-    //         expect(res.body).toHaveProperty('events');
-    //     });
-    // });
+    describe("GET /events/ filter location", () => {
+        it("should return 200 OK",async () => {
+            const {categoryID} = await createCategory();
+            const token = await getToken();
+            const events = await request(app).post("/api/events").send({
+                "name": "Aly event",
+                "capacity": 1000,
+                "description": "Aly eventAly eventAly eventAly eventAly eventAly event",
+                "summary": "Aly eventAly eventAly eventAly eventAly eventAly event",
+                "date":"2015-05-02",
+                "organizer": "178c938efc5c9b18a400de22",
+                "category": categoryID,
+                "venueName": "Aly venue",
+                "city": "Giza",
+                "address1": "Aly venue",
+                "country": "Aly venue",
+                "isOnline": "true",
+                "image":"htyppat",
+                "hostedBy":"178c938efc5c9b18a400de22",
+                "startDate":"2023-04-18T19:00",
+                "endDate":"2023-04-18T19:00",
+            }).set('Authorization', 'Bearer ' + token);
+            const res = await request(app).get("/api/events?lat=29.998481&lng=31.161729");
+            expect(res.statusCode).toEqual(200);
+            expect(res.body).toHaveProperty('city');
+            expect(res.body.city).toEqual('Giza');
+            expect(res.body).toHaveProperty('events');
+        });
+    });
 
-    // describe("GET /events/ filter category", () => {
-    //     it("should return 200 OK",async () => {
-    //         const {categoryID,categoryName} = await createCategory();
-    //         const token = await getToken();
-    //         const events = await request(app).post(`/api/events?category=${categoryName}`).send({
-    //             "name": "Aly event",
-    //             "capacity": 1000,
-    //             "description": "Aly eventAly eventAly eventAly eventAly eventAly event",
-    //             "summary": "Aly eventAly eventAly eventAly eventAly eventAly event",
-    //             "date":"2015-05-02",
-    //             "organizer": "178c938efc5c9b18a400de22",
-    //             "category": categoryID,
-    //             "venueName": "Aly venue",
-    //             "city": "Giza",
-    //             "address1": "Aly venue",
-    //             "country": "Aly venue",
-    //             "isOnline": "true",
-    //             "image":"htyppat",
-    //             "hostedBy":"178c938efc5c9b18a400de22",
-    //             "startDate":"2023-04-18T19:00",
-    //             "endDate":"2023-04-18T19:00",
-    //         }).set('Authorization', 'Bearer ' + token);
-    //         const res = await request(app).get("/api/events?lat=29.998481&lng=31.161729");
-    //         expect(res.statusCode).toEqual(200);
-    //         expect(res.body).toHaveProperty('city');
-    //         expect(res.body).toHaveProperty('events');
-    //         expect(res.body.events[0].category).toEqual(categoryID);
-    //     });
-    // });
+    describe("GET /events/ filter category", () => {
+        it("should return 200 OK",async () => {
+            const {categoryID,categoryName} = await createCategory();
+            const token = await getToken();
+            const events = await request(app).post(`/api/events?category=${categoryName}`).send({
+                "name": "Aly event",
+                "capacity": 1000,
+                "description": "Aly eventAly eventAly eventAly eventAly eventAly event",
+                "summary": "Aly eventAly eventAly eventAly eventAly eventAly event",
+                "date":"2015-05-02",
+                "organizer": "178c938efc5c9b18a400de22",
+                "category": categoryID,
+                "venueName": "Aly venue",
+                "city": "Giza",
+                "address1": "Aly venue",
+                "country": "Aly venue",
+                "isOnline": "true",
+                "image":"htyppat",
+                "hostedBy":"178c938efc5c9b18a400de22",
+                "startDate":"2023-04-18T19:00",
+                "endDate":"2023-04-18T19:00",
+            }).set('Authorization', 'Bearer ' + token);
+            const res = await request(app).get("/api/events?lat=29.998481&lng=31.161729");
+            expect(res.statusCode).toEqual(200);
+            expect(res.body).toHaveProperty('city');
+            expect(res.body).toHaveProperty('events');
+            expect(res.body.events[0].category).toEqual(categoryID);
+        });
+    });
 
 });
