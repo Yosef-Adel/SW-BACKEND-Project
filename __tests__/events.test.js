@@ -154,48 +154,48 @@ describe("Events", () => {
     });
 
     describe("POST /events", () => {
-        // beforeEach(async () => {
-        //     await Event.deleteMany({});
-        //     await Category.deleteMany({});
-        //     await User.deleteMany({});
-        // });
-        // it("should return 200 OK",async () => {
-        //     const {categoryID} = await createCategory();
-        //     const token = await getToken();
-        //     const res = await request(app).post("/api/events").send({
-        //         "name": "Aly event",
-        //         "capacity": 1000,
-        //         "description": "Aly eventAly eventAly eventAly eventAly eventAly event",
-        //         "summary": "Aly eventAly eventAly eventAly eventAly eventAly event",
-        //         "date":"2015-05-02",
-        //         "organizer": "178c938efc5c9b18a400de22",
-        //         "category": categoryID,
-        //         "venueName": "Aly venue",
-        //         "city": "Aly venue",
-        //         "address1": "Aly venue",
-        //         "country": "Aly venue",
-        //         "isOnline": "true",
-        //         "image":"htyppat",
-        //         "hostedBy":"178c938efc5c9b18a400de22",
-        //         "startDate":"2023-04-18T19:00",
-        //         "endDate":"2023-04-18T19:00",
-        //     }).set('Authorization', 'Bearer ' + token);
-        //     testFormat(res, 200, "Event created successfully");
-        //     expect(res.body).toHaveProperty('event');
-        //     expect(res.body.event).toHaveProperty('name');
-        //     expect(res.body.event.name).toEqual('Aly event');
-        // });
+        beforeEach(async () => {
+            await Event.deleteMany({});
+            await Category.deleteMany({});
+            await User.deleteMany({});
+        });
+        it("should return 200 OK",async () => {
+            const {categoryID} = await createCategory();
+            const token = await getToken();
+            const res = await request(app).post("/api/events").send({
+                "name": "Aly event",
+                "capacity": 1000,
+                "description": "Aly eventAly eventAly eventAly eventAly eventAly event",
+                "summary": "Aly eventAly eventAly eventAly eventAly eventAly event",
+                "date":"2015-05-02",
+                "organizer": "178c938efc5c9b18a400de22",
+                "category": categoryID,
+                "venueName": "Aly venue",
+                "city": "Aly venue",
+                "address1": "Aly venue",
+                "country": "Aly venue",
+                "isOnline": "true",
+                "image":"htyppat",
+                "hostedBy":"178c938efc5c9b18a400de22",
+                "startDate":"2023-04-18T19:00",
+                "endDate":"2023-04-18T19:00",
+            }).set('Authorization', 'Bearer ' + token);
+            testFormat(res, 200, "Event created successfully");
+            expect(res.body).toHaveProperty('event');
+            expect(res.body.event).toHaveProperty('name');
+            expect(res.body.event.name).toEqual('Aly event');
+        });
 
-        // it("should return 400 Bad Request due to missing name field",async () => {
-        //     const {categoryID} = await createCategory();
-        //     const token = await getToken();
-        //     const res = await request(app).post("/api/events").send({
-        //         "capacity": 1000,
-        //         "description": "Aly eventAly eventAly eventAly eventAly eventAly event",
-        //         "category": categoryID
-        //     }).set('Authorization', 'Bearer ' + token);
-        //     testFormat(res, 400, "name field is required");
-        // });
+        it("should return 400 Bad Request due to missing name field",async () => {
+            const {categoryID} = await createCategory();
+            const token = await getToken();
+            const res = await request(app).post("/api/events").send({
+                "capacity": 1000,
+                "description": "Aly eventAly eventAly eventAly eventAly eventAly event",
+                "category": categoryID
+            }).set('Authorization', 'Bearer ' + token);
+            testFormat(res, 400, "name field is required");
+        });
 
     });
 
