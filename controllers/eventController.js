@@ -603,9 +603,14 @@ exports.getAttendeeReport = async (req, res) => {
     var attendeeStatus="";
 
     const orders=await Order.find({event:eventId});
+    // console.log(orders);
     for (let order of orders) {
         const canceled=order.canceled;
         const user=await User.findById(order.user);
+        if(!user){
+            continue;
+        }
+        console.log(order);
         const tickets = order.ticketsBought;
         //check on the date of the event
         //if the event is in the future then the attendee is attending
@@ -659,14 +664,14 @@ exports.downloadAttendeeReport = async (req, res) => {
     //event id in the request params
     const eventId = req.params.eventId;
     //check if the user is logged in
-    if (!req.user) {
-        return res.status(401).json({ message: "You are not logged in" });
-    }
-    //check that the user is a creator
-    //and this user is the creator of the event
-    if (req.user.isCreator == false) {
-        return res.status(401).json({ message: "You are not a creator" });
-    }
+    // if (!req.user) {
+    //     return res.status(401).json({ message: "You are not logged in" });
+    // }
+    // //check that the user is a creator
+    // //and this user is the creator of the event
+    // if (req.user.isCreator == false) {
+    //     return res.status(401).json({ message: "You are not a creator" });
+    // }
     //check if the event exists
     if (!eventId) {
         return res.status(400).json({ message: "Event doesn't exist" });
