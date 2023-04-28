@@ -37,7 +37,7 @@ const getTicketsSold = async (event_id) => {
         //the result of the aggregation is an array of objects
         //the first object is the one we want
         ///the ticketsSold field is the one we want
-        return result[0].ticketsSold;
+        return result.length > 0 ? result[0].ticketsSold : 0;
     }
     catch(err){
         return err.message;
@@ -67,7 +67,7 @@ const getOrdersCount = async (event_id) => {
             }
         ]);
 
-        return result[0].ordersCount;
+        return result.length > 0 ? result[0].ordersCount : 0;
 
     }
     catch(err){
@@ -99,7 +99,7 @@ const getTotalCapacity = async (event_id) => {
             }
         ]);
         //the result of the aggregation is an array of objects
-        return result[0].ticketsCount;
+        return result.length > 0 ? result[0].ticketsCount : 0;
     }
     catch(err){
         return err.message;
@@ -129,7 +129,7 @@ const getTotalMoneyEarned = async (event_id) => {
             }
         ]);
         //the result of the aggregation is an array of objects
-        return result[0].totalMoneyEarned;
+        return result.length > 0 ? result[0].totalMoneyEarned : 0;
     }
     catch(err){
         return err.message;
@@ -166,12 +166,99 @@ const getTotalTicketsInOrder = async (order_id, event_id) => {
             }
         ]);
         //the result of the aggregation is an array of objects
-        return result[0].totalTickets;
+        return result.length > 0 ? result[0].totalTickets : 0;
     }
     catch(err){
         return err.message;
     }     
 };
 
+// create an aggregate function to loop through the tickets of an event and sum their capacities
+const getTotalTicketCapacity = async (eventId) => {
+    const totalTicketCapacity = await Ticket.aggregate([
+        {
+            $match: { event: eventId }
+        },
+        {
+            $group: {
+                _id: "$event",
+                ticketsCount: {
+                    $sum: "$capacity"
+                }
+            }
+        }
+    ]);
+    return totalTicketCapacity.length > 0 ? totalTicketCapacity[0].ticketsCount : 0;
+};
 
-module.exports = {getTicketsSold, getOrdersCount, getTotalCapacity, getTotalMoneyEarned, getTotalTicketsInOrder};
+//create an aggregate function to get the number of free tickets sold for an event
+//will get the event id and return the number of free tickets sold
+const getFreeTicketsSold = async (event_id) => {
+    try{
+        const result=await Ticket.aggregate([
+            //match the event id filters the tickets by the specified event
+            {
+                $match: {
+                    event: mongoose.Types.ObjectId(event_id),
+                    type: "Free"
+                }
+            },
+            //group the tickets by event and sum the free tickets sold
+            //summing the free field
+            {
+                $group: {
+                    _id: "$event",
+                    freeTicketsSold: {
+                        $sum: "$sold"
+                    }
+                }
+            }
+        ]);
+        //the result of the aggregation is an array of objects
+        //the first object is the one we want
+        ///the freeTicketsSold field is the one we want
+        return result.length > 0 ? result[0].freeTicketsSold : 0;
+    }
+    catch(err){
+        return err.message;
+    }
+};
+
+//create an aggregate function to get the number of paid tickets sold for an event
+//will get the event id and return the number of paid tickets sold
+const getPaidTicketsSold = async (event_id) => {
+    try{
+        const result=await Ticket.aggregate([
+            //match the event id filters the tickets by the specified event
+            {
+                $match: {
+                    event: mongoose.Types.ObjectId(event_id),
+                    type: "Paid"
+                }
+            },
+            //group the tickets by event and sum the paid tickets sold
+            //summing the paid field
+            {
+                $group: {
+                    _id: "$event",
+                    paidTicketsSold: {
+                        $sum: "$sold"
+                    }
+                }
+            }
+        ]);
+        //the result of the aggregation is an array of objects
+        //the first object is the one we want
+        ///the paidTicketsSold field is the one we want
+        return result.length > 0 ? result[0].paidTicketsSold : 0;
+    }
+    catch(err){
+        return err.message;
+    }
+};
+
+
+
+
+
+module.exports = {getTicketsSold, getOrdersCount, getTotalCapacity, getTotalMoneyEarned, getTotalTicketsInOrder, getTotalTicketCapacity, getFreeTicketsSold, getPaidTicketsSold};

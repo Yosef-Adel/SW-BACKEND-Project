@@ -34,5 +34,7 @@ router.get('/:eventId/getAttendeeReport',authorization, eventController.getAtten
 router.get('/:eventId/getAttendeeReport/download',authorization, eventController.downloadAttendeeReport);
 router.get('/:eventId/getSalesByTicketTypeReport',authorization, eventController.getSalesByTicketTypeReport);
 router.get('/:eventId/getOrderSummaryReport',authorization, eventController.getOrderSummaryReport);
+router.get('/:eventId/getEventUrl',authorization, eventController.getEventUrl);
+router.get('/:eventId/getTicketsSoldForEvent',authorization, eventController.getTicketsSoldForEvent);
 
 module.exports = router;

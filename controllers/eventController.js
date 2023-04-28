@@ -15,7 +15,7 @@ const axios = require('axios');
 const mongoose = require('mongoose');
 const Date = require('date.js');
 
-const {getTicketsSold, getOrdersCount, getTotalCapacity, getTotalMoneyEarned, getTotalTicketsInOrder} = require('./aggregateFunctions');
+const {getTicketsSold, getOrdersCount, getTotalCapacity, getTotalMoneyEarned, getTotalTicketsInOrder, getTotalTicketCapacity, getFreeTicketsSold, getPaidTicketsSold} = require('./aggregateFunctions');
 const Ticket = require('../models/Tickets');
 const Organization = require('../models/Organization');
 // const { CsvWriter } = require('csv-writer/src/lib/csv-writer');
@@ -587,7 +587,9 @@ exports.getAttendeeReport = async (req, res) => {
 
     //get the total sold tickets count
     //which is the number of attendees
-    const AttendeesCount = await getTicketsSold(eventId);
+    // change this to be the number of orders
+    const AttendeesCount = await getOrdersCount(eventId);
+    // const AttendeesCount = await getTicketsSold(eventId);
 
     //setup the response object
     const response = {
@@ -909,4 +911,87 @@ exports.getOrderSummaryReport = async (req, res) => {
             catch (err) {
                 res.status(400).json({ message: "Error in getting the order summary report" });
             }
+};
+
+// get the event url
+exports.getEventUrl = async (req, res) => {
+                //event id in the request params
+                const eventId = req.params.eventId;
+                //check if the user is logged in
+                if (!req.user) {
+                    return res.status(401).json({ message: "You are not logged in" });
+                }
+                //check that the user is a creator
+                //and this user is the creator of the event
+                if (req.user.isCreator == false) {
+                    return res.status(401).json({ message: "You are not a creator" });
+                }
+                //check if the event exists
+                if (!eventId) {
+                    return res.status(400).json({ message: "Event doesn't exist" });
+                }
+
+                //return the event url
+                try 
+                {
+                    const url = "https://d1a3ozfbtcn1f.cloudfront.net/user/event/"+eventId;
+                    res.status(200).json({ url: url });
+                } 
+                catch (err) {
+                    res.status(400).json({ message: "Error in getting the event url" });
+                }
+
+
+};
+
+//get tickets sold for an event
+exports.getTicketsSoldForEvent = async (req, res) => {
+            //event id in the request params
+            const eventId = req.params.eventId;
+            //check if the user is logged in
+            if (!req.user) {
+                return res.status(401).json({ message: "You are not logged in" });
+            }
+            //check that the user is a creator
+            //and this user is the creator of the event
+            if (req.user.isCreator == false) {
+                return res.status(401).json({ message: "You are not a creator" });
+            }
+            //check if the event exists
+            if (!eventId) {
+                return res.status(400).json({ message: "Event doesn't exist" });
+            }
+
+            //get the total sold tickets count
+            const soldTickets=await getTicketsSold(eventId);
+
+            const event=await Event.findById(eventId);
+            const eventCapacity=event.capacity;
+
+            const totalTicketCapacity=await getTotalCapacity(eventId);
+
+            var TotalCapacityFinal=eventCapacity;
+            if (totalTicketCapacity < eventCapacity) 
+            {
+                TotalCapacityFinal = totalTicketCapacity;
+            }
+
+            const freeTicketsSold=await getFreeTicketsSold(eventId);
+            const paidTicketsSold=await getPaidTicketsSold(eventId);
+
+            //try to send the response
+            try {
+                res.status(200).json({
+                    soldTickets: soldTickets,
+                    totalCapacity: TotalCapacityFinal,
+                    freeTicketsSold: freeTicketsSold,
+                    paidTicketsSold: paidTicketsSold
+                });
+            }
+            //catch any errors
+            catch (err) {
+                res.status(400).json({ message: "Error in getting the tickets sold for an event" });
+            }    
+
+
 };
