@@ -568,6 +568,8 @@ exports.getUserUpcomingEvents = async(req, res) => {
 exports.getAttendeeReport = async (req, res) => {
     //event id in the request params
     const eventId = req.params.eventId;
+    const page = parseInt(req.query.page) || 1; // extract page from query parameters or default to 1
+    const orderLimit = parseInt(req.query.orderLimit) || 5; // extract limit from query parameters or default to 10
     //check if the user is logged in
     if (!req.user) {
         return res.status(401).json({ message: "You are not logged in" });
@@ -585,6 +587,9 @@ exports.getAttendeeReport = async (req, res) => {
     //get the order count
     const orderCount = await getOrdersCount(eventId);
 
+    // set the total number of pages depending on the orders count
+    const totalPages = Math.ceil(orderCount / orderLimit);
+
     //get the total sold tickets count
     //which is the number of attendees
     // change this to be the number of orders
@@ -596,6 +601,13 @@ exports.getAttendeeReport = async (req, res) => {
         totalOrders: orderCount,
         totalAttendees: AttendeesCount,
         Report: [],
+        pagination: {
+            totalOrders: orderCount,
+            totalPages: totalPages,
+            currentPage: page,
+            nextPage: page < totalPages ? page + 1 : null,
+            prevPage: page > 1 ? page - 1 : null,
+        }
     };
 
     //loop through every order with the event id
@@ -604,7 +616,10 @@ exports.getAttendeeReport = async (req, res) => {
     const event = await Event.findById(eventId);
     var attendeeStatus="";
 
-    const orders=await Order.find({event:eventId});
+    const orders=await Order.find({event:eventId})
+    .skip((page - 1) * orderLimit)
+    .limit(orderLimit)
+    
     // console.log(orders);
     for (let order of orders) {
         const canceled=order.canceled;
@@ -764,7 +779,7 @@ exports.getSalesByTicketTypeReport = async (req, res) => {
     //event id in the request params
     const eventId = req.params.eventId;
     const page = parseInt(req.query.page) || 1; // extract page from query parameters or default to 1
-    const orderLimit = parseInt(req.query.orderLimit) || 10; // extract limit from query parameters or default to 10
+    const orderLimit = parseInt(req.query.orderLimit) || 5; // extract limit from query parameters or default to 10
     //check if the user is logged in
     if (!req.user) {
         return res.status(401).json({ message: "You are not logged in" });
@@ -887,7 +902,7 @@ exports.getSalesByTicketTypeReport = async (req, res) => {
 exports.getOrderSummaryReport = async (req, res) => {
     const eventId = req.params.eventId;
     const page = parseInt(req.query.page) || 1; // extract page from query parameters or default to 1
-    const limit = parseInt(req.query.limit) || 10; // extract limit from query parameters or default to 10
+    const limit = parseInt(req.query.limit) || 5; // extract limit from query parameters or default to 10
 
     if (!req.user) {
         return res.status(401).json({ message: "You are not logged in" });
