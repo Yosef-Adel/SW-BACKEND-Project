@@ -862,55 +862,71 @@ exports.getSalesByTicketTypeReport = async (req, res) => {
         }
 };
 
-//order summary report
 exports.getOrderSummaryReport = async (req, res) => {
-            //event id in the request params
-            const eventId = req.params.eventId;
-            //check if the user is logged in
-            if (!req.user) {
-                return res.status(401).json({ message: "You are not logged in" });
-            }
-            //check that the user is a creator
-            //and this user is the creator of the event
-            if (req.user.isCreator == false) {
-                return res.status(401).json({ message: "You are not a creator" });
-            }
-            //check if the event exists
-            if (!eventId) {
-                return res.status(400).json({ message: "Event doesn't exist" });
-            }
-            
-            const orders=await Order.find({event:eventId});
-            //initialize the response object
-            const response = {
-                Report: [],
-            };
-            for (let order of orders) {
-                const orderId=order._id;
-                const user=await User.findById(order.user);
-                if(!user){
-                    continue;
-                }
-                const totalTickets=await getTotalTicketsInOrder(orderId,eventId);
-                //push the info to the response object
-                response.Report.push({
-                    orderNumber: order._id,
-                    name: user.firstName+" "+user.lastName,
-                    quantity:totalTickets,
-                    price:order.total,
-                    date:order.createdAt
-                });
+    const eventId = req.params.eventId;
+    const page = parseInt(req.query.page) || 1; // extract page from query parameters or default to 1
+    const limit = parseInt(req.query.limit) || 10; // extract limit from query parameters or default to 10
 
-            }
+    if (!req.user) {
+        return res.status(401).json({ message: "You are not logged in" });
+    }
 
-            //try to send the response
-            try {
-                res.status(200).json(response);
-            }
-            //catch any errors
-            catch (err) {
-                res.status(400).json({ message: "Error in getting the order summary report" });
-            }
+    if (req.user.isCreator === false) {
+        return res.status(401).json({ message: "You are not a creator" });
+    }
+
+    if (!eventId) {
+        return res.status(400).json({ message: "Event doesn't exist" });
+    }
+
+    const orders = await Order.find({ event: eventId })
+      .skip((page - 1) * limit) // skip documents based on page number and limit
+      .limit(limit); // limit the number of documents returned
+
+    const totalOrders = await Order.countDocuments({ event: eventId });
+
+    const totalPages = Math.ceil(totalOrders / limit); // calculate total number of pages
+
+    const response = {
+        Report: [],
+        pagination: {
+            totalOrders: totalOrders,
+            totalPages: totalPages,
+            currentPage: page,
+            nextPage: page < totalPages ? page + 1 : null,
+            prevPage: page > 1 ? page - 1 : null,
+        },
+    };
+
+    // console.log(orders);
+
+    for (let order of orders) {
+        const orderId = order._id;
+        const user = await User.findById(order.user);
+        console.log(user);
+
+        if (!user) {
+        continue;
+        }
+
+        const totalTickets = await getTotalTicketsInOrder(orderId, eventId);
+
+        response.Report.push({
+        orderNumber: order._id,
+        name: user.firstName + " " + user.lastName,
+        quantity: totalTickets,
+        price: order.total,
+        date: order.createdAt,
+        });
+
+        // console.log(response.Report);
+    }
+
+    try {
+        res.status(200).json(response);
+    } catch (err) {
+        res.status(400).json({ message: "Error in getting the order summary report" });
+    }
 };
 
 // get the event url
