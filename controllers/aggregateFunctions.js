@@ -257,8 +257,33 @@ const getPaidTicketsSold = async (event_id) => {
     }
 };
 
+// create an aggregate function to sum the number of ticket types sold for an event
+// it should loop through the orders of an event and sum the lengths of the ticketsBought array for each order
+//return the sum of the lengths of the ticketsBought arrays
+const getSumofTicketsBoughtArray = async (eventId) => {
+    const sumofTicketsBoughtArray = await Order.aggregate([
+        {
+            $match:
+            {
+                event: mongoose.Types.ObjectId(eventId),
+            }
+        },
+        {
+            $group: {
+                _id: "$event",
+                sumofTicketsBoughtArray: {
+                    $sum: { $size: "$ticketsBought" }
+                }
+            }
+        }
+    ]);
+    return sumofTicketsBoughtArray.length > 0 ? sumofTicketsBoughtArray[0].sumofTicketsBoughtArray : 0;
+};
 
 
 
 
-module.exports = {getTicketsSold, getOrdersCount, getTotalCapacity, getTotalMoneyEarned, getTotalTicketsInOrder, getTotalTicketCapacity, getFreeTicketsSold, getPaidTicketsSold};
+
+
+
+module.exports = {getTicketsSold, getOrdersCount, getTotalCapacity, getTotalMoneyEarned, getTotalTicketsInOrder, getTotalTicketCapacity, getFreeTicketsSold, getPaidTicketsSold, getSumofTicketsBoughtArray};

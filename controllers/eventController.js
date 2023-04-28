@@ -15,7 +15,7 @@ const axios = require('axios');
 const mongoose = require('mongoose');
 const Date = require('date.js');
 
-const {getTicketsSold, getOrdersCount, getTotalCapacity, getTotalMoneyEarned, getTotalTicketsInOrder, getTotalTicketCapacity, getFreeTicketsSold, getPaidTicketsSold} = require('./aggregateFunctions');
+const {getTicketsSold, getOrdersCount, getTotalCapacity, getTotalMoneyEarned, getTotalTicketsInOrder, getTotalTicketCapacity, getFreeTicketsSold, getPaidTicketsSold,getSumofTicketsBoughtArray} = require('./aggregateFunctions');
 const Ticket = require('../models/Tickets');
 const Organization = require('../models/Organization');
 // const { CsvWriter } = require('csv-writer/src/lib/csv-writer');
@@ -761,106 +761,128 @@ exports.downloadAttendeeReport = async (req, res) => {
 //sales report function
 //sales by ticket type
 exports.getSalesByTicketTypeReport = async (req, res) => {
-        //event id in the request params
-        const eventId = req.params.eventId;
-        //check if the user is logged in
-        if (!req.user) {
-            return res.status(401).json({ message: "You are not logged in" });
-        }
-        //check that the user is a creator
-        //and this user is the creator of the event
-        if (req.user.isCreator == false) {
-            return res.status(401).json({ message: "You are not a creator" });
-        }
-        //check if the event exists
-        if (!eventId) {
-            return res.status(400).json({ message: "Event doesn't exist" });
-        }
+    //event id in the request params
+    const eventId = req.params.eventId;
+    const page = parseInt(req.query.page) || 1; // extract page from query parameters or default to 1
+    const orderLimit = parseInt(req.query.orderLimit) || 10; // extract limit from query parameters or default to 10
+    //check if the user is logged in
+    if (!req.user) {
+        return res.status(401).json({ message: "You are not logged in" });
+    }
+    //check that the user is a creator
+    //and this user is the creator of the event
+    if (req.user.isCreator == false) {
+        return res.status(401).json({ message: "You are not a creator" });
+    }
+    //check if the event exists
+    if (!eventId) {
+        return res.status(400).json({ message: "Event doesn't exist" });
+    }
 
-        //get the order count
-        const orderCount = await getOrdersCount(eventId);
+    //get the order count
+    const orderCount = await getOrdersCount(eventId);
 
-        //get the total sold tickets count
-        //which is the number of attendees
-        const AttendeesCount = await getTicketsSold(eventId);
+    // // the total number of pages
+    // //is the multiplication of the number of orders and the sum of lengths of ticketsBought array of every order divided by the limit
+    // const ticketsBoughtLength = await getSumofTicketsBoughtArray(eventId);
+    // // console.log(ticketsBoughtLength);
+    // const totalPages = Math.ceil(orderCount*ticketsBoughtLength / limit);
+    const totalPages = Math.ceil(orderCount / orderLimit);
 
-        //total sales
-        const totalSales = await getTotalMoneyEarned(eventId);
+    // the total attendee count is the same as the total orders count
+    const AttendeesCount = await getOrdersCount(eventId);
 
-        //initialize the response object
-        const response = {
+    //total sales
+    const totalSales = await getTotalMoneyEarned(eventId);
+
+    //initialize the response object
+    const response = {
+        totalOrders: orderCount,
+        totalAttendees: AttendeesCount,
+        totalSales: totalSales,
+        Report: [],
+        pagination: {
             totalOrders: orderCount,
-            totalAttendees: AttendeesCount,
-            totalSales: totalSales,
-            Report: [],
-        };
+            totalPages: totalPages,
+            currentPage: page,
+            nextPage: page < totalPages ? page + 1 : null,
+            prevPage: page > 1 ? page - 1 : null,
+        }
+    };
 
-        //get the event
-        const event=await Event.findById(eventId);
-        var attendeeStatus="";
-        var orderType="";
-        //get order
-        const orders=await Order.find({event:eventId});
-        for (let order of orders) {
-            const canceled=order.canceled;
-            const tickets = order.ticketsBought;
-            const user=await User.findById(order.user);
-            if(!user){
-                continue;
-            }
-            //check on the date of the event
-            //if the event is in the future then the attendee is attending
-            const currentDate = new Date();
-            if(event.startDate > currentDate  && canceled==false){
-                attendeeStatus="Attending";
-            }
-            //if the event is in the past then the attendee is attended
-            else if(event.startDate < currentDate && canceled==false){
-                attendeeStatus="Attended";
-            }
-            //if the event is in the past and the order is canceled then the attendee is not attended
-            else if(canceled==true){
-                attendeeStatus="Not Attending";
-            }
-            if(order.total==0){
-                orderType="Free Order";
-            }
-            else{
-                orderType="Paid Order";
-            }
+    //get the event
+    const event=await Event.findById(eventId);
+    var attendeeStatus="";
+    var orderType="";
+    //get order
+    const orders=await Order.find({event:eventId})
+    .skip((page - 1) * orderLimit)
+    .limit(orderLimit);
 
-            for (let ticket of tickets) {
-                const ticketType = await Ticket.findById(ticket.ticketClass);
-                const ticketNum=ticket.number;
-                //push the info to the response object
-                response.Report.push({
-                    orderNumber: order._id,
-                    orderDate:order.createdAt,
-                    firstName:order.firstName,
-                    lastName:order.lastName,
-                    email:order.email,
-                    quantity:ticketNum,
-                    ticketType:ticketType.name,
-                    attendeeNumber:user._id,
-                    orderType:orderType,
-                    orderCurrency:"EGP",
-                    totalPaid:ticketType.price*ticketNum,
-                    feesPaid:ticketType.fee*ticketNum,
-                    attendeeStatus:attendeeStatus,
-                });
-            }
+    for (let order of orders) {
+        const canceled=order.canceled;
+        const tickets = order.ticketsBought;
+        const user=await User.findById(order.user);
+        if(!user){
+            continue;
         }
-        
-        //try to send the response
-        try {
-            res.status(200).json(response);
+        //check on the date of the event
+        //if the event is in the future then the attendee is attending
+        const currentDate = new Date();
+        if(event.startDate > currentDate  && canceled==false){
+            attendeeStatus="Attending";
         }
-        //catch any errors
-        catch (err) {
-            console.log(err.message);
-            res.status(400).json({ message: "Error in getting the sales by ticket type report" });
+        //if the event is in the past then the attendee is attended
+        else if(event.startDate < currentDate && canceled==false){
+            attendeeStatus="Attended";
         }
+        //if the event is in the past and the order is canceled then the attendee is not attended
+        else if(canceled==true){
+            attendeeStatus="Not Attending";
+        }
+        if(order.total==0){
+            orderType="Free Order";
+        }
+        else{
+            orderType="Paid Order";
+        }
+
+        for (let ticket of tickets) {
+            const ticketType = await Ticket.findById(ticket.ticketClass);
+            const ticketNum=ticket.number;
+            //push the info to the response object
+            response.Report.push({
+                orderNumber: order._id,
+                orderDate:order.createdAt,
+                firstName:order.firstName,
+                lastName:order.lastName,
+                email:order.email,
+                quantity:ticketNum,
+                ticketType:ticketType.name,
+                attendeeNumber:user._id,
+                orderType:orderType,
+                orderCurrency:"EGP",
+                totalPaid:ticketType.price*ticketNum,
+                feesPaid:ticketType.fee*ticketNum,
+                attendeeStatus:attendeeStatus,
+            });
+        }
+    }
+
+    // //slice the response to get the data of the current page
+    // response.Report = response.Report.slice((page - 1) * limit, page * limit);
+    
+    //try to send the response
+    try {
+        res.status(200).json(response);
+    }
+    //catch any errors
+    catch (err) {
+        console.log(err.message);
+        res.status(400).json({ message: "Error in getting the sales by ticket type report" });
+    }
 };
+
 
 exports.getOrderSummaryReport = async (req, res) => {
     const eventId = req.params.eventId;
