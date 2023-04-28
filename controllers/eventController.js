@@ -619,7 +619,7 @@ exports.getAttendeeReport = async (req, res) => {
     const orders=await Order.find({event:eventId})
     .skip((page - 1) * orderLimit)
     .limit(orderLimit)
-    
+
     // console.log(orders);
     for (let order of orders) {
         const canceled=order.canceled;
@@ -779,7 +779,7 @@ exports.getSalesByTicketTypeReport = async (req, res) => {
     //event id in the request params
     const eventId = req.params.eventId;
     const page = parseInt(req.query.page) || 1; // extract page from query parameters or default to 1
-    const orderLimit = parseInt(req.query.orderLimit) || 5; // extract limit from query parameters or default to 10
+    const orderLimit = parseInt(req.query.orderLimit) || 5; // extract limit from query parameters or default to 5
     //check if the user is logged in
     if (!req.user) {
         return res.status(401).json({ message: "You are not logged in" });
@@ -902,7 +902,7 @@ exports.getSalesByTicketTypeReport = async (req, res) => {
 exports.getOrderSummaryReport = async (req, res) => {
     const eventId = req.params.eventId;
     const page = parseInt(req.query.page) || 1; // extract page from query parameters or default to 1
-    const limit = parseInt(req.query.limit) || 5; // extract limit from query parameters or default to 10
+    const limit = parseInt(req.query.limit) || 5; // extract limit from query parameters or default to 5
 
     if (!req.user) {
         return res.status(401).json({ message: "You are not logged in" });
@@ -1045,6 +1045,70 @@ exports.getTicketsSoldForEvent = async (req, res) => {
             catch (err) {
                 res.status(400).json({ message: "Error in getting the tickets sold for an event" });
             }    
+};
 
+// function for the sales by ticket type report in the dashboard
+exports.getSalesByTicketTypeDashboard = async (req, res) => {
+            //event id in the request params
+            const eventId = req.params.eventId;
+            const page = parseInt(req.query.page) || 1; // extract page from query parameters or default to 1
+            const limit = parseInt(req.query.limit) || 5; // extract limit from query parameters or default to 5
+            //check if the user is logged in
+            if (!req.user) {
+                return res.status(401).json({ message: "You are not logged in" });
+            }
+            //check that the user is a creator
+            //and this user is the creator of the event
+            if (req.user.isCreator == false) {
+                return res.status(401).json({ message: "You are not a creator" });
+            }
+            //check if the event exists
+            if (!eventId) {
+                return res.status(400).json({ message: "Event doesn't exist" });
+            }
+
+            // get total tickets of the event
+            const event = await Event.findById(eventId);
+            const ticketTypes= event.tickets.length;
+            const totalPages=Math.ceil(ticketTypes/limit);
+    //initialize the response object
+    const response = {
+        Report: [],
+        pagination: {
+            totalTickets: ticketTypes,
+            totalPages: totalPages,
+            currentPage: page,
+            nextPage: page < totalPages ? page + 1 : null,
+            prevPage: page > 1 ? page - 1 : null,
+        }
+    };
+
+        const tickets=await Ticket.find({event:eventId})
+        .skip((page - 1) * limit) 
+        .limit(limit)
+        for(let ticket of tickets)
+        {
+            const ticketPriceNum=ticket.price;
+            const ticketPriceStr="free";
+            var ticketPriceFinal=ticketPriceNum;
+            if(ticketPriceNum==0){
+                ticketPriceFinal=ticketPriceStr;
+            }
+
+            response.Report.push({
+                ticketType: ticket.name,
+                Price: ticketPriceFinal,
+                sold: ticket.sold,
+                total: ticket.capacity
+            });
+
+        }
+
+        try {
+            res.status(200).json(response);
+        }
+        catch (err) {
+            res.status(400).json({ message: "Error in getting the sales by ticket type" });
+        }
 
 };

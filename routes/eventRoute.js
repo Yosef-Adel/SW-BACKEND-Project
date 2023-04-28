@@ -36,5 +36,6 @@ router.get('/:eventId/getSalesByTicketTypeReport',authorization, eventController
 router.get('/:eventId/getOrderSummaryReport',authorization, eventController.getOrderSummaryReport);
 router.get('/:eventId/getEventUrl',authorization, eventController.getEventUrl);
 router.get('/:eventId/getTicketsSoldForEvent',authorization, eventController.getTicketsSoldForEvent);
+router.get('/:eventId/getSalesByTicketTypeDashboard',authorization, eventController.getSalesByTicketTypeDashboard);
 
 module.exports = router;
