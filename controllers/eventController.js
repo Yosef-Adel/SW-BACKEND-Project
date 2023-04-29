@@ -6,7 +6,7 @@ const csv = require('csv-parser');
 const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 const { Readable,pipeline } = require('stream');
 // import { Parser } from 'json2csv';
-const { downloadResource } = require ('../utils/exportCSV');
+const { downloadResource } = require ('../utils/CSV');
 
 const {generateQRCodeAndSendEmail}=require('../controllers/qrCodeController');
 
