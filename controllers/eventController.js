@@ -1201,15 +1201,11 @@ exports.getSalesSummaryReport=async(req,res)=>{
 
             //initialize the response object
             const response = {
-                Report: []
-            };
-
-            response.Report.push({
                 totalOrders: totalOrders,
-                totalTickets: totalTickets,
+                totalSoldTickets: totalTickets,
                 grossSales: grossSales,
                 netSales: netSales
-            });
+            };
 
             // try to send the response
             try {
