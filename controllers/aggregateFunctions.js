@@ -136,6 +136,40 @@ const getTotalMoneyEarned = async (event_id) => {
     }
 };
 
+// create an aggregate function to get the net sales of an event
+// loop through the orders of an event and sum the subtotal field and the fees field
+// will get the event id and return the net sales
+const getNetSales = async (event_id) => {
+    try{
+        const result=await Order.aggregate([
+            //match the event id filters the orders by the specified event
+            {
+                $match: {
+                    event: mongoose.Types.ObjectId(event_id)
+                }
+            },
+            //group the orders by event and sum the subtotal field and the fees field
+            {
+                $group: {
+                    _id: "$event",
+                    netSales: {
+                        $sum: {
+                            $add: ["$subTotal", "$fees"]
+                        }
+                    }
+                }
+            }
+        ]);
+        // console.log(result);
+        //the result of the aggregation is an array of objects
+        return result.length > 0 ? result[0].netSales : 0;
+    }
+    catch(err){
+        return err.message;
+    }
+};
+
+
 //aggregate function to get the total number of tickets in a certain order
 //loop through the ticketsBought array and sum the number field
 //will get the order id and event id and return the total number of tickets
@@ -286,4 +320,4 @@ const getSumofTicketsBoughtArray = async (eventId) => {
 
 
 
-module.exports = {getTicketsSold, getOrdersCount, getTotalCapacity, getTotalMoneyEarned, getTotalTicketsInOrder, getTotalTicketCapacity, getFreeTicketsSold, getPaidTicketsSold, getSumofTicketsBoughtArray};
+module.exports = {getTicketsSold, getOrdersCount, getTotalCapacity, getTotalMoneyEarned, getTotalTicketsInOrder, getTotalTicketCapacity, getFreeTicketsSold, getPaidTicketsSold, getSumofTicketsBoughtArray, getNetSales};
