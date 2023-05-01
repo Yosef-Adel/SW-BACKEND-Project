@@ -42,7 +42,7 @@ exports.signUp= async (req, res) => {
         await user.save();
         
         //sending verification email
-        const verifyEmailText = `Please click on the link to complete the verification process http://ec2-3-219-197-102.compute-1.amazonaws.com/auth/sign-up-verify/${user.verifyEmailToken}\n`;
+        const verifyEmailText = `Please click on the link to complete the verification process http://ec2-54-208-157-121.compute-1.amazonaws.com/auth/sign-up-verify/${user.verifyEmailToken}\n`;
         await sendMail({
         email: user.emailAddress,
         subject: `Verify your email address with Eventbrite`,
@@ -89,7 +89,7 @@ exports.verification = async (req, res) => {
         user.isVerified = true;
         
         await user.save();
-        return res.redirect(301,"http://d1a3ozfbtcn1f.cloudfront.net/login");  
+        return res.redirect(301,"http://d3aoer2ec83h2c.cloudfront.net/login");  
         
 }
     catch(err){
@@ -170,7 +170,7 @@ exports.forgotPassword = async (req, res) => {
         user.forgotPasswordToken = await user.generateForgotPasswordToken();
         
         //send email address with password token
-        const forgotPasswordEmailText = `Click on the link to reset your password http://d1a3ozfbtcn1f.cloudfront.net/forgetPassword/${user.forgotPasswordToken}\n`;
+        const forgotPasswordEmailText = `Click on the link to reset your password http://d3aoer2ec83h2c.cloudfront.net/forgetPassword/${user.forgotPasswordToken}\n`;
         await sendMail({
             email: req.body.emailAddress,
             subject: `We received a request to reset your password for your Eventbrite account`,
