@@ -8,6 +8,7 @@ const upload = new multer({storage: cloudinaryStorage.storage});
 
 
 router.get('/', eventController.getAll);
+router.get('/paginated', eventController.getAllPaginated);
 router.get('/all-events', eventController.getAllEvents);
 router.get('/nearest', eventController.getNearest);
 router.get('/search', eventController.search);
