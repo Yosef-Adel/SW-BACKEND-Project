@@ -60,14 +60,15 @@ const EventSchema = new Schema({
 
     hostedBy: {
         type: Schema.Types.ObjectId,
-        ref: 'organizer'
+        ref: 'organizer',
+        required: true
     },
     
-    // createdBy:{
-    //     type: Schema.Types.ObjectId,
-    //     ref: 'user',
-    //     required: true
-    // },
+    createdBy:{
+        type: Schema.Types.ObjectId,
+        ref: 'user',
+        required: true
+    },
 
     isPrivate: {
         type: Boolean,

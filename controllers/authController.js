@@ -4,6 +4,7 @@ const bcrypt = require("bcryptjs");
 const {sendMail} = require('../utils/emailVerification');
 const saltRounds = 10;
 const password = "Admin@123";
+const tokenVerification = require('../utils/verifyToken');
 
 
 /////////////////////////   setting bycrypt to hash password   /////////////////////////  
@@ -73,12 +74,14 @@ exports.verification = async (req, res) => {
         
         // check if token is still valid
         let token = req.params.token;
-        let valid = true;
-        await jwt.verify(token, process.env.JWT_KEY, async (err) => {
-            if (err) {
-                valid=false;
-            }
-        });
+        // let valid = true;
+        // await jwt.verify(token, process.env.JWT_KEY, async (err) => {
+        //     if (err) {
+        //         valid=false;
+        //     }
+        // });
+        
+        const valid = tokenVerification.verifyToken(token);
         // if token is not valid, delete user so that sign-up process using same email can happen
         if (!valid){
             await User.findOneAndDelete({verifyEmailToken: req.params.token});
@@ -207,14 +210,16 @@ exports.resetPassword = async (req, res) => {
         if (!user) return res.status(400).send("User not found");
 
         let token = req.params.token;
-        let valid = true;
-        // check if token has expired or not
-        await jwt.verify(token, process.env.JWT_KEY, async (err) => {
-            if (err) {
-                valid=false;
-            }
-        });
-
+        // let valid = true;
+        // // check if token has expired or not
+        // await jwt.verify(token, process.env.JWT_KEY, async (err) => {
+        //     if (err) {
+        //         valid=false;
+        //     }
+        // });
+        
+        const valid = tokenVerification.verifyToken(token);
+        
         // if not valid, return status 400
         if (!valid){
             return res.status(401).json({message: 'Password token has expired'});

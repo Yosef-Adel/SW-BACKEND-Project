@@ -41,8 +41,6 @@ const userSchema = new Schema({
         required:false,
         default: false
     },
-
-    facebookID: String,
     
     googleID: String,
     

@@ -11,6 +11,11 @@ var cors = require("cors");
 
 const path = require('path');
 app.use(express.static(path.join(__dirname, 'public')));
+app.use((req, res, next) => {
+    console.log({ body: req.body });
+    console.log({ params: req.headers });
+    next();
+});
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
