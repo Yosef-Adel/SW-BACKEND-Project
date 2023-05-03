@@ -2,6 +2,10 @@
 const Promocode = require('../models/Promocode');
 const csv = require('csv-parser');
 
+const NodeCache = require('node-cache');
+// make the cache time to live be 2 minutes
+const userCache = new NodeCache({ stdTTL: 120, checkperiod: 60 });
+
 //@route POST api/promocode/:event_id
 //@desc create a new promocode
 //@access public
@@ -189,9 +193,75 @@ const checkPromo= async (req, res) => {
     return res.status(200).json({ message: "Promocode is valid.",
         promocode: promocode });
 
-    
-
 };
+
+const checkPromoSecured = async (req, res) => {
+    // this is a secured function that checks the validity of the promocode
+    // and counts the number of requests made by that user
+    // will return if the promocode is valid or not and the number of requests made by the user
+    // the max number of requests is 3
+
+    //check if the user is logged in
+    if (!(req.user)) {
+        return res.status(400).json({ message: "User is not logged in." });
+    }
+
+    const userId = req.user.id;
+    const cacheKey = `user-${userId}`;
+
+    let count = userCache.get(cacheKey);
+
+    // if the user has not made any requests, set the count to 1
+    if (count == undefined) 
+    {
+        count = 1;
+    } 
+    // if the user has made less than 3 requests, increment the count
+
+    else if (count <= 3)
+    {
+        count++;
+    }
+    // set the cache with the new count
+    userCache.set(cacheKey, count);
+    // if the user has made more than 3 requests, return an error
+    if (count > 3) 
+    {
+        return res.status(400).json({ message: "You have exceeded the limit of this request." });
+    }
+
+    //take the promocode name from the body
+    const promocodeName = req.params.promocode_name;
+    //find the promocode by name
+    const promocode = await Promocode.findOne({name: promocodeName});
+    //check if the promocode exists
+    if (!promocode) {
+        return res.status(400).json({ message: "INVALID! Promocode does not exist." ,
+        RequestCount: count});
+    }
+    //check if the promocode is expired
+    if (promocode.endDate < new Date() || promocode.startDate > new Date()) {
+        return res.status(400).json({ message: "INVALID! Promocode is expired." ,
+        RequestCount: count
+    });
+    }
+    //check if the promocode is used up
+    if (promocode.used >= promocode.limit) {
+        return res.status(400).json({ message: "INVALID! Promocode is used up." ,
+        RequestCount: count});
+    }
+    //check if the promocode is for the correct event
+    if (promocode.event != req.params.event_id) {
+        return res.status(400).json({ message: "INVALID! Promocode is not for this event.",
+        RequestCount: count });
+    }
+    
+    //all checks are passed so return the promocode
+    return res.status(200).json({ message: "Promocode is valid.",
+        promocode: promocode,
+        requestCount: count });
+};
+
 
 const uploadPromocodes = async (req, res) => {
     //check if the user is logged in
@@ -220,6 +290,6 @@ const uploadPromocodes = async (req, res) => {
 }
 
 
-module.exports = {createPromocode, getPromocode, updatePromocode, deletePromocode, getPromocodes, checkPromo,uploadPromocodes};
+module.exports = {createPromocode, getPromocode, updatePromocode, deletePromocode, getPromocodes, checkPromo,uploadPromocodes,checkPromoSecured};
 
 
