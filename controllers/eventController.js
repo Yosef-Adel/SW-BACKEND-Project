@@ -514,7 +514,7 @@ exports.addAttendee = async (req, res) => {
             email: req.body.email
         });
 
-        let eventURL="http://ec2-3-219-197-102.compute-1.amazonaws.com/events/"+event;
+        let eventURL="http://d3aoer2ec83h2c.cloudfront.net/events/"+event;
 
         //sending the mail to the email specified in the order form
         await generateQRCodeAndSendEmail(eventURL,user._id,order.email,ticketDetails);
