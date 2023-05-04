@@ -17,6 +17,11 @@ const createPromocode = async (req, res, next) => {
         if (!req.isCreator) {
             return res.status(400).json({ message: "User is not a creator." });
         }
+        const event=await Event.findById(req.params.event_id);
+        if (!event) {
+            return res.status(400).json({ message: "Event not found." });
+        }
+
         //check on all fields 
         if (!req.body.name || req.body.tickets==NaN || req.body.limit==NaN || req.body.startDate==NaN || req.body.endDate==NaN) {
             return res.status(400).json({ message: "All fields are required." });
@@ -37,6 +42,10 @@ const createPromocode = async (req, res, next) => {
         }
 
         
+        let limit=event.capacity;
+        if (req.body.limit) {
+            limit=req.body.limit;
+        }
 
         try {
             const promocode = new Promocode({
@@ -45,7 +54,7 @@ const createPromocode = async (req, res, next) => {
             tickets: req.body.tickets,
             percentOff: percentOff,
             amountOff: amountOff,
-            limit: req.body.limit,
+            limit: limit,
             used: 0,
             startDate: new Date(req.body.startDate),
             endDate: new Date(req.body.endDate)
