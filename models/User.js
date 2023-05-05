@@ -92,6 +92,11 @@ const userSchema = new Schema({
     organization: {
         type: Schema.Types.ObjectId,
         ref: 'organization'
+    },
+
+    events: {
+        type: Schema.Types.ObjectId,
+        ref: 'event'
     }
 
 }, {timestamps: true});
@@ -128,6 +133,20 @@ userSchema.methods.generateForgotPasswordToken = async function() {
     
     return passwordToken;
 };
+
+
+// userSchema.pre('deleteOne', async(next) => {
+//     try{
+//         var userId = this.getQuery()["_id"];
+//         const user = mongoose.Types.ObjectId(userId);
+//         await mongoose.model("events").deleteMany({'createdBy': user}, { session });
+//     }
+//     catch(err){
+//         console.log(err.message);
+//         return res.status(400).json({message: "Error in deleting user events"});
+//     }
+// });
+
 
 
 module.exports = User = mongoose.model('users', userSchema);
