@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 var uniqueValidator = require('mongoose-unique-validator');
 const jwt = require('jsonwebtoken');
 const Schema = mongoose.Schema;
+const Events = require('../models/Events')
 
 const userSchema = new Schema({
 
@@ -92,6 +93,11 @@ const userSchema = new Schema({
     organization: {
         type: Schema.Types.ObjectId,
         ref: 'organization'
+    },
+
+    events: {
+        type: Schema.Types.ObjectId,
+        ref: 'event'
     }
 
 }, {timestamps: true});
@@ -128,6 +134,7 @@ userSchema.methods.generateForgotPasswordToken = async function() {
     
     return passwordToken;
 };
+
 
 
 module.exports = User = mongoose.model('users', userSchema);
