@@ -568,6 +568,18 @@ exports.getUserEvents = async(req,res) => {
             return res.status(400).json({message: "No events created by this user"});
         }
         
+        for (let event of events){
+            let numberOfTicketsSold = 0;
+            let numberOfTicketsCapacity = 0;
+            const tickets = await TicketClass.find({"event": event._id});
+            for (let ticket of tickets){
+                numberOfTicketsSold += ticket.sold;
+                numberOfTicketsCapacity += ticket.capacity;
+            }
+            event.numberOfTicketsSold = numberOfTicketsSold;
+            event.numberOfTicketsCapacity = numberOfTicketsCapacity;
+        }
+
         return res.status(200).json({message: "Success", events});
 
     }
@@ -591,12 +603,21 @@ exports.getUserPastEvents = async(req, res) => {
         const userEvents = [];
         const currDate = new Date();
         for (let event of events){
+            let numberOfTicketsSold = 0;
+            let numberOfTicketsCapacity = 0;
+            const tickets = await TicketClass.find({"event": event._id});
+            for (let ticket of tickets){
+                numberOfTicketsSold += ticket.sold;
+                numberOfTicketsCapacity += ticket.capacity;
+            }
+            event.numberOfTicketsSold = numberOfTicketsSold;
+            event.numberOfTicketsCapacity = numberOfTicketsCapacity;
             if (event.startDate < currDate)
             {
                 userEvents.push(event);
             }
         }
-        
+
         if (userEvents.length == 0){
             return res.status(400).json({message: "No past events created by this user"});
         }
@@ -624,6 +645,15 @@ exports.getUserUpcomingEvents = async(req, res) => {
         const userEvents = [];
         const currDate = new Date();
         for (let event of events){
+            let numberOfTicketsSold = 0;
+            let numberOfTicketsCapacity = 0;
+            const tickets = await TicketClass.find({"event": event._id});
+            for (let ticket of tickets){
+                numberOfTicketsSold += ticket.sold;
+                numberOfTicketsCapacity += ticket.capacity;
+            }
+            event.numberOfTicketsSold = numberOfTicketsSold;
+            event.numberOfTicketsCapacity = numberOfTicketsCapacity;
             if (event.startDate > currDate)
             {
                 userEvents.push(event);
