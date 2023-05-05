@@ -133,6 +133,13 @@ exports.login= async (req, res) => {
         }
         //generate user token for session
         const token = await user.generateAuthToken();
+        
+        if (user.forgotPasswordToken != undefined){
+            user.forgotPasswordToken = undefined;
+        }
+        
+        await user.save()
+        
         //testing
 
         //special return for testing
@@ -140,7 +147,6 @@ exports.login= async (req, res) => {
         
         return res.status(200).json({token, user});
     }
-
     catch(err){
         console.log(err.message);
         return res.status(400).json({ message: "Error in logging in" });

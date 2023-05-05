@@ -554,44 +554,28 @@ exports.downloadUserEvents = async(req,res) => {
     }
 }
 
+
 exports.getUserEvents = async(req,res) => {
     try{
-        if (!req.isCreator)
-        {
+        if (!req.isCreator){
             return res.status(400).json({message: "You are not a creator"})
         }
         const user = mongoose.Types.ObjectId(req.params.userId);
 
-        const userOrganization = await Organization.findOne({"createdBy": user})
-        if (!userOrganization){
-            return res.status(400).json({message: "This user doesn't have an organization."})
-        }
-        const organizersArray = userOrganization.organizers;
+        const events = await Event.find({"createdBy": user});
 
-        if (!organizersArray){
-            return res.status(400).json({message: "This organization doesn't have any organizers."})
-        }
-        
-        const userEvents = [];
-        for (let i=0; i< organizersArray.length; i++){
-            const events = await Event.find({"hostedBy": organizersArray[i]});
-            for (let event of events)
-            {
-                userEvents.push(event);
-            }
-        }
-        
-        if (userEvents.length == 0){
+        if (!events.length){
             return res.status(400).json({message: "No events created by this user"});
         }
         
-        return res.status(200).json({message: "Success", userEvents});
-    }
+        return res.status(200).json({message: "Success", events});
 
+    }
     catch(err){
         console.log(err.message);
-        return res.status(400).json({message: "Error in getting user events"})
+        return res.status(400).json({message: "Error in filtering user events"});
     }
+
 }
 
 exports.getUserPastEvents = async(req, res) => {
@@ -603,28 +587,13 @@ exports.getUserPastEvents = async(req, res) => {
 
         const user = mongoose.Types.ObjectId(req.params.userId);
 
-        const userOrganization = await Organization.findOne({"createdBy": user})
-        if (!userOrganization){
-            return res.status(400).json({message: "This user doesn't have an organization."})
-        }
-        const organizersArray = userOrganization.organizers;
-
-        if (!organizersArray){
-            return res.status(400).json({message: "This organization doesn't have any organizers."})
-        }
-        
+        const events = await Event.find({"createdBy": user});
         const userEvents = [];
         const currDate = new Date();
-        for (let i=0; i< organizersArray.length; i++){
-            const events = await Event.find({"hostedBy": organizersArray[i]});
-            // console.log(events);
-            for (let event of events)
+        for (let event of events){
+            if (event.startDate < currDate)
             {
-                console.log(event);
-                if (event.startDate < currDate)
-                {
-                    userEvents.push(event);
-                }
+                userEvents.push(event);
             }
         }
         
@@ -648,30 +617,16 @@ exports.getUserUpcomingEvents = async(req, res) => {
         {
             return res.status(400).json({message: "You are not a creator"})
         }
+        // Cast the user id to Object Id mongoose
         const user = mongoose.Types.ObjectId(req.params.userId);
 
-        const userOrganization = await Organization.findOne({"createdBy": user})
-        if (!userOrganization){
-            return res.status(400).json({message: "This user doesn't have an organization."})
-        }
-        const organizersArray = userOrganization.organizers;
-
-        if (!organizersArray){
-            return res.status(400).json({message: "This organization doesn't have any organizers."})
-        }
-        
+        const events = await Event.find({"createdBy": user});
         const userEvents = [];
         const currDate = new Date();
-        for (let i=0; i< organizersArray.length; i++){
-            const events = await Event.find({"hostedBy": organizersArray[i]});
-            // console.log(events);
-            for (let event of events)
+        for (let event of events){
+            if (event.startDate > currDate)
             {
-                console.log(event);
-                if (event.startDate > currDate)
-                {
-                    userEvents.push(event);
-                }
+                userEvents.push(event);
             }
         }
         

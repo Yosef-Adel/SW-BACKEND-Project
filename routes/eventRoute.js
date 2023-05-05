@@ -16,9 +16,10 @@ router.get('/:id', eventController.getById);
 
 
 router.get('/:userId/all-events', authorization, authorization, eventController.getUserEvents);
-router.get('/:userId/all-events/download', eventController.downloadUserEvents);
 router.get('/:userId/past-events', authorization, authorization, eventController.getUserPastEvents);
 router.get('/:userId/upcoming-events', authorization, authorization, eventController.getUserUpcomingEvents);
+
+router.get('/:userId/all-events/download', eventController.downloadUserEvents);
 
 router.post('/',  [upload.single("image"),authorization], eventController.create);
 

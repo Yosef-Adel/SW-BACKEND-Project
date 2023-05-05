@@ -40,6 +40,7 @@ function testFormat(res, statusCode, message){
     expect(res.statusCode).toEqual(statusCode);
 }
 
+let userID;
 async function getToken(){
     const randomName = Math.random().toString(36).substring(7);
 
@@ -53,6 +54,7 @@ async function getToken(){
     });
 
     await user.save();
+    userID = user._id;
     const res = await request(app).post("/auth/login").send({
         "emailAddress": `${randomName}@aly.com`,
         "password":"hash"
@@ -271,6 +273,15 @@ describe("Events", () => {
             expect(res.body).toHaveProperty('events');
             expect(res.body.events[0].category).toEqual(categoryID);
         });
+    });
+
+    describe('Get user events', () =>{
+        it('should return 200 OK',async () => {
+            const res = await request(app).get(`api/events/${userID}/all-events`);
+            expect(res.statusCode).toEqual(200);
+            expect(res.body).toHaveProperty(message);
+            expect(res.body.message).toEqual('Success');
+        })  
     });
 
 });
