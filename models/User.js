@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 var uniqueValidator = require('mongoose-unique-validator');
 const jwt = require('jsonwebtoken');
 const Schema = mongoose.Schema;
+const Events = require('../models/Events')
 
 const userSchema = new Schema({
 
@@ -133,19 +134,6 @@ userSchema.methods.generateForgotPasswordToken = async function() {
     
     return passwordToken;
 };
-
-
-// userSchema.pre('deleteOne', async(next) => {
-//     try{
-//         var userId = this.getQuery()["_id"];
-//         const user = mongoose.Types.ObjectId(userId);
-//         await mongoose.model("events").deleteMany({'createdBy': user}, { session });
-//     }
-//     catch(err){
-//         console.log(err.message);
-//         return res.status(400).json({message: "Error in deleting user events"});
-//     }
-// });
 
 
 

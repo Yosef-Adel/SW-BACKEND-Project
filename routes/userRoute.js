@@ -9,7 +9,7 @@ userRouter.get('/to-attendee/:id', authorization, userController.changeToAttende
 
 userRouter.put('/edit/:id', authorization, userController.editInfo);
 
-// userRouter.delete('/delete/:id', authorization, userController.deleteUser);
+userRouter.delete('/delete/:id', authorization, userController.deleteUser);
 
 
 

@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const Events = require('../models/Events');
 const uploadImage = require("../utils/uploadImage");
 const fs = require('fs');
 
@@ -53,23 +54,24 @@ exports.editInfo = async(req, res) => {
     }
 }
 
-// exports.deleteUser = async(req,res) =>{
-//     try{
-//         const user = await User.findById(req.params.id);
-//         if (!user){
-//             return res.status(400).json({message: "User not found"});
-//         }
+exports.deleteUser = async(req,res) =>{
+    try{
+        const user = await User.findById(req.params.id);
+        if (!user){
+            return res.status(400).json({message: "User not found"});
+        }
 
-//         await user.deleteOne();
+        await Events.deleteMany({"createdBy": user});
+        await User.deleteOne(user);
 
-//         return res.status(200).json({message: "User deleted successfully."})
+        return res.status(200).json({message: "User deleted successfully."})
 
-//     }
-//     catch(err){
-//         console.log(err.message);
-//         return res.status(400).json({message: "Error in editing user info"});
-//     }
-// }
+    }
+    catch(err){
+        console.log(err.message);
+        return res.status(400).json({message: "Error in editing user info"});
+    }
+}
 
 
 exports.changeToCreator = async(req,res) => {
