@@ -74,7 +74,9 @@ beforeAll(async () => {
         city:"Cairo",
         venueName:"Test Venue Name",
         startDate: "2020-04-10T00:00:00.000Z",
-        endDate: "2020-04-20T00:00:00.000Z"
+        endDate: "2020-04-20T00:00:00.000Z",
+        createdBy:userId,
+        hostedBy:userId
     });
     await event.save();
     eventId=event._id;
