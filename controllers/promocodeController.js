@@ -285,14 +285,48 @@ const uploadPromocodes = async (req, res) => {
     try {
         // Get uploaded csv file
         const csvFile = req.files.file;
+    
+        // Validate file format
+        if (csvFile.mimetype !== "text/csv") {
+            return res.status(400).json({ message: "Invalid file format. Only CSV files are allowed." });
+        }
+    
         // Convert csv file to json
         const csvData = await csv().fromString(csvFile.data.toString());
+    
+        // Validate provided fields
+        const allowedFields = ["name", "percentOff", "amountOff", "limit", "startDate", "endDate"];
+        const invalidFields = csvData.some((promo) => !allowedFields.every((field) => Object.keys(promo).includes(field)));
+        if (invalidFields) {
+            return res.status(400).json({ message: "Invalid fields provided in the CSV file. Allowed fields are: name, percentOff, amountOff, limit, startDate, and endDate." });
+        }
+    
+        // Whitelist fields and filter out invalid entries
+        const validPromocodes = csvData
+            .map((promo) => ({
+                name: promo.name,
+                percentOff: parseFloat(promo.percentOff),
+                amountOff: parseFloat(promo.amountOff),
+                limit: parseInt(promo.limit),
+                startDate: new Date(promo.startDate),
+                endDate: new Date(promo.endDate),
+            }))
+            .filter((promo) => {
+                return promo.name && promo.startDate && promo.endDate &&
+                    ((promo.percentOff && !isNaN(promo.percentOff)) ||
+                        (promo.amountOff && !isNaN(promo.amountOff))) &&
+                    promo.limit && !isNaN(promo.limit);
+            });
+    
+        // Check if any valid promocodes were found
+        if (validPromocodes.length === 0) {
+            return res.status(400).json({ message: "No valid promocodes found in the CSV file." });
+        }
+    
         // Create new promocodes
-        const promocodes = await Promocode.insertMany(csvData);
+        const promocodes = await Promocode.insertMany(validPromocodes);
         res.status(200).json({ message: "Promocodes uploaded successfully!", promocodes: promocodes });
-
-    }
-    catch (err) {
+    } catch (err) {
         return res.status(400).json({ message: err.message });
     }
 
