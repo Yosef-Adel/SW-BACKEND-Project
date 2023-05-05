@@ -3,8 +3,9 @@ const Organization = require("../models/Organization");
 
 exports.createOrganizer = async(req,res)=> {
     try{
+
         if (!req.isCreator){
-            return res.status(400).json({message: "You have to be a creator to create organization."});
+            return res.status(400).json({message: "You are not a creator"});
         }
         
         if (!req.body.name){
@@ -36,7 +37,7 @@ exports.createOrganizer = async(req,res)=> {
         await organizer.save();
         organization.organizers.push(organizer._id);
         await organization.save();
-        return res.status(200).json(organizer);
+        return res.status(200).json({message: "Organizer created successfully" ,organizer});
     }
 
     catch(err){
@@ -48,7 +49,7 @@ exports.createOrganizer = async(req,res)=> {
 exports.editInfo = async(req,res)=>{
     try{
         if (!req.isCreator){
-            return res.status(400).json({message: "You have to be a creator to create organization."});
+            return res.status(400).json({message: "You are not a creator"});
         }
 
         const organizer = await Organizer.findById(req.params.organizerId);
@@ -65,7 +66,7 @@ exports.editInfo = async(req,res)=>{
         }
 
         await organizer.save();
-        return res.status(200).json(organizer);
+        return res.status(200).json({message : "Organizer info updated successfully", organizer});
 
     }
     catch(err){
@@ -77,14 +78,14 @@ exports.editInfo = async(req,res)=>{
 exports.getInfo = async(req,res) => {
     try{
         if (!req.isCreator){
-            return res.status(400).json({message: "You have to be a creator to create organization."});
+            return res.status(400).json({message: "You are not a creator"});
         }
 
         const organizer = await Organizer.findById(req.params.organizerId);
         if (!organizer){
             return res.status(400).json({message: "Organizer not found"})
         }
-        return res.status(200).json(organizer);
+        return res.status(200).json({message: "Success", organizer});
 
     }
     catch(err){
@@ -97,22 +98,25 @@ exports.getInfo = async(req,res) => {
 exports.deleteOrganizer = async(req, res) =>{
     try{
         if (!req.isCreator){
-            return res.status(400).json({message: "You have to be a creator to create organization."});
+            return res.status(400).json({message: "You are not a creator"});
         }
-        const org = await Organizer.findByIdAndDelete(req.params.organizerId);
-        if(!org){
-            return res.status(400).json({message: "Organizer not found"});
-        }
+        
         const organization = await Organization.findById(req.params.orgId);
         if(!organization){
             return res.status(400).json({message: "Organization not found"});
+        }
+        
+        const org = await Organizer.findByIdAndDelete(req.params.organizerId);
+        if(!org){
+            return res.status(400).json({message: "Organizer not found"});
         }
         var organizersArray = organization.organizers;
         let organizerToDelete = req.params.organizerId;
         var organizersArray = organizersArray.filter(item => !organizerToDelete.includes(item));
         organization.organizers=organizersArray;
         await organization.save();
-        // await organizer.save();
+
+        return res.status(200).json({message: "Organizer deleted successfully."});
 
     }
     catch(err){

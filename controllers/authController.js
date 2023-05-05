@@ -4,6 +4,7 @@ const bcrypt = require("bcryptjs");
 const {sendMail} = require('../utils/emailVerification');
 const saltRounds = 10;
 const password = "Admin@123";
+const tokenVerification = require('../utils/verifyToken');
 
 
 /////////////////////////   setting bycrypt to hash password   /////////////////////////  
@@ -42,7 +43,7 @@ exports.signUp= async (req, res) => {
         await user.save();
         
         //sending verification email
-        const verifyEmailText = `Please click on the link to complete the verification process http://ec2-54-208-157-121.compute-1.amazonaws.com/auth/sign-up-verify/${user.verifyEmailToken}\n`;
+        const verifyEmailText = `Please click on the link to complete the verification process ${process.env.BACK_DEPLOY}/auth/sign-up-verify/${user.verifyEmailToken}\n`;
         await sendMail({
         email: user.emailAddress,
         subject: `Verify your email address with Eventbrite`,
@@ -73,12 +74,14 @@ exports.verification = async (req, res) => {
         
         // check if token is still valid
         let token = req.params.token;
-        let valid = true;
-        await jwt.verify(token, process.env.JWT_KEY, async (err) => {
-            if (err) {
-                valid=false;
-            }
-        });
+        // let valid = true;
+        // await jwt.verify(token, process.env.JWT_KEY, async (err) => {
+        //     if (err) {
+        //         valid=false;
+        //     }
+        // });
+        
+        const valid = tokenVerification.verifyToken(token);
         // if token is not valid, delete user so that sign-up process using same email can happen
         if (!valid){
             await User.findOneAndDelete({verifyEmailToken: req.params.token});
@@ -89,7 +92,7 @@ exports.verification = async (req, res) => {
         user.isVerified = true;
         
         await user.save();
-        return res.redirect(301,"http://d3aoer2ec83h2c.cloudfront.net/login");  
+        return res.redirect(301,`${process.env.FRONT_DEPLOY}/login`);  
         
 }
     catch(err){
@@ -170,7 +173,7 @@ exports.forgotPassword = async (req, res) => {
         user.forgotPasswordToken = await user.generateForgotPasswordToken();
         
         //send email address with password token
-        const forgotPasswordEmailText = `Click on the link to reset your password http://d3aoer2ec83h2c.cloudfront.net/forgetPassword/${user.forgotPasswordToken}\n`;
+        const forgotPasswordEmailText = `Click on the link to reset your password ${process.env.FRONT_DEPLOY}/forgetPassword/${user.forgotPasswordToken}\n`;
         await sendMail({
             email: req.body.emailAddress,
             subject: `We received a request to reset your password for your Eventbrite account`,
@@ -207,14 +210,16 @@ exports.resetPassword = async (req, res) => {
         if (!user) return res.status(400).send("User not found");
 
         let token = req.params.token;
-        let valid = true;
-        // check if token has expired or not
-        await jwt.verify(token, process.env.JWT_KEY, async (err) => {
-            if (err) {
-                valid=false;
-            }
-        });
-
+        // let valid = true;
+        // // check if token has expired or not
+        // await jwt.verify(token, process.env.JWT_KEY, async (err) => {
+        //     if (err) {
+        //         valid=false;
+        //     }
+        // });
+        
+        const valid = tokenVerification.verifyToken(token);
+        
         // if not valid, return status 400
         if (!valid){
             return res.status(401).json({message: 'Password token has expired'});

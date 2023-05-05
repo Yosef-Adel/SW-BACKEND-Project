@@ -5,7 +5,6 @@ const Event = require('../models/Events');
 
 exports.create = async(req,res) => {
     try{
-        // check if the user is authorized
         if (!req.isCreator){
             return res.status(400).json({message: "You are not a creator"});
         }
@@ -16,7 +15,7 @@ exports.create = async(req,res) => {
         
         const user = await User.findById(req.params.id);
         if(!user){
-            return res.status(400).json({message: "user not found"});
+            return res.status(400).json({message: "User not found"});
         }
         
         const organization = await Organization.create({...req.body});
@@ -40,7 +39,7 @@ exports.create = async(req,res) => {
 exports.editInfo = async(req, res) => {
     try{
         if (!req.isCreator){
-            return res.status(400).json({message: "You have to be a creator to create organization."});
+            return res.status(400).json({message: "You are not a creator"});
         }
         const organization = await Organization.findById(req.params.orgId);
         if(!organization){
@@ -68,14 +67,14 @@ exports.editInfo = async(req, res) => {
 exports.getInfo = async(req, res) => {
     try{
         if (!req.isCreator){
-            return res.status(400).json({message: "You have to be a creator to create organization."});
+            return res.status(400).json({message: "You are not a creator"});
         }
         const organization = await Organization.findById(req.params.orgId);
         if(!organization){
             return res.status(400).json({message: "Organization not found"});
         }
 
-        return res.status(200).json(organization);
+        return res.status(200).json({message: "Success", organization});
 
     }
     catch(err){
@@ -111,7 +110,7 @@ exports.deleteOrganization = async(req, res) => {
 exports.getEvents = async(req, res) => {
     try{
         if (!req.isCreator){
-            return res.status(400).json({message: "You have to be a creator to create organization."});
+            return res.status(400).json({message: "You are not a creator"});
         }
         
         const organization = await Organization.findById(req.params.orgId);
@@ -125,8 +124,12 @@ exports.getEvents = async(req, res) => {
             const event = await Event.findOne({"hostedBy" : organizersArray[i]})
             events.push(event);
         }
+        
+        if (events == null){
+            res.status(400).json({message: "No events to show."});
+        }
 
-        return res.status(200).json(events);
+        return res.status(200).json({message :"Success", events});
     }
     catch(err){
         console.log(err.message);
