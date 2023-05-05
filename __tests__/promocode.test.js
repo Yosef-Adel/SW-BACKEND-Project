@@ -107,6 +107,8 @@ describe("Create a ticket class", () => {
 
 describe("Create a promocode", () => {
     it("should return 201 OK, valid promocode",async () => {
+        const tdate = new Date("2022-04-26" + " 3:45 PM");
+        startdate = tdate.toISOString();
 
         //valid promocode
         const promocode={
@@ -116,7 +118,7 @@ describe("Create a promocode", () => {
             ],
             "percentOff": 20,
             "limit": 80,
-            "startDate": "2023-03-21T00:00:00.000Z",
+            "startDate": startdate,
             "endDate": "2024-03-31T00:00:00.000Z"
         }
         const res=await request(app).post("/promocode/"+eventId).send(promocode).set("Authorization", "Bearer " + token);
