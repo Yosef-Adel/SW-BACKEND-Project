@@ -43,7 +43,7 @@ exports.signUp= async (req, res) => {
         await user.save();
         
         //sending verification email
-        const verifyEmailText = `Please click on the link to complete the verification process https://sw-backend-project.vercel.app/auth/sign-up-verify/${user.verifyEmailToken}\n`;
+        const verifyEmailText = `Please click on the link to complete the verification process ${process.env.BACK_DEPLOY}/auth/sign-up-verify/${user.verifyEmailToken}\n`;
         await sendMail({
         email: user.emailAddress,
         subject: `Verify your email address with Eventbrite`,
@@ -92,7 +92,7 @@ exports.verification = async (req, res) => {
         user.isVerified = true;
         
         await user.save();
-        return res.redirect(301,"https://sw-frnt-project.vercel.app/login");  
+        return res.redirect(301,`${process.env.FRONT_DEPLOY}/login`);  
         
 }
     catch(err){
@@ -173,7 +173,7 @@ exports.forgotPassword = async (req, res) => {
         user.forgotPasswordToken = await user.generateForgotPasswordToken();
         
         //send email address with password token
-        const forgotPasswordEmailText = `Click on the link to reset your password https://sw-frnt-project.vercel.app/forgetPassword/${user.forgotPasswordToken}\n`;
+        const forgotPasswordEmailText = `Click on the link to reset your password ${process.env.FRONT_DEPLOY}/forgetPassword/${user.forgotPasswordToken}\n`;
         await sendMail({
             email: req.body.emailAddress,
             subject: `We received a request to reset your password for your Eventbrite account`,
