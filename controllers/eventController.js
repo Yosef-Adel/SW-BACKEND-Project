@@ -557,6 +557,16 @@ exports.downloadUserEvents = async(req,res) => {
     }
 }
 
+function getTicketsSoldAndCapacity(tickets){
+    let numberOfTicketsSold = 0;
+    let numberOfTicketsCapacity = 0;
+    for (let ticket of tickets){
+        numberOfTicketsSold += ticket.sold;
+        numberOfTicketsCapacity += ticket.capacity;
+    }
+    return [numberOfTicketsSold,numberOfTicketsCapacity];
+}
+
 
 exports.getUserEvents = async(req,res) => {
     try{
@@ -570,8 +580,10 @@ exports.getUserEvents = async(req,res) => {
         if (!events.length){
             return res.status(400).json({message: "No events created by this user"});
         }
+        let newEvents = [];
         
         for (let event of events){
+            event = event.toJSON();
             let numberOfTicketsSold = 0;
             let numberOfTicketsCapacity = 0;
             const tickets = await TicketClass.find({"event": event._id});
@@ -581,9 +593,15 @@ exports.getUserEvents = async(req,res) => {
             }
             event.numberOfTicketsSold = numberOfTicketsSold;
             event.numberOfTicketsCapacity = numberOfTicketsCapacity;
+            newEvents.push(event);
+            // console.log(newEvents);
+            
         }
+        console.log(newEvents);
 
-        return res.status(200).json({message: "Success", events});
+
+
+        return res.status(200).json({message: "Success", events:newEvents});
 
     }
     catch(err){
