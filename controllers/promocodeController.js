@@ -273,7 +273,6 @@ const checkPromoSecured = async (req, res) => {
 
 
 const uploadPromocodes = async (req, res) => {
-    //check if the user is logged in
     if (!(req.user)) {
         return res.status(400).json({ message: "User is not logged in." });
     }
@@ -281,8 +280,37 @@ const uploadPromocodes = async (req, res) => {
     if (!req.isCreator) {
         return res.status(400).json({ message: "User is not a creator." });
     }
+    const event=await Event.findById(req.params.event_id);
+    if (!event) {
+        return res.status(400).json({ message: "Event not found." });
+    }
 
-    try {
+    //check on all fields 
+    if (req.body.tickets==NaN || req.body.limit==NaN || req.body.startDate==NaN || req.body.endDate==NaN) {
+        return res.status(400).json({ message: "All fields are required." });
+    }
+    //check if the body contains amount off or percent off
+    // if (!req.body.amountOff && !req.body.percentOff) {
+    //     return res.status(400).json({ message: "Amount off or percent off is required." });
+    // }
+    //check if given which one and store it
+    //let -1 mean a flag that the field is not given
+    let amountOff = -1;
+    let percentOff = -1;
+    if (req.body.amountOff) {
+        amountOff = req.body.amountOff;
+    }
+    if (req.body.percentOff) {
+        percentOff = req.body.percentOff;
+    }
+
+    
+    let limit=event.capacity;
+    if (req.body.limit) {
+        limit=req.body.limit;
+    }
+
+    // try {
         // Get uploaded csv file
         const csvFile = req.files.file;
     
@@ -292,43 +320,55 @@ const uploadPromocodes = async (req, res) => {
         }
     
         // Convert csv file to json
-        const csvData = await csv().fromString(csvFile.data.toString());
-    
-        // Validate provided fields
-        const allowedFields = ["name", "percentOff", "amountOff", "limit", "startDate", "endDate"];
-        const invalidFields = csvData.some((promo) => !allowedFields.every((field) => Object.keys(promo).includes(field)));
-        if (invalidFields) {
-            return res.status(400).json({ message: "Invalid fields provided in the CSV file. Allowed fields are: name, percentOff, amountOff, limit, startDate, and endDate." });
+        const csvData = [];
+        csvFile.data.toString().split('\n').forEach(line => {
+            if (line) {
+                csvData.push(line.split(','));
+            }
+        });
+        console.log(csvData[0]);
+        
+        // Convert codes to an array of strings
+        let codes = csvData.map((code) => code[0]);
+        
+        // Remove spaces and special characters from codes
+        codes = codes.map(code => code.replace(/(\r\n|\n|\r)/gm, ''));
+        codes = codes.map(code => code.replace(/[^\w-_,@\.]/g, ''));
+        
+        console.log(codes);
+        // Check if any invalid codes were found
+        const invalidCodes = codes.some(code => !/^[a-zA-Z0-9-_@.]+$/.test(code));
+        if (invalidCodes) {
+            return res.status(400).json({ message: "Invalid promocode values provided. Only letters, numbers, hyphens, underscores, commas, at signs (@), and periods (.) are allowed." });
         }
-    
+        
         // Whitelist fields and filter out invalid entries
-        const validPromocodes = csvData
-            .map((promo) => ({
-                name: promo.name,
-                percentOff: parseFloat(promo.percentOff),
-                amountOff: parseFloat(promo.amountOff),
-                limit: parseInt(promo.limit),
-                startDate: new Date(promo.startDate),
-                endDate: new Date(promo.endDate),
-            }))
-            .filter((promo) => {
-                return promo.name && promo.startDate && promo.endDate &&
-                    ((promo.percentOff && !isNaN(promo.percentOff)) ||
-                        (promo.amountOff && !isNaN(promo.amountOff))) &&
-                    promo.limit && !isNaN(promo.limit);
-            });
-    
+        const validPromocodes = codes
+        .map((promo) => ({
+            event: req.params.event_id,
+            name: promo,
+            tickets: req.body.tickets,
+            percentOff: percentOff,
+            tickets: req.body.tickets,
+            amountOff: amountOff,
+            limit: limit,
+            used: 0,
+            startDate: new Date(req.body.startDate),
+            endDate: new Date(req.body.endDate)
+        }));
+        
         // Check if any valid promocodes were found
         if (validPromocodes.length === 0) {
             return res.status(400).json({ message: "No valid promocodes found in the CSV file." });
         }
+        console.log(validPromocodes);
     
         // Create new promocodes
         const promocodes = await Promocode.insertMany(validPromocodes);
         res.status(200).json({ message: "Promocodes uploaded successfully!", promocodes: promocodes });
-    } catch (err) {
-        return res.status(400).json({ message: err.message });
-    }
+    // } catch (err) {
+    //     return res.status(400).json({ message: err.message });
+    // }
 
 }
 

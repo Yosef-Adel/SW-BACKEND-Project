@@ -11,7 +11,7 @@ promocodeRouter.delete('/:event_id/:promo_id', authorization, promocodeControlle
 promocodeRouter.get('/:event_id', authorization, promocodeController.getPromocodes);
 promocodeRouter.get('/:event_id/:promocode_name/checkPromo', promocodeController.checkPromo);
 promocodeRouter.get('/:event_id/:promocode_name/checkPromoSecured',authorization ,promocodeController.checkPromoSecured);
-promocodeRouter.post('/:event_id/upload', promocodeController.uploadPromocodes);
+promocodeRouter.post('/:event_id/upload',authorization, promocodeController.uploadPromocodes);
 
 
 
