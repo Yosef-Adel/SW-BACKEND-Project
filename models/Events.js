@@ -61,7 +61,7 @@ const EventSchema = new Schema({
     hostedBy: {
         type: Schema.Types.ObjectId,
         ref: 'organizer',
-        required: true
+        required: false
     },
     
     createdBy:{
