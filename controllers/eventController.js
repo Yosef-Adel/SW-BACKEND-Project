@@ -624,6 +624,8 @@ exports.getUserPastEvents = async(req, res) => {
         const userEvents = [];
         const currDate = new Date();
         for (let event of events){
+            event = event.toJSON();
+
             let numberOfTicketsSold = 0;
             let numberOfTicketsCapacity = 0;
             const tickets = await TicketClass.find({"event": event._id});
@@ -637,6 +639,8 @@ exports.getUserPastEvents = async(req, res) => {
             {
                 userEvents.push(event);
             }
+
+
         }
 
         if (userEvents.length == 0){
@@ -666,6 +670,8 @@ exports.getUserUpcomingEvents = async(req, res) => {
         const userEvents = [];
         const currDate = new Date();
         for (let event of events){
+            event = event.toJSON();
+
             let numberOfTicketsSold = 0;
             let numberOfTicketsCapacity = 0;
             const tickets = await TicketClass.find({"event": event._id});
