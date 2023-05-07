@@ -1,12 +1,11 @@
+
 var admin = require("firebase-admin");
 
-var serviceAccount = require("./julla-tutorial.json");
-
+var serviceAccount = require("../envie-a85e3-firebase-adminsdk-tn5bn-750d28216b.json");
 
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://sample-project-e1a84.firebaseio.com"
-})
+  credential: admin.credential.cert(serviceAccount)
+});
 
 function sendNotification(res,message, token){
     const notification_options = {
