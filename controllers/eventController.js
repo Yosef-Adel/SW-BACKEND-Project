@@ -525,7 +525,7 @@ exports.addAttendee = async (req, res) => {
             email: req.body.email
         });
 
-        let eventURL=process.env.FRONT_DEPLOY+event;
+        let eventURL=process.env.FRONT_DEPLOY+"/user/event/"+event;
 
         //sending the mail to the email specified in the order form
         await generateQRCodeAndSendEmail(eventURL,user._id,order.email,ticketDetails);
