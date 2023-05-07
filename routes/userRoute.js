@@ -11,6 +11,7 @@ userRouter.put('/edit/:id', authorization, userController.editInfo);
 
 userRouter.delete('/delete/:id', authorization, userController.deleteUser);
 
+userRouter.post('/notification', userController.assingNotification)
 
 
 

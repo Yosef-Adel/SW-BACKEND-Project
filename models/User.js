@@ -98,7 +98,14 @@ const userSchema = new Schema({
     events: {
         type: Schema.Types.ObjectId,
         ref: 'event'
-    }
+    },
+
+    firebaseRegistrationToken: [
+        {
+            type: String,
+            required: false
+        }
+    ]
 
 }, {timestamps: true});
 
