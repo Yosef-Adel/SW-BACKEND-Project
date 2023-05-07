@@ -7,7 +7,7 @@ const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 const { Readable,pipeline } = require('stream');
 // import { Parser } from 'json2csv';
 const { downloadResource } = require ('../utils/CSV');
-
+const cron = require('node-cron');
 const {generateQRCodeAndSendEmail}=require('../controllers/qrCodeController');
 
 const User = require('../models/User');
@@ -19,6 +19,7 @@ const {getTicketsSold, getOrdersCount, getTotalCapacity, getTotalMoneyEarned, ge
 const Ticket = require('../models/Tickets');
 const Organization = require('../models/Organization');
 // const { CsvWriter } = require('csv-writer/src/lib/csv-writer');
+
 
 
 
@@ -283,6 +284,13 @@ exports.getAllPaginated = async (req, res) => {
     if (free) {
         eventQuery.where('price').equals(0);
     }
+
+    cron.schedule('* * * * *', (eventQuery) =>{
+        const currDate = new Date();
+        if (eventQuery.publishDate >currDate){
+            eventQuery.isPrivate = false;
+        }
+    })
 
     // for pagination
 
@@ -567,6 +575,30 @@ function getTicketsSoldAndCapacity(tickets){
     return [numberOfTicketsSold,numberOfTicketsCapacity];
 }
 
+exports.getPrivateEventByPassword = async(req, res)=>{
+    try{
+        const event = await Event.findById(req.params.id);
+        if (!event)
+        {
+            return res.status(400).json({message: "Event doesn't exist"});
+        }
+        
+        if (eventQuery.password){
+            if (!req.body.password){
+                return res.status(400).json({message:"Please enter password."});
+            }
+            if (eventQuery.password != req.body.password){
+                return res.status(400).json({message: "Password is incorrect."});
+            }
+        }
+        return res.status(200).json(event);
+
+    }
+    catch(err){
+        console.log(err.message);
+        return res.status(400).json({message: "Error in getting private events by password"});
+    }
+}
 
 exports.getUserEvents = async(req,res) => {
     try{
@@ -594,7 +626,6 @@ exports.getUserEvents = async(req,res) => {
             event.numberOfTicketsSold = numberOfTicketsSold;
             event.numberOfTicketsCapacity = numberOfTicketsCapacity;
             newEvents.push(event);
-            // console.log(newEvents);
             
         }
         console.log(newEvents);
