@@ -517,7 +517,7 @@ exports.addAttendee = async (req, res) => {
             email: req.body.email
         });
 
-        let eventURL="http://d2m1dnewdqs19v.cloudfront.net/events/"+event;
+        let eventURL=process.env.FRONT_DEPLOY+event;
 
         //sending the mail to the email specified in the order form
         await generateQRCodeAndSendEmail(eventURL,user._id,order.email,ticketDetails);
@@ -1179,7 +1179,7 @@ exports.getEventUrl = async (req, res) => {
                 //return the event url
                 try 
                 {
-                    const url = "http://d2m1dnewdqs19v.cloudfront.net/user/event/"+eventId;
+                    const url = process.env.FRONT_DEPLOY+"/user/event/"+eventId;
                     res.status(200).json({ url: url });
                 } 
                 catch (err) {
