@@ -382,9 +382,15 @@ exports.update = async (req, res) => {
     // consider this
     
     const updates = Object.keys(req.body);
+    const allowedUpdates = ['isPublished', 'isPrivate', 'isScheduled','publishDate'];
+    const isValidUpdate = updates.every(update => allowedUpdates.includes(update));
+    if (!isValidUpdate) {
+        return res.status(400).json({message: "You can't update this field"});
+    }
+
     for (let update of updates){
         if (update == 'isPrivate'){
-            event.isPrivate = true
+            event.isPrivate = req.body.isPrivate
         }
 
         if (update == 'password'){
@@ -392,17 +398,26 @@ exports.update = async (req, res) => {
         }
 
         if (update == 'isPublished'){
-            event.isPublished = true
+            event.isPublished = req.body.isPublished
         }
-        if (update == 'isScheduled'){
-            event.isScheduled = true
-            event.publishDate = req.body.publishDate;
+
+        if (!event.isPublished){
+            if (update == 'isScheduled'){
+                event.isScheduled = true
+                event.publishDate = req.body.publishDate;
+            }
+            else {
+                return res.status(400).json({message : "You have to enter a scheduling date."})
+            }
+        }
+        else
+        {
+            if (update == 'isScheduled'){
+                return res.status(400).json({message: "You can't publish now and schedule at the same time."});
+            }
+
         }
     }
-
-    // for (const key in req.body) {
-    //     event[key] = req.body[key];
-    // }
     
     if (req.file){
         event.image = req.file.path;
