@@ -78,20 +78,6 @@ exports.create = async (req, res) => {
 // @access  Public
 exports.getAll = async (req, res) => {
 
-    const allEvents = await Event.find()
-    await allEvents.forEach((eq) =>{
-        if (!eq.isPublished)
-        {
-            cron.schedule('* * * * * *', (eq) =>{
-            const currDate = new Date();
-            if (eq.publishDate <= currDate){
-                eq.isPublished = true;
-                eq.save();
-                console.log(`${eq._id} is updated to true.`);
-            }})
-        }
-    });
-
     const category = req.query.category;
     const lat = req.query.lat;
     const lng = req.query.lng;
@@ -180,8 +166,6 @@ exports.getAll = async (req, res) => {
     if (free) {
         eventQuery.where('price').equals(0);
     }
-    
-
 
     eventQuery.then(events => res.json({ city, events}))
         .catch(err => res.status(400).json(err));
@@ -213,7 +197,7 @@ exports.getAllPaginated = async (req, res) => {
         }
     }
 
-    const eventQuery = Event.find({isPrivate: false}).populate('category');
+    const eventQuery = Event.find({isPrivate: false, isPublished: true}).populate('category');
     if (category) {
         const categoryID = await Category.findOne({name: category})
         console.log(category);
@@ -279,13 +263,6 @@ exports.getAllPaginated = async (req, res) => {
     if (free) {
         eventQuery.where('price').equals(0);
     }
-
-    cron.schedule('* * * * *', (eventQuery) =>{
-        const currDate = new Date();
-        if (eventQuery.publishDate >currDate){
-            eventQuery.isPrivate = false;
-        }
-    })
 
     // for pagination
 
