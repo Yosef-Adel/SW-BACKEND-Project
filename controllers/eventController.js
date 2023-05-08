@@ -397,6 +397,19 @@ exports.update = async (req, res) => {
         if (update == 'isScheduled'){
             event.isScheduled = true
             event.publishDate = req.body.publishDate;
+            const date = new Date(req.body.publishDate);
+            const minute = date.getUTCMinutes();
+            const hour = date.getUTCHours();
+            const dayOfMonth = date.getUTCDate();
+            const month = date.getUTCMonth() + 1;
+            const dayOfWeek = date.getUTCDay();
+            const cronExpression = `${minute} ${hour} ${dayOfMonth} ${month} ${dayOfWeek}`;
+
+            cron.schedule(cronExpression, () => {            
+                event.isPrivate = false;
+                event.isPublished = true;
+                event.isScheduled = false;
+            });
         }
     }
 
