@@ -378,19 +378,17 @@ exports.update = async (req, res) => {
     }
 
     const event = await Event.findById(req.params.id);
-    // this includes new updates only and removes older info, take care
-    // consider this
-    
+
     const updates = Object.keys(req.body);
-    const allowedUpdates = ['isPublished', 'isPrivate', 'isScheduled','publishDate'];
+    const allowedUpdates = ['isPublished', 'isPrivate', 'isScheduled','publishDate', 'image'];
     const isValidUpdate = updates.every(update => allowedUpdates.includes(update));
     if (!isValidUpdate) {
-        return res.status(400).json({message: "You can't update this field"});
+        return res.status(400).json({message: "Your request contains fields that cannot be updated. Please enter only valid fields."});
     }
 
     for (let update of updates){
         if (update === 'isPrivate'){
-            event.isPrivate = true
+            event.isPrivate = req.body.isPrivate
         }
 
         if (update === 'password'){
@@ -398,25 +396,47 @@ exports.update = async (req, res) => {
         }
 
         if (update === 'isPublished'){
-            event.isPublished = true
+            event.isPublished = req.boy.isPublished
         }
-        if (update === 'isScheduled'){
+
+        if (update == 'isScheduled'){
             console.log(req.body.publishDate);
             event.isScheduled = true
             event.isPublished = false
             const date = new Date(req.body.publishDate);
             event.publishDate = date;
-
         }
-    }
 
+        if (update === 'image')
+        {
+            if (req.file){
+                event.image = req.file.path;
+            }
+            else { //no image path
+                return res.status(400).json({message: "You must enter an image path"});
+            }
         }
     }
     
-    if (req.file){
-        event.image = req.file.path;
-    }
     
+    // not published and not scheduled
+    if (!event.isPublished && !event.isScheduled)
+    {
+        return res.status(400).json({message : "You have to either nter a scheduling date or publish event now."})
+    }
+
+    //published and scheduled
+    if (event.isPublished && event.isScheduled)
+    {
+        return res.status(400).json({message: "You can't publish now and schedule at the same time."});
+    }
+
+    //public and has a password
+    if (!event.isPrivate && event.password)
+    {
+        return res.status(400).json({message: "Public events don't have passwords."})
+    }
+
     await event.save()
         .then(event => res.json(event))
         .catch(err => res.status(400).json(err));
