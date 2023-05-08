@@ -34,7 +34,7 @@ exports.create = async (req, res) => {
 
     // Check if category exists
     const category = req.body.category;
-    const categoryObject = await Category.exists({ name: category });
+    const categoryObject = await Category.exists({ _id: category });
     if (!categoryObject) {
         return res.status(400).json({ message: "Category does not exist" });
     }
@@ -389,32 +389,26 @@ exports.update = async (req, res) => {
     }
 
     for (let update of updates){
-        if (update == 'isPrivate'){
-            event.isPrivate = req.body.isPrivate
+        if (update === 'isPrivate'){
+            event.isPrivate = true
         }
 
-        if (update == 'password'){
+        if (update === 'password'){
             event.password = req.body.password
         }
 
-        if (update == 'isPublished'){
-            event.isPublished = req.body.isPublished
+        if (update === 'isPublished'){
+            event.isPublished = true
         }
+        if (update === 'isScheduled'){
+            console.log(req.body.publishDate);
+            event.isScheduled = true
+            event.isPublished = false
+            const date = new Date(req.body.publishDate);
+            event.publishDate = date;
 
-        if (!event.isPublished){
-            if (update == 'isScheduled'){
-                event.isScheduled = true
-                event.publishDate = req.body.publishDate;
-            }
-            else {
-                return res.status(400).json({message : "You have to enter a scheduling date."})
-            }
         }
-        else
-        {
-            if (update == 'isScheduled'){
-                return res.status(400).json({message: "You can't publish now and schedule at the same time."});
-            }
+    }
 
         }
     }
