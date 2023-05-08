@@ -34,7 +34,7 @@ exports.create = async (req, res) => {
 
     // Check if category exists
     const category = req.body.category;
-    const categoryObject = await Category.exists({ name: category });
+    const categoryObject = await Category.exists({ _id: category });
     if (!categoryObject) {
         return res.status(400).json({ message: "Category does not exist" });
     }
@@ -383,33 +383,24 @@ exports.update = async (req, res) => {
     
     const updates = Object.keys(req.body);
     for (let update of updates){
-        if (update == 'isPrivate'){
+        if (update === 'isPrivate'){
             event.isPrivate = true
         }
 
-        if (update == 'password'){
+        if (update === 'password'){
             event.password = req.body.password
         }
 
-        if (update == 'isPublished'){
+        if (update === 'isPublished'){
             event.isPublished = true
         }
-        if (update == 'isScheduled'){
+        if (update === 'isScheduled'){
+            console.log(req.body.publishDate);
             event.isScheduled = true
-            event.publishDate = req.body.publishDate;
+            event.isPublished = false
             const date = new Date(req.body.publishDate);
-            const minute = date.getUTCMinutes();
-            const hour = date.getUTCHours();
-            const dayOfMonth = date.getUTCDate();
-            const month = date.getUTCMonth() + 1;
-            const dayOfWeek = date.getUTCDay();
-            const cronExpression = `${minute} ${hour} ${dayOfMonth} ${month} ${dayOfWeek}`;
+            event.publishDate = date;
 
-            cron.schedule(cronExpression, () => {            
-                event.isPrivate = false;
-                event.isPublished = true;
-                event.isScheduled = false;
-            });
         }
     }
 
