@@ -13,7 +13,7 @@ router.get('/all-events', eventController.getAllEvents);
 router.get('/nearest', eventController.getNearest);
 router.get('/search', eventController.search);
 router.get('/:id', eventController.getById);
-
+router.get('/private/:id', eventController.getPrivateEventByPassword);
 
 router.get('/:userId/all-events', authorization, authorization, eventController.getUserEvents);
 router.get('/:userId/past-events', authorization, authorization, eventController.getUserPastEvents);
@@ -28,7 +28,7 @@ router.put('/:id', upload.single("image"), authorization, eventController.update
 router.delete('/:id', authorization, eventController.delete);
 
 router.get('/:id/attendees',authorization,  eventController.getAttendees);
-router.post('/:id/attendees', authorization, eventController.addAttendee);
+router.post('/:id/:creatorId/attendees', authorization, eventController.addAttendee);
 // router.delete('/:id/attendees/:attendeeId', eventController.removeAttendee);
 
 

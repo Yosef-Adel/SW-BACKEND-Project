@@ -10,7 +10,7 @@ const EventSchema = new Schema({
 
     description: {
         type: String,
-        required: true
+        required: false
     },
 
     startDate: {
@@ -67,10 +67,20 @@ const EventSchema = new Schema({
     createdBy:{
         type: Schema.Types.ObjectId,
         ref: 'user',
-        required: true
+        required: false
     },
 
     isPrivate: {
+        type: Boolean,
+        default: false
+    },
+    
+    isScheduled:{
+        type: Boolean, 
+        default: false
+    },
+
+    isPublished: {
         type: Boolean,
         default: false
     },
@@ -81,7 +91,8 @@ const EventSchema = new Schema({
     },
 
     password: {
-        type: String
+        type: String,
+        required: false
     },
 
     qrCode: {
@@ -91,7 +102,7 @@ const EventSchema = new Schema({
 
     venueName: {
         type: String,
-        required: true
+        required: false
     },
     
     venueCapacity: {
@@ -101,12 +112,12 @@ const EventSchema = new Schema({
 
     city: {
         type: String,
-        required: true
+        required: false
     },
 
     address1: {
         type: String,
-        required: true
+        required: false
     },
 
     address2: {
@@ -120,11 +131,11 @@ const EventSchema = new Schema({
     },
     country: {
         type: String,
-        required: true
+        required: false
     },
     postalCode: {
         type: String,
-        required: true
+        required: false
     },
 
     longitude: {

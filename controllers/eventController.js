@@ -9,7 +9,7 @@ const { Readable,pipeline } = require('stream');
 const { downloadResource } = require ('../utils/CSV');
 const cron = require('node-cron');
 const {generateQRCodeAndSendEmail}=require('../controllers/qrCodeController');
-
+const {sendMail} = require('../utils/emailVerification');
 const User = require('../models/User');
 const axios = require('axios');
 const mongoose = require('mongoose');
@@ -24,7 +24,7 @@ const Organization = require('../models/Organization');
 
 
 // @route   Create api/events/
-// @desc    Create event
+// @desc    Create event basic info
 // @access  Public
 exports.create = async (req, res) => {
     // check if the user is authorized
@@ -34,56 +34,33 @@ exports.create = async (req, res) => {
 
     // Check if category exists
     const category = req.body.category;
-    const categoryObject = await Category.exists({ id: category });
+    const categoryObject = await Category.exists({ name: category });
     if (!categoryObject) {
         return res.status(400).json({ message: "Category does not exist" });
     }
 
+    req.body['createdBy'] = req.user
+
     const missingFieldErrorMessage = "field is required";
-    const field = ["name", "startDate", "endDate", "createdBy", "category", "description", "summary", "capacity", "venueName", "city", "address1", "country", "postalCode"];
+    const field = ["name", "startDate", "endDate", "category", "summary", "capacity"];
     console.log(req.body);
     for (let i = 0; i < field.length; i++) {
         if (!req.body[field[i]]) {
             return res.status(400).json({ message: field[i] + " " + missingFieldErrorMessage });
         }
     }
-    req.body['createdBy'] = req.user
-    console.log(req.body);  
-    // {
-    //     "name": "Ola's venue",
-    //     "city": "Cairo",
-    //     "address1":"ay address 1 talet",
-    //     "country":"Egypt",
-    //     "postalCode":"111111",
-    //     "longitude": 30.123,
-    //     "latitude": 30.123
-    //     "capacity": 100
-    // }
-    // const venueFields = ["name", "city", "address1", "country", "postalCode", "longitude", "latitude", "capacity"];
-    // for (let i = 0; i < venueFields.length; i++) {
-    //     if (!req.body.venue[venueFields[i]]) {
-    //         return res.status(400).json({ message: venueFields[i] + " " + missingFieldErrorMessage });
-    //     }
-    // }
 
-    
+    if (!req.body.isOnline)
+    {
+        const venueFields = ["venueName", "city", "address1", "country", "postalCode"];
+        for (let i = 0; i < venueFields.length; i++) {
+            if (!req.body[venueFields[i]]) {
+                return res.status(400).json({ message: venueFields[i] + " " + missingFieldErrorMessage });
+            }
+        }
+    }
 
     const newEvent = await Event.create({...req.body});
-    // Create event
-    // const newEvent = new Event({
-    //     name: req.body.name,
-    //     description: req.body.description,
-    //     startDate: req.body.startDate,
-    //     endDate: req.body.endDate,
-    //     venue: req.body.venue,
-    //     category: req.body.category,
-    //     capacity: req.body.capacity,
-    //     summary: req.body.summary,
-    //     hostedBy: req.body.hostedBy,
-    //     isPrivate: req.body.isPrivate,
-    //     password: req.body.password,
-    //     publishDate: req.body.publishDate
-    // });
 
     if (req.file){
         newEvent.image = req.file.path;
@@ -100,6 +77,21 @@ exports.create = async (req, res) => {
 // @desc    Get all events
 // @access  Public
 exports.getAll = async (req, res) => {
+
+    const allEvents = await Event.find()
+    await allEvents.forEach((eq) =>{
+        if (!eq.isPublished)
+        {
+            cron.schedule('* * * * * *', (eq) =>{
+            const currDate = new Date();
+            if (eq.publishDate <= currDate){
+                eq.isPublished = true;
+                eq.save();
+                console.log(`${eq._id} is updated to true.`);
+            }})
+        }
+    });
+
     const category = req.query.category;
     const lat = req.query.lat;
     const lng = req.query.lng;
@@ -121,9 +113,10 @@ exports.getAll = async (req, res) => {
         }
     }
 
-    const eventQuery = Event.find({isPrivate: false}).populate('category');
+    const eventQuery = Event.find({isPrivate: false, isPublished: true}).populate('category');
+    console.log(category);
     if (category) {
-        const categoryID = await Category.findOne({name: category})
+        const categoryID = await Category.findOne({"name": category})
         console.log(category);
         console.log(categoryID);
         if (!categoryID) {
@@ -187,6 +180,8 @@ exports.getAll = async (req, res) => {
     if (free) {
         eventQuery.where('price').equals(0);
     }
+    
+
 
     eventQuery.then(events => res.json({ city, events}))
         .catch(err => res.status(400).json(err));
@@ -348,6 +343,31 @@ exports.getById = (req, res) => {
         .catch(err => res.status(400).json(err));
 }
 
+exports.getPrivateEventByPassword = async(req, res)=>{
+    try{
+        const event = await Event.findById(req.params.id);
+        if (!event)
+        {
+            return res.status(400).json({message: "Event doesn't exist"});
+        }
+        
+        if (event.password){
+            if (!req.body.password){
+                return res.status(400).json({message:"You can't access this link without a password."});
+            }
+            if (event.password != req.body.password){
+                return res.status(400).json({message: "Password is incorrect."});
+            }
+        }
+        return res.status(200).json(event);
+
+    }
+    catch(err){
+        console.log(err.message);
+        return res.status(400).json({message: "Error in getting private events by password"});
+    }
+}
+
 // @route   PUT api/events/:id
 // @desc    Update event by id
 // @access  Public
@@ -362,7 +382,23 @@ exports.update = async (req, res) => {
     // consider this
     
     const updates = Object.keys(req.body);
-    updates.forEach((element) => (event[element] = req.body[element]));
+    for (let update of updates){
+        if (update == 'isPrivate'){
+            event.isPrivate = true
+        }
+
+        if (update == 'password'){
+            event.password = req.body.password
+        }
+
+        if (update == 'isPublished'){
+            event.isPublished = true
+        }
+        if (update == 'isScheduled'){
+            event.isScheduled = true
+            event.publishDate = req.body.publishDate;
+        }
+    }
 
     // for (const key in req.body) {
     //     event[key] = req.body[key];
@@ -527,8 +563,19 @@ exports.addAttendee = async (req, res) => {
 
         let eventURL=process.env.FRONT_DEPLOY+"/user/event/"+event;
 
+        const eventObject = await Event.findById(req.params.id);
         //sending the mail to the email specified in the order form
         await generateQRCodeAndSendEmail(eventURL,user._id,order.email,ticketDetails);
+        
+        //sending an email to notify the user
+        const creator = await User.findById(req.params.creatorId);
+        const notifyingText = `Hi ${req.body.firstName}, ${creator.firstName} ${creator.lastName} got you tickets to ${eventObject.name}! Click here to go to the event page ${eventURL}`;
+        
+        await sendMail({
+        email: req.body.email,
+        subject: `${creator.firstName} ${creator.lastName} got you tickets to ${eventObject.name}`,
+        message: notifyingText
+        });
 
         res.status(201).json({message: "Order created successfully!",
             order: order
@@ -540,6 +587,7 @@ exports.addAttendee = async (req, res) => {
         res.status(500).json(error.message);
     }
 }
+
 
 exports.downloadUserEvents = async(req,res) => {
     try{
@@ -565,6 +613,7 @@ exports.downloadUserEvents = async(req,res) => {
     }
 }
 
+
 function getTicketsSoldAndCapacity(tickets){
     let numberOfTicketsSold = 0;
     let numberOfTicketsCapacity = 0;
@@ -575,30 +624,6 @@ function getTicketsSoldAndCapacity(tickets){
     return [numberOfTicketsSold,numberOfTicketsCapacity];
 }
 
-exports.getPrivateEventByPassword = async(req, res)=>{
-    try{
-        const event = await Event.findById(req.params.id);
-        if (!event)
-        {
-            return res.status(400).json({message: "Event doesn't exist"});
-        }
-        
-        if (eventQuery.password){
-            if (!req.body.password){
-                return res.status(400).json({message:"Please enter password."});
-            }
-            if (eventQuery.password != req.body.password){
-                return res.status(400).json({message: "Password is incorrect."});
-            }
-        }
-        return res.status(200).json(event);
-
-    }
-    catch(err){
-        console.log(err.message);
-        return res.status(400).json({message: "Error in getting private events by password"});
-    }
-}
 
 exports.getUserEvents = async(req,res) => {
     try{
