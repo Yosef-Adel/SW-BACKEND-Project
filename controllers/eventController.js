@@ -617,7 +617,12 @@ exports.addAttendee = async (req, res) => {
         message: notifyingText
         });
 
-
+        const notificationMessage = {
+            title: "New Order",
+            body: notifyingText
+        }
+        // "d2ySh3grCYccs5EpX7T882:APA91bGItx6UMtrGlKIRBxPgnFsSTGe2HpfzmlRjyXJ0qc_-KvUMI-BwywKuvenFkqHEniV4Hf-PcWB7SBaUAXQZnNrJj8iioHmCAItH8AAYKbkg77sJO-AFywJ6K8zU0NnT2vRkNs-t"
+        sendNotification(notificationMessage,user.firebaseRegistrationToken);
 
         res.status(201).json({message: "Order created successfully!",
             order: order
