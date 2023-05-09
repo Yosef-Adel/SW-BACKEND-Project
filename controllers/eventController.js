@@ -435,6 +435,12 @@ exports.update = async (req, res) => {
         return res.status(400).json({message: "You can't publish now and schedule at the same time."});
     }
 
+    //public and has a password
+    // if (!event.isPrivate && event.password)
+    // {
+    //     return res.status(400).json({message: "Public events don't have passwords."})
+    // }
+
     await event.save()
         .then(event => res.json(event))
         .catch(err => res.status(400).json(err));
