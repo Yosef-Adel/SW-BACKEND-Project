@@ -423,7 +423,8 @@ exports.update = async (req, res) => {
     // console.log(event.isPublished);
     // console.log(event.isScheduled);
     // not published and not scheduled
-    if (!event.isPublished && !event.isScheduled)
+
+    if (!req.body.isPublished && !req.body.isScheduled)
     {
         return res.status(400).json({message : "You have to either enter a scheduling date or publish event now."})
     }
