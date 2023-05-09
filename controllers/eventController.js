@@ -401,7 +401,7 @@ exports.update = async (req, res) => {
             // console.log(event.isPublished);
             // console.log(req.body.isPublished);
             event.isPublished = req.body.isPublished
-            if (req.body.isPublished) {
+            if (req.body.isPublished.toString() == 'true') {
                 event.isScheduled = false;
             }
         }
@@ -423,25 +423,20 @@ exports.update = async (req, res) => {
     // console.log(event.isScheduled);
     // not published and not scheduled
 
-    // if (!req.body.isPublished && !req.body.isScheduled)
-    // {
-    //     return res.status(400).json({message : "You have to either enter a scheduling date or publish event now."})
-    // }
+    if (req.body.isPublished.toString() == 'false' && req.body.isScheduled.toString() == 'false')
+    {
+        return res.status(400).json({message : "You have to either enter a scheduling date or publish event now."})
+    }
 
     
     //published and scheduled
-    // if (req.body.isPublished && req.body.isScheduled)
-    // {
-    //     console.log(req.body.isPublished)
-    //     console.log(req.body.isScheduled)
-    //     return res.status(400).json({message: "You can't publish now and schedule at the same time."});
-    // }
+    if (req.body.isPublished.toString() == 'true' && req.body.isScheduled.toString() == 'true')
+    {
+        console.log(req.body.isPublished)
+        console.log(req.body.isScheduled)
+        return res.status(400).json({message: "You can't publish now and schedule at the same time."});
+    }
 
-    //public and has a password
-    // if (!event.isPrivate && event.password)
-    // {
-    //     return res.status(400).json({message: "Public events don't have passwords."})
-    // }
 
     await event.save()
         .then(event => res.json(event))
