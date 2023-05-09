@@ -377,11 +377,11 @@ exports.update = async (req, res) => {
 
     for (let update of updates){
         if (update === 'capacity'){
-            // if (req.params.capacity < event.capacity){
-            //     return res.status(400).json({message: "New capacity has to be bigger than previous."})
-            // }
-            console.log(req.params.capacity)
-            event.capacity = req.params.capacity;
+            if (req.body.capacity < event.capacity){
+                return res.status(400).json({message: "New capacity has to be bigger than previous."})
+            }
+            console.log(req.body.capacity)
+            event.capacity = req.body.capacity;
         }
         if (update == 'summary'){
             event.summary = req.body.summary;
@@ -415,7 +415,6 @@ exports.update = async (req, res) => {
         }
     }
 
-    console.log(req.file)
     if (req.file){
         event.image = req.file.path;
     }
