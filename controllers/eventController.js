@@ -373,7 +373,7 @@ exports.update = async (req, res) => {
         }
 
         if (update === 'isPublished'){
-            event.isPublished = req.boy.isPublished
+            event.isPublished = req.body.isPublished
         }
 
         if (update == 'isScheduled'){
