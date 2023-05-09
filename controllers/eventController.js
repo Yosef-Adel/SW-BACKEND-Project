@@ -430,12 +430,12 @@ exports.update = async (req, res) => {
 
     
     //published and scheduled
-    if (req.body.isPublished && req.body.isScheduled)
-    {
-        // console.log(req.body.isPublished)
-        // console.log(req.body.isScheduled)
-        return res.status(400).json({message: "You can't publish now and schedule at the same time."});
-    }
+    // if (req.body.isPublished && req.body.isScheduled)
+    // {
+    //     console.log(req.body.isPublished)
+    //     console.log(req.body.isScheduled)
+    //     return res.status(400).json({message: "You can't publish now and schedule at the same time."});
+    // }
 
     //public and has a password
     // if (!event.isPrivate && event.password)
