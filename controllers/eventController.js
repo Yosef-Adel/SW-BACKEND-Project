@@ -100,6 +100,10 @@ exports.getAll = async (req, res) => {
     }
 
     const eventQuery = Event.find({isPrivate: false, isPublished: true}).populate('category');
+    if (!eventQuery){
+        return res.status(400).json({message: "Event not found"});
+    }
+
     console.log(category);
     if (category) {
         const categoryID = await Category.findOne({"name": category})
@@ -198,6 +202,10 @@ exports.getAllPaginated = async (req, res) => {
     }
 
     const eventQuery = Event.find({isPrivate: false, isPublished: true}).populate('category');
+    if (!eventQuery)
+    {
+        return res.status(400).json({message: "Event not found"});
+    }
     if (category) {
         const categoryID = await Category.findOne({name: category})
         console.log(category);
@@ -325,7 +333,7 @@ exports.getPrivateEventByPassword = async(req, res)=>{
         const event = await Event.findById(req.params.id);
         if (!event)
         {
-            return res.status(400).json({message: "Event doesn't exist"});
+            return res.status(400).json({message: "Event not found"});
         }
         
         if (event.password){
@@ -447,7 +455,7 @@ exports.delete = async(req, res) => {
         const event = await Event.findById(req.params.id);
         if (!event)
         {
-            return res.status(400).json({message: "Event doesn't exist"});
+            return res.status(400).json({message: "Event not found"});
         }
         const ticketsArray = event.tickets;
         console.log(ticketsArray);
@@ -509,7 +517,7 @@ exports.getNearest = async (req, res) => {
         }
     }
     
-    const events = await Event.find({ "venue.city": city, isPrivate: false }).populate('category');
+    const events = await Event.find({ "venue.city": city, isPrivate: false, isPublished: true }).populate('category');
     res.json({ city, events});
 }
 
@@ -699,6 +707,7 @@ exports.getUserPastEvents = async(req, res) => {
         const user = mongoose.Types.ObjectId(req.params.userId);
 
         const events = await Event.find({"createdBy": user});
+
         const userEvents = [];
         const currDate = new Date();
         for (let event of events){
@@ -717,8 +726,6 @@ exports.getUserPastEvents = async(req, res) => {
             {
                 userEvents.push(event);
             }
-
-
         }
 
         if (userEvents.length == 0){
@@ -806,13 +813,15 @@ exports.getAttendeeReport = async (req, res) => {
     }
 
     const event = await Event.findById(eventId);
-    if (!event) {
-        return res.status(400).json({ message: "Event doesn't exist" });
+    if (!event)
+    {
+        return res.status(400).json({message: "Event not found"});
     }
 
     if (event.createdBy && event.createdBy != req.user._id) {
         return res.status(401).json({ message: "You are not the creator of this event" });
     }
+
     if(typeof event.createdBy === 'undefined'){
         return res.status(401).json({ message: "You are not the creator of this event" });
     }
@@ -925,7 +934,7 @@ exports.downloadAttendeeReport = async (req, res) => {
     // }
     //check if the event exists
     if (!eventId) {
-        return res.status(400).json({ message: "Event doesn't exist" });
+        return res.status(400).json({message: "Event id is missing"});
     }
 
     //get the order count
@@ -946,6 +955,11 @@ exports.downloadAttendeeReport = async (req, res) => {
     //and get to the tickets array
     //I want to see the number of tickets for each order and the type
     const event = await Event.findById(eventId);
+    if (!event)
+    {
+        return res.status(400).json({message: "Event not found"});
+    }
+
     var attendeeStatus="";
 
     const orders=await Order.find({event:eventId});
@@ -1025,12 +1039,13 @@ exports.getSalesByTicketTypeReport = async (req, res) => {
     }
     //check if the event exists
     if (!eventId) {
-        return res.status(400).json({ message: "Event doesn't exist" });
+        return res.status(400).json({ message: "Event id is missing" });
     }
 
     const event=await Event.findById(eventId);
-    if(!event){
-        return res.status(400).json({ message: "Event doesn't exist" });
+    if (!event)
+    {
+        return res.status(400).json({message: "Event not found"});
     }
 
     if (event.createdBy && event.createdBy != req.user._id) {
@@ -1159,12 +1174,12 @@ exports.getOrderSummaryReport = async (req, res) => {
     }
 
     if (!eventId) {
-        return res.status(400).json({ message: "Event doesn't exist" });
+        return res.status(400).json({ message: "Event id is missing" });
     }
 
     const event=await Event.findById(eventId);
     if(!event){
-        return res.status(400).json({ message: "Event doesn't exist" });
+        return res.status(400).json({ message: "Event not found" });
     }
 
     if (event.createdBy && event.createdBy != req.user._id) {
@@ -1226,105 +1241,106 @@ exports.getOrderSummaryReport = async (req, res) => {
 
 // get the event url
 exports.getEventUrl = async (req, res) => {
-                //event id in the request params
-                const eventId = req.params.eventId;
-                //check if the user is logged in
-                if (!req.user) {
-                    return res.status(401).json({ message: "You are not logged in" });
-                }
-                //check that the user is a creator
-                //and this user is the creator of the event
-                if (req.user.isCreator == false) {
-                    return res.status(401).json({ message: "You are not a creator" });
-                }
-                //check if the event exists
-                if (!eventId) {
-                    return res.status(400).json({ message: "Event doesn't exist" });
-                }
+    //event id in the request params
+    const eventId = req.params.eventId;
+    //check if the user is logged in
+    if (!req.user) {
+        return res.status(401).json({ message: "You are not logged in" });
+    }
+    //check that the user is a creator
+    //and this user is the creator of the event
+    if (req.user.isCreator == false) {
+        return res.status(401).json({ message: "You are not a creator" });
+    }
+    //check if the event exists
+    if (!eventId) {
+        return res.status(400).json({ message: "Event id is missing" });
+    }
 
-                const event=await Event.findById(eventId);
-                if(!event){
-                    return res.status(400).json({ message: "Event doesn't exist" });
-                }
-            
-                if (event.createdBy && event.createdBy != req.user._id) {
-                    return res.status(401).json({ message: "You are not the creator of this event" });
-                }
-                if(typeof event.createdBy === 'undefined'){
-                    return res.status(401).json({ message: "You are not the creator of this event" });
-                }
+    const event=await Event.findById(eventId);
+    if(!event){
+        return res.status(400).json({ message: "Event not found" });
+    }
 
-                //return the event url
-                try 
-                {
-                    const url = process.env.FRONT_DEPLOY+"/user/event/"+eventId;
-                    res.status(200).json({ url: url });
-                } 
-                catch (err) {
-                    res.status(400).json({ message: "Error in getting the event url" });
-                }
+    if (event.createdBy && event.createdBy != req.user._id) {
+        return res.status(401).json({ message: "You are not the creator of this event" });
+    }
+    if(typeof event.createdBy === 'undefined'){
+        return res.status(401).json({ message: "You are not the creator of this event" });
+    }
+
+    //return the event url
+    try 
+    {
+        const url = process.env.FRONT_DEPLOY+"/user/event/"+eventId;
+        res.status(200).json({ url: url });
+    } 
+    catch (err) {
+        res.status(400).json({ message: "Error in getting the event url" });
+    }
 
 
 };
 
 //get tickets sold for an event
 exports.getTicketsSoldForEvent = async (req, res) => {
-            //event id in the request params
-            const eventId = req.params.eventId;
-            //check if the user is logged in
-            if (!req.user) {
-                return res.status(401).json({ message: "You are not logged in" });
-            }
-            //check that the user is a creator
-            //and this user is the creator of the event
-            if (req.user.isCreator == false) {
-                return res.status(401).json({ message: "You are not a creator" });
-            }
-            //check if the event exists
-            if (!eventId) {
-                return res.status(400).json({ message: "Event doesn't exist" });
-            }
-            const event=await Event.findById(eventId);
-            if(!event){
-                return res.status(400).json({ message: "Event doesn't exist" });
-            }
-        
-            if (event.createdBy && event.createdBy != req.user._id) {
-                return res.status(401).json({ message: "You are not the creator of this event" });
-            }
-            if(typeof event.createdBy === 'undefined'){
-                return res.status(401).json({ message: "You are not the creator of this event" });
-            }
+    //event id in the request params
+    const eventId = req.params.eventId;
+    //check if the user is logged in
+    if (!req.user) {
+        return res.status(401).json({ message: "You are not logged in" });
+    }
+    //check that the user is a creator
+    //and this user is the creator of the event
+    if (req.user.isCreator == false) {
+        return res.status(401).json({ message: "You are not a creator" });
+    }
+    //check if the event exists
+    if (!eventId) {
+        return res.status(400).json({ message: "Event id is missing" });
+    }
+    const event=await Event.findById(eventId);
+    if(!event){
+        return res.status(400).json({ message: "Event not found" });
+    }
+    
 
-            //get the total sold tickets count
-            const soldTickets=await getTicketsSold(eventId);
+    if (event.createdBy && event.createdBy != req.user._id) {
+        return res.status(401).json({ message: "You are not the creator of this event" });
+    }
+    if(typeof event.createdBy === 'undefined'){
+        return res.status(401).json({ message: "You are not the creator of this event" });
+    }
 
-            const eventCapacity=event.capacity;
+    //get the total sold tickets count
+    const soldTickets=await getTicketsSold(eventId);
 
-            const totalTicketCapacity=await getTotalCapacity(eventId);
+    const eventCapacity=event.capacity;
 
-            var TotalCapacityFinal=eventCapacity;
-            if (totalTicketCapacity < eventCapacity) 
-            {
-                TotalCapacityFinal = totalTicketCapacity;
-            }
+    const totalTicketCapacity=await getTotalCapacity(eventId);
 
-            const freeTicketsSold=await getFreeTicketsSold(eventId);
-            const paidTicketsSold=await getPaidTicketsSold(eventId);
+    var TotalCapacityFinal=eventCapacity;
+    if (totalTicketCapacity < eventCapacity) 
+    {
+        TotalCapacityFinal = totalTicketCapacity;
+    }
 
-            //try to send the response
-            try {
-                res.status(200).json({
-                    soldTickets: soldTickets,
-                    totalCapacity: TotalCapacityFinal,
-                    freeTicketsSold: freeTicketsSold,
-                    paidTicketsSold: paidTicketsSold
-                });
-            }
-            //catch any errors
-            catch (err) {
-                res.status(400).json({ message: "Error in getting the tickets sold for an event" });
-            }    
+    const freeTicketsSold=await getFreeTicketsSold(eventId);
+    const paidTicketsSold=await getPaidTicketsSold(eventId);
+
+    //try to send the response
+    try {
+        res.status(200).json({
+            soldTickets: soldTickets,
+            totalCapacity: TotalCapacityFinal,
+            freeTicketsSold: freeTicketsSold,
+            paidTicketsSold: paidTicketsSold
+        });
+    }
+    //catch any errors
+    catch (err) {
+        res.status(400).json({ message: "Error in getting the tickets sold for an event" });
+    }    
 };
 
 // function for the sales by ticket type report in the dashboard
