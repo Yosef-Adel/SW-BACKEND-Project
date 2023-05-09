@@ -430,7 +430,7 @@ exports.update = async (req, res) => {
     }
 
     //published and scheduled
-    if (event.isPublished && event.isScheduled)
+    if (req.body.isPublished && req.body.isScheduled)
     {
         return res.status(400).json({message: "You can't publish now and schedule at the same time."});
     }
