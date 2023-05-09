@@ -355,6 +355,9 @@ exports.update = async (req, res) => {
     }
 
     const event = await Event.findById(req.params.id);
+    if (!event){
+        return res.status(400).json({message : "Event not found"})
+    }
 
     const updates = Object.keys(req.body);
     const allowedUpdates = ['isPublished', 'isPrivate', 'isScheduled','publishDate', 'image'];
@@ -373,7 +376,12 @@ exports.update = async (req, res) => {
         }
 
         if (update === 'isPublished'){
+            console.log(event.isPublished);
+            console.log(req.body.isPublished);
             event.isPublished = req.body.isPublished
+            if (req.body.isPublished) {
+                event.isScheduled = false;
+            }
         }
 
         if (update == 'isScheduled'){
@@ -395,11 +403,13 @@ exports.update = async (req, res) => {
         }
     }
     
-    
+
+    console.log(event.isPublished);
+    console.log(event.isScheduled);
     // not published and not scheduled
     if (!event.isPublished && !event.isScheduled)
     {
-        return res.status(400).json({message : "You have to either nter a scheduling date or publish event now."})
+        return res.status(400).json({message : "You have to either enter a scheduling date or publish event now."})
     }
 
     //published and scheduled
