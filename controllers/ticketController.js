@@ -1,6 +1,7 @@
 
 const Ticket = require('../models/Tickets');
 const Event = require('../models/Events');
+const Promocode = require('../models/Promocode');
 
 
 //@route POST api/ticket/:event_id
@@ -143,6 +144,49 @@ const deleteTicketById = async (req, res, next) => {
         if (!ticket) {
             return res.status(400).json({ message: "Ticket not found." });
         }
+
+// before removing the ticket, remove it from the event ticket list
+let event = await Event.findById(ticket.event);
+if (!event) {
+    return res.status(400).json({ message: "Event not found." });
+}
+console.log(event.tickets);
+//remove the ticket from the event
+event.tickets.pull(ticket);
+
+//update the event price
+//if the ticket price is the same as the event price, then update the event price
+if (event.price==ticket.price) {
+    //loop through the tickets of the event and find the minimum price
+    let tickets = event.tickets;
+    let minPrice
+    for (let i = 0; i < tickets.length; i++) {
+        let ticket = await Ticket.findById(tickets[i]);
+        if (i==0) {
+            minPrice=ticket.price;
+        }
+        else {
+            if (ticket.price<minPrice) {
+                minPrice=ticket.price;
+            }
+        }
+    }
+    event.price=minPrice;
+}
+await event.save();
+
+//get the promocode objects with the event equal to the event id and has the ticket id in the tickets array
+let promocodes = await Promocode.find({event: event._id, tickets: ticket._id});
+//loop through the promocodes and remove the ticket from the tickets array
+if (promocodes.length>0){
+    for (let i = 0; i < promocodes.length; i++) {
+        console.log(promocodes[i]);
+        let promocode = promocodes[i];
+        promocode.tickets.pull(ticket);
+        await promocode.save();
+    }
+}
+
         await ticket.remove();
         res.status(200).json({ message: "Ticket deleted successfully!",
         ticket: ticket
