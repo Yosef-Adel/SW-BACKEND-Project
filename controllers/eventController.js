@@ -360,13 +360,19 @@ exports.update = async (req, res) => {
     }
 
     const updates = Object.keys(req.body);
-    const allowedUpdates = ['isPublished', 'isPrivate', 'isScheduled','publishDate', 'image'];
+    const allowedUpdates = ['isPublished', 'isPrivate', 'isScheduled','publishDate', 'image', 'summary', 'description'];
     const isValidUpdate = updates.every(update => allowedUpdates.includes(update));
     if (!isValidUpdate) {
         return res.status(400).json({message: "Your request contains fields that cannot be updated. Please enter only valid fields."});
     }
 
     for (let update of updates){
+        if (update == 'summary'){
+            event.summary = req.body.summary;
+        }
+        if (update == 'description'){
+            event.description = req.body.description;
+        }
         if (update === 'isPrivate'){
             event.isPrivate = req.body.isPrivate
         }
