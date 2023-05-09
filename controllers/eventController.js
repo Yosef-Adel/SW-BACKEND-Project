@@ -368,13 +368,16 @@ exports.update = async (req, res) => {
     }
 
     const updates = Object.keys(req.body);
-    const allowedUpdates = ['isPublished', 'isPrivate', 'isScheduled','publishDate', 'image', 'summary', 'description'];
+    const allowedUpdates = ['isPublished', 'isPrivate', 'isScheduled','publishDate', 'image', 'summary', 'description', 'capacity'];
     const isValidUpdate = updates.every(update => allowedUpdates.includes(update));
     if (!isValidUpdate) {
         return res.status(400).json({message: "Your request contains fields that cannot be updated. Please enter only valid fields."});
     }
 
     for (let update of updates){
+        if (update === 'capacity'){
+            event.capacity = req.params.capacity;
+        }
         if (update == 'summary'){
             event.summary = req.body.summary;
         }
@@ -465,6 +468,11 @@ exports.delete = async(req, res) => {
                 return res.status(400).json({message: "Ticket not found"});
             }
         };
+
+        const orders = await Order.find({event: req.params.id});
+        for(let order of orders){
+            await Order.deleteOne(order);
+        }
         await Event.findByIdAndDelete(req.params.id);
 
         return res.status(200).json({message: "Event deleted successfully", event})
