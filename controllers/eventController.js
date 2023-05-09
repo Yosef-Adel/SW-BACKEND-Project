@@ -19,7 +19,7 @@ const {getTicketsSold, getOrdersCount, getTotalCapacity, getTotalMoneyEarned, ge
 const Ticket = require('../models/Tickets');
 const Organization = require('../models/Organization');
 // const { CsvWriter } = require('csv-writer/src/lib/csv-writer');
-
+const {sendNotification} = require('../utils/notification');
 
 
 
@@ -381,7 +381,7 @@ exports.update = async (req, res) => {
             //     return res.status(400).json({message: "New capacity has to be bigger than previous."})
             // }
             console.log(req.params.capacity)
-            event.capacity = req.params.capacity;
+            event.capacity = req.body.capacity;
         }
         if (update == 'summary'){
             event.summary = req.body.summary;
@@ -614,6 +614,8 @@ exports.addAttendee = async (req, res) => {
         subject: `${creator.firstName} ${creator.lastName} got you tickets to ${eventObject.name}`,
         message: notifyingText
         });
+
+
 
         res.status(201).json({message: "Order created successfully!",
             order: order
