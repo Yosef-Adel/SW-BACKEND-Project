@@ -368,7 +368,7 @@ exports.update = async (req, res) => {
     }
 
     const updates = Object.keys(req.body);
-    const allowedUpdates = ['isPublished', 'isPrivate', 'isScheduled','publishDate', 'image', 'summary', 'description', 'capacity'];
+    const allowedUpdates = ['isPublished', 'isPrivate', 'isScheduled','publishDate', 'image', 'summary', 'description', 'capacity', 'password'];
     const isValidUpdate = updates.every(update => allowedUpdates.includes(update));
     if (!isValidUpdate) {
         return res.status(400).json({message: "Your request contains fields that cannot be updated. Please enter only valid fields."});
