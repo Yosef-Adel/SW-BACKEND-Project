@@ -599,7 +599,7 @@ exports.addAttendee = async (req, res) => {
             email: req.body.email
         });
 
-        let eventURL=process.env.FRONT_DEPLOY+"/user/event/"+event;
+        let eventURL=process.env.FRONT_DEVOPS+"/user/event/"+event;
 
         const eventObject = await Event.findById(req.params.id);
         //sending the mail to the email specified in the order form
@@ -1280,7 +1280,7 @@ exports.getEventUrl = async (req, res) => {
     //return the event url
     try 
     {
-        const url = process.env.FRONT_DEPLOY+"/user/event/"+eventId;
+        const url = process.env.FRONT_DEVOPS+"/user/event/"+eventId;
         res.status(200).json({ url: url });
     } 
     catch (err) {
