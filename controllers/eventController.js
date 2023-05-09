@@ -42,7 +42,7 @@ exports.create = async (req, res) => {
     req.body['createdBy'] = req.user
 
     const missingFieldErrorMessage = "field is required";
-    const field = ["name", "startDate", "endDate", "category", "summary", "capacity"];
+    const field = ["name", "startDate", "endDate", "category", "capacity"];
     console.log(req.body);
     for (let i = 0; i < field.length; i++) {
         if (!req.body[field[i]]) {
