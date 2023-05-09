@@ -273,6 +273,7 @@ const checkPromoSecured = async (req, res) => {
 
 
 const uploadPromocodes = async (req, res) => {
+    console.log("fdsf")
     if (!(req.user)) {
         return res.status(400).json({ message: "User is not logged in." });
     }
@@ -281,6 +282,7 @@ const uploadPromocodes = async (req, res) => {
         return res.status(400).json({ message: "User is not a creator." });
     }
     const event=await Event.findById(req.params.event_id);
+    console.log(event);
     if (!event) {
         return res.status(400).json({ message: "Event not found." });
     }
@@ -312,8 +314,8 @@ const uploadPromocodes = async (req, res) => {
 
     // try {
         // Get uploaded csv file
-        const csvFile = req.files.file;
-    
+        const csvFile = req.file;
+        console.log(csvFile);
         // Validate file format
         if (csvFile.mimetype !== "text/csv") {
             return res.status(400).json({ message: "Invalid file format. Only CSV files are allowed." });
@@ -321,7 +323,7 @@ const uploadPromocodes = async (req, res) => {
     
         // Convert csv file to json
         const csvData = [];
-        csvFile.data.toString().split('\n').forEach(line => {
+        csvFile.buffer.toString().split('\n').forEach(line => {
             if (line) {
                 csvData.push(line.split(','));
             }
