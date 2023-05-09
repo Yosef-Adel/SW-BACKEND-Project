@@ -42,7 +42,7 @@ exports.create = async (req, res) => {
     req.body['createdBy'] = req.user
 
     const missingFieldErrorMessage = "field is required";
-    const field = ["name", "startDate", "endDate", "category", "summary", "capacity"];
+    const field = ["name", "startDate", "endDate", "category"];
     console.log(req.body);
     for (let i = 0; i < field.length; i++) {
         if (!req.body[field[i]]) {
@@ -423,13 +423,14 @@ exports.update = async (req, res) => {
     // console.log(event.isPublished);
     // console.log(event.isScheduled);
     // not published and not scheduled
-    if (!event.isPublished && !event.isScheduled)
-    {
-        return res.status(400).json({message : "You have to either enter a scheduling date or publish event now."})
-    }
+
+    // if (!req.body.isPublished && !req.body.isScheduled)
+    // {
+    //     return res.status(400).json({message : "You have to either enter a scheduling date or publish event now."})
+    // }
 
     //published and scheduled
-    if (event.isPublished && event.isScheduled)
+    if (req.body.isPublished && req.body.isScheduled)
     {
         return res.status(400).json({message: "You can't publish now and schedule at the same time."});
     }

@@ -1,9 +1,9 @@
 const eventController = require('../controllers/eventController');
 const express = require('express');
 const router = express.Router();
+const authorization = require('../middleware/authorization');
 const multer = require('multer');
 const cloudinaryStorage = require("../config/cloudinary");
-const authorization = require('../middleware/authorization');
 const upload = new multer({storage: cloudinaryStorage.storage});
 
 
