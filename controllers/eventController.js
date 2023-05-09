@@ -368,7 +368,8 @@ exports.update = async (req, res) => {
     }
 
     const updates = Object.keys(req.body);
-    const allowedUpdates = ['isPublished', 'isPrivate', 'isScheduled','publishDate', 'image', 'summary', 'description', 'capacity', 'password'];
+    // console.log(updates)
+    const allowedUpdates = ['isPublished', 'isPrivate', 'isScheduled','publishDate', 'summary', 'description', 'capacity', 'password'];
     const isValidUpdate = updates.every(update => allowedUpdates.includes(update));
     if (!isValidUpdate) {
         return res.status(400).json({message: "Your request contains fields that cannot be updated. Please enter only valid fields."});
@@ -376,6 +377,10 @@ exports.update = async (req, res) => {
 
     for (let update of updates){
         if (update === 'capacity'){
+            // if (req.params.capacity < event.capacity){
+            //     return res.status(400).json({message: "New capacity has to be bigger than previous."})
+            // }
+            console.log(req.params.capacity)
             event.capacity = req.params.capacity;
         }
         if (update == 'summary'){
@@ -408,16 +413,11 @@ exports.update = async (req, res) => {
             const date = new Date(req.body.publishDate);
             event.publishDate = date;
         }
+    }
 
-        if (update === 'image')
-        {
-            if (req.file){
-                event.image = req.file.path;
-            }
-            else { //no image path
-                return res.status(400).json({message: "You must enter an image path"});
-            }
-        }
+    console.log(req.file)
+    if (req.file){
+        event.image = req.file.path;
     }
     
 
