@@ -421,8 +421,8 @@ exports.update = async (req, res) => {
     }
     
 
-    console.log(event.isPublished);
-    console.log(event.isScheduled);
+    // console.log(event.isPublished);
+    // console.log(event.isScheduled);
     // not published and not scheduled
     if (!event.isPublished && !event.isScheduled)
     {
