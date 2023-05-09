@@ -99,10 +99,6 @@ exports.changeToAttendee = async(req,res) => {
         if (!user){
             return res.status(400).json({message: "User not found"})
         }
-        // check if the user is authorized
-        if (!req.isCreator){
-            return res.status(400).json({message: "You are not a creator"});
-        }
         user.isCreator=false;
         await user.save();
         

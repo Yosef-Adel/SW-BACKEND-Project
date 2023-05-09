@@ -34,7 +34,7 @@ exports.create = async (req, res) => {
 
     // Check if category exists
     const category = req.body.category;
-    const categoryObject = await Category.exists({ _id: category });
+    const categoryObject = await Category.exists({ name: category });
     if (!categoryObject) {
         return res.status(400).json({ message: "Category does not exist" });
     }
