@@ -380,7 +380,7 @@ exports.update = async (req, res) => {
             if (req.body.capacity < event.capacity){
                 return res.status(400).json({message: "New capacity has to be bigger than previous."})
             }
-            console.log(req.body.capacity)
+            // console.log(req.body.capacity)
             event.capacity = req.body.capacity;
         }
         if (update == 'summary'){
