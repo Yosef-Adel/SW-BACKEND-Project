@@ -398,8 +398,8 @@ exports.update = async (req, res) => {
         }
 
         if (update === 'isPublished'){
-            console.log(event.isPublished);
-            console.log(req.body.isPublished);
+            // console.log(event.isPublished);
+            // console.log(req.body.isPublished);
             event.isPublished = req.body.isPublished
             if (req.body.isPublished) {
                 event.isScheduled = false;
@@ -407,7 +407,6 @@ exports.update = async (req, res) => {
         }
 
         if (update == 'isScheduled'){
-            console.log(req.body.publishDate);
             event.isScheduled = true
             event.isPublished = false
             const date = new Date(req.body.publishDate);
@@ -429,9 +428,12 @@ exports.update = async (req, res) => {
     //     return res.status(400).json({message : "You have to either enter a scheduling date or publish event now."})
     // }
 
+    
     //published and scheduled
     if (req.body.isPublished && req.body.isScheduled)
     {
+        // console.log(req.body.isPublished)
+        // console.log(req.body.isScheduled)
         return res.status(400).json({message: "You can't publish now and schedule at the same time."});
     }
 
