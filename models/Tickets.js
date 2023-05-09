@@ -29,7 +29,7 @@ const TicketSchema = new Schema({
     //fee per ticket= (ticketPrice * 0.037)+(1.79)+(ticketPrice * 0.029)
     fee:{
         type: Number,
-        required: false
+        required: true
     },
 
     capacity:{
