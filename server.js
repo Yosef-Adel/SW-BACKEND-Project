@@ -19,6 +19,9 @@ const task = cron.schedule('* * * * * *', async () =>{
             console.log('publishing event', event._id);
             event.isScheduled = false;
             event.isPublished = true;
+            if (event.isPrivate && event.isPrivate.toString() == 'true'){
+                event.isPrivate = false;
+            }
             await event.save();
         }
     });

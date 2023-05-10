@@ -398,17 +398,20 @@ exports.update = async (req, res) => {
         }
 
         if (update === 'isPublished'){
-            // console.log(event.isPublished);
-            // console.log(req.body.isPublished);
             event.isPublished = req.body.isPublished
-            if (req.body.isPublished.toString() == 'true') {
+            if (req.body.isPublished.toString() === 'true') {
                 event.isScheduled = false;
             }
         }
 
         if (update == 'isScheduled'){
-            event.isScheduled = true
-            event.isPublished = false
+            event.isScheduled = req.body.isScheduled
+            if (req.body.isScheduled.toString() === 'true'){
+                event.isPublished = false
+                if (!req.body.publishDate){
+                    return res.status(400).json({message: "You have to enter a publish date"})
+                }
+            }
             const date = new Date(req.body.publishDate);
             event.publishDate = date;
         }
@@ -417,26 +420,23 @@ exports.update = async (req, res) => {
     if (req.file){
         event.image = req.file.path;
     }
-    
-
-    // console.log(event.isPublished);
-    // console.log(event.isScheduled);
-    // not published and not scheduled
 
     // not published and not scheduled
-    if (req.body.isPublished && req.body.isPublished.toString() == 'false' && req.body.isScheduled.toString() == 'false' && req.body.isScheduled)
+    if (req.body.isPublished && req.body.isPublished.toString() === 'false' && req.body.isScheduled && req.body.isScheduled.toString() === 'false' )
     {
         return res.status(400).json({message : "You have to either enter a scheduling date or publish event now."})
     }
 
     //published and scheduled
-    if (req.body.isPublished && req.body.isPublished.toString() == 'true' && req.body.isScheduled.toString() == 'true' && req.body.isScheduled)
+    if (req.body.isPublished && req.body.isPublished.toString() === 'true' && req.body.isScheduled && req.body.isScheduled.toString() === 'true' )
     {
-        console.log(req.body.isPublished)
-        console.log(req.body.isScheduled)
         return res.status(400).json({message: "You can't publish now and schedule at the same time."});
     }
 
+    if (req.body.isPublished && req.body.isPublished.toString() === 'true' && req.body.isPrivate && req.body.isPrivate.toString() === 'true' )
+    {
+        return res.status(400).json({message: "Event can't be private and published"});
+    }
 
     await event.save()
         .then(event => res.json(event))
@@ -560,15 +560,15 @@ exports.addAttendee = async (req, res) => {
     try {
         const user = await User.findOne({ email: req.body.email });
         if (!user) {
-            throw new Error("User not found");
+            return res.status(400).json({message: "User not found"});
         }
         for (const ticket of ticketsBought) {
             const ticketClass = await TicketClass.findById(ticket.ticketClass);
             if (!ticketClass) {
-                throw new Error("Ticket class not found");
+                return res.status(400).json({message: "Ticket class not found"});
             }
             if (ticketClass.capacity < ticket.number + ticketClass.sold) {
-                throw new Error("Ticket class capacity exceeded");
+                return res.status(400).json({message: "Ticket class capacity exceeded"});
             }
             faceValue += ticket.faceValue;
             subTotal += ticketClass.price * ticket.number;
