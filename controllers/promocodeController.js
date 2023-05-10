@@ -273,6 +273,7 @@ const checkPromoSecured = async (req, res) => {
 
 
 const uploadPromocodes = async (req, res) => {
+    console.log("fdsf")
     if (!(req.user)) {
         return res.status(400).json({ message: "User is not logged in." });
     }
@@ -280,7 +281,9 @@ const uploadPromocodes = async (req, res) => {
     if (!req.isCreator) {
         return res.status(400).json({ message: "User is not a creator." });
     }
+    console.log(req.body);
     const event=await Event.findById(req.params.event_id);
+    console.log(event);
     if (!event) {
         return res.status(400).json({ message: "Event not found." });
     }
@@ -312,8 +315,8 @@ const uploadPromocodes = async (req, res) => {
 
     // try {
         // Get uploaded csv file
-        const csvFile = req.files.file;
-    
+        const csvFile = req.file;
+        console.log(csvFile);
         // Validate file format
         if (csvFile.mimetype !== "text/csv") {
             return res.status(400).json({ message: "Invalid file format. Only CSV files are allowed." });
@@ -321,7 +324,7 @@ const uploadPromocodes = async (req, res) => {
     
         // Convert csv file to json
         const csvData = [];
-        csvFile.data.toString().split('\n').forEach(line => {
+        csvFile.buffer.toString().split('\n').forEach(line => {
             if (line) {
                 csvData.push(line.split(','));
             }
@@ -341,7 +344,11 @@ const uploadPromocodes = async (req, res) => {
         if (invalidCodes) {
             return res.status(400).json({ message: "Invalid promocode values provided. Only letters, numbers, hyphens, underscores, commas, at signs (@), and periods (.) are allowed." });
         }
-        
+
+        let tickets = req.body.tickets.split(',');
+        // Remove spaces and special characters from tickets
+        tickets = tickets.map(ticket => ticket.replace(" ", ''));
+        console.log(tickets);
         // Whitelist fields and filter out invalid entries
         const validPromocodes = codes
         .map((promo) => ({
@@ -349,7 +356,7 @@ const uploadPromocodes = async (req, res) => {
             name: promo,
             tickets: req.body.tickets,
             percentOff: percentOff,
-            tickets: req.body.tickets,
+            tickets: tickets,
             amountOff: amountOff,
             limit: limit,
             used: 0,

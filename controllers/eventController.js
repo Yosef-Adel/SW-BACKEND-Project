@@ -19,7 +19,7 @@ const {getTicketsSold, getOrdersCount, getTotalCapacity, getTotalMoneyEarned, ge
 const Ticket = require('../models/Tickets');
 const Organization = require('../models/Organization');
 // const { CsvWriter } = require('csv-writer/src/lib/csv-writer');
-
+const {sendNotification} = require('../utils/notification');
 
 
 
@@ -42,7 +42,7 @@ exports.create = async (req, res) => {
     req.body['createdBy'] = req.user
 
     const missingFieldErrorMessage = "field is required";
-    const field = ["name", "startDate", "endDate", "category", "summary", "capacity"];
+    const field = ["name", "startDate", "endDate", "category"];
     console.log(req.body);
     for (let i = 0; i < field.length; i++) {
         if (!req.body[field[i]]) {
@@ -368,7 +368,8 @@ exports.update = async (req, res) => {
     }
 
     const updates = Object.keys(req.body);
-    const allowedUpdates = ['isPublished', 'isPrivate', 'isScheduled','publishDate', 'image', 'summary', 'description', 'capacity', 'password'];
+    // console.log(updates)
+    const allowedUpdates = ['isPublished', 'isPrivate', 'isScheduled','publishDate', 'summary', 'description', 'capacity', 'password'];
     const isValidUpdate = updates.every(update => allowedUpdates.includes(update));
     if (!isValidUpdate) {
         return res.status(400).json({message: "Your request contains fields that cannot be updated. Please enter only valid fields."});
@@ -376,7 +377,11 @@ exports.update = async (req, res) => {
 
     for (let update of updates){
         if (update === 'capacity'){
-            event.capacity = req.params.capacity;
+            if (req.body.capacity < event.capacity){
+                return res.status(400).json({message: "New capacity has to be bigger than previous."})
+            }
+            // console.log(req.body.capacity)
+            event.capacity = req.body.capacity;
         }
         if (update == 'summary'){
             event.summary = req.body.summary;
@@ -393,53 +398,45 @@ exports.update = async (req, res) => {
         }
 
         if (update === 'isPublished'){
-            console.log(event.isPublished);
-            console.log(req.body.isPublished);
+            // console.log(event.isPublished);
+            // console.log(req.body.isPublished);
             event.isPublished = req.body.isPublished
-            if (req.body.isPublished) {
+            if (req.body.isPublished.toString() == 'true') {
                 event.isScheduled = false;
             }
         }
 
         if (update == 'isScheduled'){
-            console.log(req.body.publishDate);
             event.isScheduled = true
             event.isPublished = false
             const date = new Date(req.body.publishDate);
             event.publishDate = date;
         }
+    }
 
-        if (update === 'image')
-        {
-            if (req.file){
-                event.image = req.file.path;
-            }
-            else { //no image path
-                return res.status(400).json({message: "You must enter an image path"});
-            }
-        }
+    if (req.file){
+        event.image = req.file.path;
     }
     
 
-    console.log(event.isPublished);
-    console.log(event.isScheduled);
+    // console.log(event.isPublished);
+    // console.log(event.isScheduled);
     // not published and not scheduled
-    if (!event.isPublished && !event.isScheduled)
+
+    // not published and not scheduled
+    if (req.body.isPublished && req.body.isPublished.toString() == 'false' && req.body.isScheduled.toString() == 'false' && req.body.isScheduled)
     {
         return res.status(400).json({message : "You have to either enter a scheduling date or publish event now."})
     }
 
     //published and scheduled
-    if (event.isPublished && event.isScheduled)
+    if (req.body.isPublished && req.body.isPublished.toString() == 'true' && req.body.isScheduled.toString() == 'true' && req.body.isScheduled)
     {
+        console.log(req.body.isPublished)
+        console.log(req.body.isScheduled)
         return res.status(400).json({message: "You can't publish now and schedule at the same time."});
     }
 
-    //public and has a password
-    if (!event.isPrivate && event.password)
-    {
-        return res.status(400).json({message: "Public events don't have passwords."})
-    }
 
     await event.save()
         .then(event => res.json(event))
@@ -614,6 +611,13 @@ exports.addAttendee = async (req, res) => {
         subject: `${creator.firstName} ${creator.lastName} got you tickets to ${eventObject.name}`,
         message: notifyingText
         });
+
+        const notificationMessage = {
+            title: "New Order",
+            body: notifyingText
+        }
+        // "d2ySh3grCYccs5EpX7T882:APA91bGItx6UMtrGlKIRBxPgnFsSTGe2HpfzmlRjyXJ0qc_-KvUMI-BwywKuvenFkqHEniV4Hf-PcWB7SBaUAXQZnNrJj8iioHmCAItH8AAYKbkg77sJO-AFywJ6K8zU0NnT2vRkNs-t"
+        sendNotification(notificationMessage,user.firebaseRegistrationToken);
 
         res.status(201).json({message: "Order created successfully!",
             order: order

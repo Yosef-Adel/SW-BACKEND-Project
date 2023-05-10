@@ -124,6 +124,9 @@ exports.login= async (req, res) => {
             return res.status(400).json({message: "Please verify your email first."});
         }
         //testing
+        if (user.googleID){
+            return res.status(400).json({message: "This user is signed in with google. Use the google button"})
+        }
 
         // compare password after hashing with encyrpted password in db
         const isMatch = await bcrypt.compare(req.body.password, user.password);

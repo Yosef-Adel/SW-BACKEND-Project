@@ -33,12 +33,12 @@ const EventSchema = new Schema({
     
     summary: {
         type: String,
-        required: true
+        required: false
     },
 
     capacity: {
         type: Number,
-        required: true
+        required: false
     },
 
     category: {
