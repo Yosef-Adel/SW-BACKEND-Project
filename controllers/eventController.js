@@ -398,16 +398,15 @@ exports.update = async (req, res) => {
         }
 
         if (update === 'isPublished'){
-            console.log(event.isPublished);
-            console.log(req.body.isPublished);
+            // console.log(event.isPublished);
+            // console.log(req.body.isPublished);
             event.isPublished = req.body.isPublished
-            if (req.body.isPublished) {
+            if (req.body.isPublished.toString() == 'true') {
                 event.isScheduled = false;
             }
         }
 
         if (update == 'isScheduled'){
-            console.log(req.body.publishDate);
             event.isScheduled = true
             event.isPublished = false
             const date = new Date(req.body.publishDate);
@@ -424,22 +423,20 @@ exports.update = async (req, res) => {
     // console.log(event.isScheduled);
     // not published and not scheduled
 
-    // if (!req.body.isPublished && !req.body.isScheduled)
-    // {
-    //     return res.status(400).json({message : "You have to either enter a scheduling date or publish event now."})
-    // }
+    // not published and not scheduled
+    if (req.body.isPublished && req.body.isPublished.toString() == 'false' && req.body.isScheduled.toString() == 'false' && req.body.isScheduled)
+    {
+        return res.status(400).json({message : "You have to either enter a scheduling date or publish event now."})
+    }
 
     //published and scheduled
-    if (req.body.isPublished && req.body.isScheduled)
+    if (req.body.isPublished && req.body.isPublished.toString() == 'true' && req.body.isScheduled.toString() == 'true' && req.body.isScheduled)
     {
+        console.log(req.body.isPublished)
+        console.log(req.body.isScheduled)
         return res.status(400).json({message: "You can't publish now and schedule at the same time."});
     }
 
-    //public and has a password
-    // if (!event.isPrivate && event.password)
-    // {
-    //     return res.status(400).json({message: "Public events don't have passwords."})
-    // }
 
     await event.save()
         .then(event => res.json(event))
@@ -1368,7 +1365,7 @@ exports.getSalesByTicketTypeDashboard = async (req, res) => {
             //event id in the request params
             const eventId = req.params.eventId;
             const page = parseInt(req.query.page) || 1; // extract page from query parameters or default to 1
-            const limit = parseInt(req.query.limit) || 5; // extract limit from query parameters or default to 5
+            const limit = parseInt(req.query.limit) || 100 ; // extract limit from query parameters or default to 5
             //check if the user is logged in
             if (!req.user) {
                 return res.status(401).json({ message: "You are not logged in" });

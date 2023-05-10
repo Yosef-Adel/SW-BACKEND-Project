@@ -38,7 +38,7 @@ const EventSchema = new Schema({
 
     capacity: {
         type: Number,
-        required: true
+        required: false
     },
 
     category: {
