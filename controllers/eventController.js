@@ -1360,7 +1360,7 @@ exports.getSalesByTicketTypeDashboard = async (req, res) => {
             //event id in the request params
             const eventId = req.params.eventId;
             const page = parseInt(req.query.page) || 1; // extract page from query parameters or default to 1
-            const limit = parseInt(req.query.limit) || 5; // extract limit from query parameters or default to 5
+            const limit = parseInt(req.query.limit) || 100 ; // extract limit from query parameters or default to 5
             //check if the user is logged in
             if (!req.user) {
                 return res.status(401).json({ message: "You are not logged in" });
