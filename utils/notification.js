@@ -15,8 +15,13 @@ function sendNotification(message, token){
     const payload = {
       'notification': {
         'title': message.title,
-        'body': message.body
-      }, 
+        'body': message.body, 
+        "priority": "high"
+      },
+      "data": {
+        "importance": "max",
+        "priority": "high"
+      }
     };
     admin.messaging().sendToDevice(token, payload, notification_options).then((response) => {
       console.log('Successfully sent message:', response);   
