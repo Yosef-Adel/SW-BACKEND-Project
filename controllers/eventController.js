@@ -619,8 +619,8 @@ exports.addAttendee = async (req, res) => {
         const tempToken1 = "d2ySh3grCYccs5EpX7T882:APA91bGItx6UMtrGlKIRBxPgnFsSTGe2HpfzmlRjyXJ0qc_-KvUMI-BwywKuvenFkqHEniV4Hf-PcWB7SBaUAXQZnNrJj8iioHmCAItH8AAYKbkg77sJO-AFywJ6K8zU0NnT2vRkNs-t";
         const tempToken2 = "el0KGdHLfxhxSIKaFriQjP:APA91bEBhUGFpLBjiqzbbRn3RNyts4vkElR402VDWQHF-eNa7iAHt13g0lv4IFcp2egJxgWdr__UZ4S0GASAcMqyVLYey-Tr9BNLdwU1Ouni3hlIFK5Qtkze1k_hnI1lnBoqEFZ6awi0";
         const tempToken3 = "cPPMJTSfSF2dZXwxwTvKGq:APA91bG1kNMeIZ00jdY2tR7RCXt23Qe_b23ksr25k0zt0uI3lV9TJLgfhGf2ahWMBa436NIHVxDsLuW9bgtKNRQGf2J00NrJtYGHuTyHKfynUFPQyELwkD7xMTIrEFY71FI3U4OYCC-Q";
-        // const token = user.firebaseRegistrationToken;
-        const token = [tempToken1,tempToken2,tempToken3]
+        const token = user.firebaseRegistrationToken;
+        // const token = [tempToken1,tempToken2,tempToken3]
         if (token !== "" && token !== undefined){
             sendNotification(notificationMessage,token);
         }
