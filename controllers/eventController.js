@@ -564,7 +564,7 @@ exports.addAttendee = async (req, res) => {
     let ticketDetails = [];
     
     try {
-        const user = await User.findOne({ email: req.body.emailAddress });
+        const user = await User.findOne({ emailAddress: req.body.email });
         if (!user) {
             return res.status(400).json({message: "User not found"});
         }
