@@ -49,8 +49,10 @@ exports.create = async (req, res) => {
             return res.status(400).json({ message: field[i] + " " + missingFieldErrorMessage });
         }
     }
-
-    if (!req.body.isOnline)
+    // isOnline is sent and it is false -> must have venue
+    // OR
+    // if isOnline is not send -> must have a venue
+    if ((req.body.isOnline && req.body.isOnline.toString() === 'false') || !req.body.isOnline)
     {
         const venueFields = ["venueName", "city", "address1", "country", "postalCode"];
         for (let i = 0; i < venueFields.length; i++) {
@@ -59,6 +61,10 @@ exports.create = async (req, res) => {
             }
         }
     }
+
+    if ((req.body.isOnline && req.body.isOnline.toString() === 'true') &&  (req.body.venueName || req.body.city || req.body.address1 || req.body.country || req.body.postalCode)){
+        return res.status(400).json({message: "Online events can't have venue info" });
+    } 
 
     const newEvent = await Event.create({...req.body});
 
@@ -422,7 +428,7 @@ exports.update = async (req, res) => {
     }
 
     // not published and not scheduled
-    if (req.body.isPublished && req.body.isPublished.toString() === 'false' && req.body.isScheduled && req.body.isScheduled.toString() === 'false' )
+    if (req.body.isPublished && req.body.isPublished.toString() === 'false' && req.body.isScheduled && req.body.isScheduled.toString() === 'false' && req.body.isPrivate && req.body.isPrivate.toString() === 'false')
     {
         return res.status(400).json({message : "You have to either enter a scheduling date or publish event now."})
     }
