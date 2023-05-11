@@ -49,8 +49,10 @@ exports.create = async (req, res) => {
             return res.status(400).json({ message: field[i] + " " + missingFieldErrorMessage });
         }
     }
-
-    if (!req.body.isOnline)
+    // isOnline is sent and it is false -> must have venue
+    // OR
+    // if isOnline is not send -> must have a venue
+    if ((req.body.isOnline && req.body.isOnline.toString() === 'false') || !req.body.isOnline)
     {
         const venueFields = ["venueName", "city", "address1", "country", "postalCode"];
         for (let i = 0; i < venueFields.length; i++) {
@@ -59,6 +61,10 @@ exports.create = async (req, res) => {
             }
         }
     }
+
+    if ((req.body.isOnline && req.body.isOnline.toString() === 'true') &&  (req.body.venueName || req.body.city || req.body.address1 || req.body.country || req.body.postalCode)){
+        return res.status(400).json({message: "Online events can't have venue info" });
+    } 
 
     const newEvent = await Event.create({...req.body});
 
@@ -398,17 +404,20 @@ exports.update = async (req, res) => {
         }
 
         if (update === 'isPublished'){
-            // console.log(event.isPublished);
-            // console.log(req.body.isPublished);
             event.isPublished = req.body.isPublished
-            if (req.body.isPublished.toString() == 'true') {
+            if (req.body.isPublished.toString() === 'true') {
                 event.isScheduled = false;
             }
         }
 
         if (update == 'isScheduled'){
-            event.isScheduled = true
-            event.isPublished = false
+            event.isScheduled = req.body.isScheduled
+            if (req.body.isScheduled.toString() === 'true'){
+                event.isPublished = false
+                if (!req.body.publishDate){
+                    return res.status(400).json({message: "You have to enter a publish date"})
+                }
+            }
             const date = new Date(req.body.publishDate);
             event.publishDate = date;
         }
@@ -417,26 +426,23 @@ exports.update = async (req, res) => {
     if (req.file){
         event.image = req.file.path;
     }
-    
-
-    // console.log(event.isPublished);
-    // console.log(event.isScheduled);
-    // not published and not scheduled
 
     // not published and not scheduled
-    if (req.body.isPublished && req.body.isPublished.toString() == 'false' && req.body.isScheduled.toString() == 'false' && req.body.isScheduled)
+    if (req.body.isPublished && req.body.isPublished.toString() === 'false' && req.body.isScheduled && req.body.isScheduled.toString() === 'false' && req.body.isPrivate && req.body.isPrivate.toString() === 'false')
     {
         return res.status(400).json({message : "You have to either enter a scheduling date or publish event now."})
     }
 
     //published and scheduled
-    if (req.body.isPublished && req.body.isPublished.toString() == 'true' && req.body.isScheduled.toString() == 'true' && req.body.isScheduled)
+    if (req.body.isPublished && req.body.isPublished.toString() === 'true' && req.body.isScheduled && req.body.isScheduled.toString() === 'true' )
     {
-        console.log(req.body.isPublished)
-        console.log(req.body.isScheduled)
         return res.status(400).json({message: "You can't publish now and schedule at the same time."});
     }
 
+    if (req.body.isPublished && req.body.isPublished.toString() === 'true' && req.body.isPrivate && req.body.isPrivate.toString() === 'true' )
+    {
+        return res.status(400).json({message: "Event can't be private and published"});
+    }
 
     await event.save()
         .then(event => res.json(event))
@@ -558,17 +564,17 @@ exports.addAttendee = async (req, res) => {
     let ticketDetails = [];
     
     try {
-        const user = await User.findOne({ email: req.body.email });
+        const user = await User.findOne({ emailAddress: req.body.email });
         if (!user) {
-            throw new Error("User not found");
+            return res.status(400).json({message: "User not found"});
         }
         for (const ticket of ticketsBought) {
             const ticketClass = await TicketClass.findById(ticket.ticketClass);
             if (!ticketClass) {
-                throw new Error("Ticket class not found");
+                return res.status(400).json({message: "Ticket class not found"});
             }
             if (ticketClass.capacity < ticket.number + ticketClass.sold) {
-                throw new Error("Ticket class capacity exceeded");
+                return res.status(400).json({message: "Ticket class capacity exceeded"});
             }
             faceValue += ticket.faceValue;
             subTotal += ticketClass.price * ticket.number;
@@ -616,9 +622,14 @@ exports.addAttendee = async (req, res) => {
             title: "New Order",
             body: notifyingText
         }
-        // "d2ySh3grCYccs5EpX7T882:APA91bGItx6UMtrGlKIRBxPgnFsSTGe2HpfzmlRjyXJ0qc_-KvUMI-BwywKuvenFkqHEniV4Hf-PcWB7SBaUAXQZnNrJj8iioHmCAItH8AAYKbkg77sJO-AFywJ6K8zU0NnT2vRkNs-t"
-        sendNotification(notificationMessage,user.firebaseRegistrationToken);
-
+        const tempToken1 = "d2ySh3grCYccs5EpX7T882:APA91bGItx6UMtrGlKIRBxPgnFsSTGe2HpfzmlRjyXJ0qc_-KvUMI-BwywKuvenFkqHEniV4Hf-PcWB7SBaUAXQZnNrJj8iioHmCAItH8AAYKbkg77sJO-AFywJ6K8zU0NnT2vRkNs-t";
+        const tempToken2 = "el0KGdHLfxhxSIKaFriQjP:APA91bEBhUGFpLBjiqzbbRn3RNyts4vkElR402VDWQHF-eNa7iAHt13g0lv4IFcp2egJxgWdr__UZ4S0GASAcMqyVLYey-Tr9BNLdwU1Ouni3hlIFK5Qtkze1k_hnI1lnBoqEFZ6awi0";
+        const tempToken3 = "cPPMJTSfSF2dZXwxwTvKGq:APA91bG1kNMeIZ00jdY2tR7RCXt23Qe_b23ksr25k0zt0uI3lV9TJLgfhGf2ahWMBa436NIHVxDsLuW9bgtKNRQGf2J00NrJtYGHuTyHKfynUFPQyELwkD7xMTIrEFY71FI3U4OYCC-Q";
+        const token = user.firebaseRegistrationToken;
+        // const token = [tempToken1,tempToken2,tempToken3]
+        if (token !== "" && token !== undefined){
+            sendNotification(notificationMessage,token);
+        }
         res.status(201).json({message: "Order created successfully!",
             order: order
         });
