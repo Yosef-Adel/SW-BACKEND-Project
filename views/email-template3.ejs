@@ -39,8 +39,23 @@
     }
     #logoDiv{
         width: 5rem;
-    height: 5rem;    
-}
+        height: 5rem;    
+    }
+    /* Styling for the second table */
+    .order-table {
+        margin-top: 20px;
+        background-color: #f9f9f9;
+        border: 1px solid #ddd;
+        border-collapse: collapse;
+    }
+    .order-table th {
+        background-color: #FF8C00;
+        color: white;
+    }
+    .order-table td, .order-table th {
+        padding: 8px;
+        border-bottom: 1px solid #ddd;
+    }
     </style>
 </head>
 <body>
@@ -51,14 +66,15 @@
 
     <img src="cid:image" alt="Image">
     
+    <h2>Ticket Details</h2>
     <table>
     <thead>
         <tr>
         <th>Ticket Type</th>
         <th>Quantity</th>
-        <th>Price</th>
+        <th>Price with added discount</th>
         <th>Fee</th>
-        <th>Total Price</th>
+        <th>Total Ticket Price</th>
         </tr>
     </thead>
     <tbody>
@@ -73,9 +89,31 @@
         <%}); %>
     </tbody>
     </table>
-    </script>
-    <div id="logoDiv" >
-        
-    </div>
+    
+    <h2>Order Details</h2>
+    <table class="order-table">
+        <tr>
+            <th>Order Item</th>
+            <th>Amount</th>
+        </tr>
+        <tr>
+            <td>Subtotal</td>
+            <td>{{subTotal}}</td>
+        </tr>
+        <tr>
+            <td>Fees</td>
+            <td>{{fees}}</td>
+        </tr>
+        <tr>
+            <td>Discount Amount</td>
+            <td>{{discountAmount}}</td>
+        </tr>
+        <tr>
+            <td>Total</td>
+            <td>{{total}}</td>
+        </tr>
+    </table>
+    
+    <div id="logoDiv"></div>
 </body>
 </html>
