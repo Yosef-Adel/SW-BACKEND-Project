@@ -52,7 +52,7 @@ const createTicket = async (req, res, next ) => {
     }
 
     /////////////////////////////////check on the event capacity/////////////////////////////////////
-    let eventCapacity = event.capacity;
+    let eventCapacity = event.capacity; 
     //loop through the tickets of the event and sum the capacities
     //not tested yet
     let tickets = event.tickets;
