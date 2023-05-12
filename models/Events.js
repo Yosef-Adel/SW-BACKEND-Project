@@ -38,7 +38,11 @@ const EventSchema = new Schema({
 
     capacity: {
         type: Number,
-        required: false
+        required: false,
+        // put the default capacity to 0
+        // 0 means that the event capacity is undefined
+        //will be updated if the creator updated the capacity or added tickets
+        default: 0
     },
 
     category: {
