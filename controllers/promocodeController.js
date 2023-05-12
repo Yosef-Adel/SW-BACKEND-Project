@@ -30,14 +30,20 @@ const createPromocode = async (req, res, next) => {
         if (!req.body.amountOff && !req.body.percentOff) {
             return res.status(400).json({ message: "Amount off or percent off is required." });
         }
+                //check if both are given
+        if (req.body.amountOff && req.body.percentOff) {
+            return res.status(400).json({ message: "Only one of amount off or percent off is required." });
+        }
+        // console.log(req.body.amountOff);
+        // console.log(req.body.percentOff);
         //check if given which one and store it
         //let -1 mean a flag that the field is not given
         let amountOff = -1;
         let percentOff = -1;
-        if (req.body.amountOff) {
+        if (req.body.amountOff && !req.body.percentOff) {
             amountOff = req.body.amountOff;
         }
-        if (req.body.percentOff) {
+        if (req.body.percentOff && !req.body.amountOff) {
             percentOff = req.body.percentOff;
         }
 
@@ -296,16 +302,25 @@ const uploadPromocodes = async (req, res) => {
     // if (!req.body.amountOff && !req.body.percentOff) {
     //     return res.status(400).json({ message: "Amount off or percent off is required." });
     // }
+
+        //check if both are given
+        if (req.body.amountOff && req.body.percentOff) {
+            return res.status(400).json({ message: "Only one of amount off or percent off is required." });
+        }
+        // console.log(req.body.amountOff);
+        // console.log(req.body.percentOff);
+
     //check if given which one and store it
     //let -1 mean a flag that the field is not given
     let amountOff = -1;
     let percentOff = -1;
-    if (req.body.amountOff) {
+    if (req.body.amountOff && !req.body.percentOff) {
         amountOff = req.body.amountOff;
     }
-    if (req.body.percentOff) {
+    if (req.body.percentOff && !req.body.amountOff) {
         percentOff = req.body.percentOff;
     }
+
 
     
     let limit=event.capacity;

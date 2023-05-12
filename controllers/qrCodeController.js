@@ -17,8 +17,9 @@ const path = require('path');
 //generate the QR code and send it to the user's email
 //the data is in the request body
 //trial
-const generateQRCodeAndSendEmail = async (url,userId,email,ticketArray) => {
+const generateQRCodeAndSendEmail = async (url,userId,email,ticketArray,total,firstName,lastName,subTotal,discountAmount,fees) => {
 
+    let userName = firstName + " " + lastName;
     // //find the user by id from the id in the request
     let user = await User.findById(userId);
     // let userEmail = user.emailAddress;
@@ -60,7 +61,8 @@ const generateQRCodeAndSendEmail = async (url,userId,email,ticketArray) => {
                     const template=fs.readFileSync('./views/email-template-final.html','utf8');
                     // console.log("read the html file success")
                     const name = user.firstName;
-                    const personalizedTemplate = await template.replace('{{name}}', name);
+                    const personalizedTemplate = await template.replace('{{name}}', userName).replace('{{subTotal}}', subTotal).replace('{{discountAmount}}', discountAmount).replace('{{fees}}', fees).replace('{{total}}', total);
+
                     // console.log("replaced the name success")
                 
                     

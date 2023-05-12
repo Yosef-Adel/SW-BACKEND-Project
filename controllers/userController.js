@@ -1,5 +1,7 @@
 const User = require('../models/User');
 const Events = require('../models/Events');
+const Order = require('../models/Order');
+const Tickets = require('../models/Tickets');
 const uploadImage = require("../utils/uploadImage");
 const fs = require('fs');
 
@@ -61,7 +63,16 @@ exports.deleteUser = async(req,res) =>{
             return res.status(400).json({message: "User not found"});
         }
 
-        await Events.deleteMany({"createdBy": user});
+        const events = await Events.find({"createdBy": user});
+        for (let event of events){ 
+            const tickets = event.tickets
+            for (let ticket of tickets){
+                await Tickets.deleteOne(ticket);
+            }
+            await Order.deleteMany({"event": event})
+            await Events.deleteOne(event);
+        }
+
         await User.deleteOne(user);
 
         return res.status(200).json({message: "User deleted successfully."})
@@ -69,7 +80,7 @@ exports.deleteUser = async(req,res) =>{
     }
     catch(err){
         console.log(err.message);
-        return res.status(400).json({message: "Error in editing user info"});
+        return res.status(400).json({message: "Error in deleting user info"});
     }
 }
 

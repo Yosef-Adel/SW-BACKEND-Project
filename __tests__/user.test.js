@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const request = require("supertest");
 const app = require("../app");
 const User = require('../models/User');
+const Event = require('../models/Events');
 const bcrypt = require("bcryptjs");
 
 jest.setTimeout(1000000);
@@ -9,6 +10,9 @@ jest.setTimeout(1000000);
 
 let userId;
 let token;
+
+let newUserId;
+let newToken;
 const objectId = mongoose.Types.ObjectId('569ed8269353e9f4c51617aa');
 
 beforeAll(async() => {
@@ -39,6 +43,42 @@ beforeAll(async() => {
     });
     userId = res.body.user._id;
     token = res.body.token;
+
+
+    let newUser = new User({
+        firstName: "Mai",
+        lastName: "Abdelhameed",
+        emailAddress:"maiabdelhameedd@gmail.com",
+        password: await bcrypt.hash("ayhaga", 10),
+        isVerified: true,
+        isCreator: true
+    });
+    await newUser.save();
+    const newRes = await request(app).post("/auth/login").send({
+        "emailAddress": "maiabdelhameedd@gmail.com",
+        "password":"ayhaga"
+    });
+    newUserId = newRes.body.user._id;
+    newToken = newRes.body.token;
+
+
+    let event = new Event({
+        "name": "test",
+        "startDate":"2023-04-18T19:00",
+        "endDate":"2023-04-18T19:00",
+        "category":"Music",
+        "createdBy": newUserId
+    });
+    await event.save();
+
+    let newEvent = new Event({
+        "name": "test",
+        "startDate":"2024-04-18T19:00",
+        "endDate":"2024-04-18T19:00",
+        "category":"Music",
+        "createdBy": newUserId
+    });
+    await newEvent.save();
 });
 
 
@@ -159,6 +199,93 @@ describe('Changing creator view to attendee view', () => {
     describe('Case 3: User not found', () => {
         it('it should return 400 Error', async() => {
             const res = await request(app).get('/user/to-attendee/' + objectId).set("Authorization", "Bearer " + token);
+            testFormat(res, 400, 'User not found');
+        })
+    });
+});
+
+
+describe('Getting user events', () => {
+    describe('Case 1: Success', () => {
+        it('it should return 200 OK', async() => {
+            const res = await request(app).get(`/api/events/${newUserId}/all-events`).set("Authorization", "Bearer " + newToken);
+            testFormat(res, 200, "Success");
+        })
+    });
+
+    describe('Case 2: Invalid Token', () => {
+        it('it should return 400 Error', async() => {
+            const res = await request(app).get(`/api/events/${newUserId}/all-events`);
+            testFormat(res, 401, 'No token provided!');
+        })
+    });
+
+    describe('Case 3: User not found', () => {
+        it('it should return 400 Error', async() => {
+            const res = await request(app).get(`/api/events/${objectId}/all-events`).set("Authorization", "Bearer " + token);
+            testFormat(res, 400, 'You are not a creator');
+        })
+    });
+});
+
+describe('Getting user past events', () => {
+    describe('Case 1: Success', () => {
+        it('it should return 200 OK', async() => {
+            const res = await request(app).get(`/api/events/${newUserId}/past-events`).set("Authorization", "Bearer " + newToken);
+            testFormat(res, 200, "Success");
+        })
+    });
+
+    describe('Case 2: Invalid Token', () => {
+        it('it should return 400 Error', async() => {
+            const res = await request(app).get(`/api/events/${newUserId}/past-events`);
+            testFormat(res, 401, 'No token provided!');
+        })
+    });
+
+    describe('Case 3: User not found', () => {
+        it('it should return 400 Error', async() => {
+            const res = await request(app).get(`/api/events/${objectId}/past-events`).set("Authorization", "Bearer " + token);
+            testFormat(res, 400, 'You are not a creator');
+        })
+    });
+});
+
+
+describe('Getting user upcoming events', () => {
+    describe('Case 1: Success', () => {
+        it('it should return 200 OK', async() => {
+            const res = await request(app).get(`/api/events/${newUserId}/upcoming-events`).set("Authorization", "Bearer " + newToken);
+            testFormat(res, 200, "Success");
+        })
+    });
+
+    describe('Case 2: Invalid Token', () => {
+        it('it should return 400 Error', async() => {
+            const res = await request(app).get(`/api/events/${newUserId}/upcoming-events`);
+            testFormat(res, 401, 'No token provided!');
+        })
+    });
+
+    describe('Case 3: User not found', () => {
+        it('it should return 400 Error', async() => {
+            const res = await request(app).get(`/api/events/${objectId}/upcoming-events`).set("Authorization", "Bearer " + token);
+            testFormat(res, 400, 'You are not a creator');
+        })
+    });
+});
+
+describe('Deleting user', () => {
+    describe('Case 1: Success', () => {
+        it('it should return 200 OK', async() => {
+            const res = await request(app).delete(`/user/delete/${newUserId}`).set("Authorization", "Bearer " + newToken);
+            testFormat(res, 200, "User deleted successfully.");
+        })
+    });
+
+    describe('Case 2: User not found', () => {
+        it('it should return 400 Error', async() => {
+            const res = await request(app).delete(`/user/delete/${objectId}`).set("Authorization", "Bearer " + token);
             testFormat(res, 400, 'User not found');
         })
     });
