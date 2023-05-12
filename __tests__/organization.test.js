@@ -286,7 +286,7 @@ describe('Getting upcoming events of an organization', () => {
     describe('Case 1: User not found', () => {
         it('it should return 400 Error', async() => {
             const res = await request(app).get(`/api/events/${objectId}/upcoming-events`).set('Authorization', 'Bearer ' + token);
-            testFormat(res, 400, "This user doesn't have an organization.");
+            testFormat(res, 400, "No upcoming events created by this user");
         });
     });
 
