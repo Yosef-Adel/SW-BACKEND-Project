@@ -211,7 +211,7 @@ const createOrder=async (req, res ) => {
         // let eventURL=process.env.CURRENTURL+"events/"+eventId;
 
         //sending the mail to the email specified in the order form
-        await generateQRCodeAndSendEmail(eventURL,req.user._id,order.email,ticketDetails);
+        await generateQRCodeAndSendEmail(eventURL,req.user._id,order.email,ticketDetails,order.total,order.firstName,order.lastName,order.subTotal,order.discountAmount,order.fees);
         //testing
 
         res.status(201).json({message: "Order created successfully!",
