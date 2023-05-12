@@ -1552,8 +1552,10 @@ exports.getSalesSummaryReport=async(req,res)=>{
             // net sales is the sales without the discount
             // gross sales is the total money earned
 
-            const grossSales = await getTotalMoneyEarned(eventId);
-            const netSales = await getNetSales(eventId);
+            var grossSales = await getTotalMoneyEarned(eventId);
+            grossSales = grossSales.toFixed(2);
+            var netSales = await getNetSales(eventId);
+            netSales = netSales.toFixed(2);
 
             //initialize the response object
             const response = {
