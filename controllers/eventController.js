@@ -627,7 +627,9 @@ exports.addAttendee = async (req, res) => {
         const tempToken3 = "cPPMJTSfSF2dZXwxwTvKGq:APA91bG1kNMeIZ00jdY2tR7RCXt23Qe_b23ksr25k0zt0uI3lV9TJLgfhGf2ahWMBa436NIHVxDsLuW9bgtKNRQGf2J00NrJtYGHuTyHKfynUFPQyELwkD7xMTIrEFY71FI3U4OYCC-Q";
         const token = user.firebaseRegistrationToken;
         // const token = [tempToken1,tempToken2,tempToken3]
-        if (token !== "" && token !== undefined && token !== null){
+        console.log(token);
+        // check if token is not empty
+        if (token && token.length > 0){
             sendNotification(notificationMessage,token);
         }
         res.status(201).json({message: "Order created successfully!",
