@@ -328,10 +328,32 @@ exports.getAllEvents = (req, res) => {
 // @route   GET api/events/:id
 // @desc    Get event by id
 // @access  Public
-exports.getById = (req, res) => {
-    Event.findById(req.params.id).populate('category')
-        .then(event => res.json(event))
-        .catch(err => res.status(400).json(err));
+exports.getById = async (req, res) => {
+    let event= await Event.findById(req.params.id).populate('category')
+    let Newevent=[];
+    event=event.toJSON();
+
+        
+            let numberOfTicketsSold = 0;
+            let numberOfTicketsCapacity = 0;
+            const tickets = await TicketClass.find({"event": req.params.id});
+            if(tickets.length != 0){
+            for (let ticket of tickets){
+                numberOfTicketsSold += ticket.sold;
+                numberOfTicketsCapacity += ticket.capacity;
+            }
+        }
+            event.numberOfTicketsSold = numberOfTicketsSold;
+            event.numberOfTicketsCapacity = numberOfTicketsCapacity;
+            Newevent.push(event);
+            
+            try{
+                res.json(Newevent);
+            }
+            catch(err){
+                // console.log(err);
+                res.status(400).json({message: "Error in getting event by id"});
+            }
 }
 
 exports.getPrivateEventByPassword = async(req, res)=>{
