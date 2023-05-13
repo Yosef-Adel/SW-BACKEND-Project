@@ -56,7 +56,7 @@ const createOrder=async (req, res ) => {
             ///////////////////////////////////Availablity Check/////////////////////////////////////
             //check if the ticket class is available
             //check on the start date and end date of ticket class
-            if(ticketClass.capacity <= ticketClass.used || ticketClass.salesStart > Date.now() || ticketClass.salesEnd < Date.now()){
+            if(ticketClass.capacity <= ticketClass.used || ticketClass.salesStart > Date.now() || ticketClass.salesEnd < Date.now() || numberOfTicketsBought > ticketClass.capacity - ticketClass.sold){
                 isTicketClassAvailable=false;
                 break;
             }
