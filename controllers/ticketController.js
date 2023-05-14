@@ -59,7 +59,9 @@ const createTicket = async (req, res, next ) => {
     let totalCapacity = req.body.capacity;
     for (let i = 0; i < tickets.length; i++) {
         let ticket = await Ticket.findById(tickets[i]);
+        if(ticket!=null){
         totalCapacity += ticket.capacity;
+        }
     }
     //check if the total capacity of the tickets is less than the event capacity
     if (totalCapacity > eventCapacity) {
