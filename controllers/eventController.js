@@ -356,13 +356,11 @@ exports.getByIdAndFields = async (req, res) => {
             }
 }
 
-
 exports.getById = (req, res) => {
     Event.findById(req.params.id).populate('category')
         .then(event => res.json(event))
         .catch(err => res.status(400).json(err));
 }
-
 
 exports.getPrivateEventByPassword = async(req, res)=>{
     try{
