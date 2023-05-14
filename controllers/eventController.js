@@ -120,7 +120,7 @@ exports.getAll = async (req, res) => {
         }
 
 
-        eventQuery.where('category').equals(categoryID._id);
+        eventQuery.where('category').equals(categoryID.name);
     }
 
     if (lat && lng) {
@@ -221,7 +221,7 @@ exports.getAllPaginated = async (req, res) => {
         }
 
 
-        eventQuery.where('category').equals(categoryID._id);
+        eventQuery.where('category').equals(categoryID.name);
     }
 
     if (lat && lng) {
