@@ -13,6 +13,7 @@ router.get('/all-events', eventController.getAllEvents);
 router.get('/nearest', eventController.getNearest);
 router.get('/search', eventController.search);
 router.get('/:id', eventController.getById);
+router.get('/:id/fields', eventController.getByIdAndFields);
 router.get('/private/:id', eventController.getPrivateEventByPassword);
 
 router.get('/:userId/all-events', authorization, eventController.getUserEvents);

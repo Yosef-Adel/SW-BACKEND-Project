@@ -120,7 +120,7 @@ exports.getAll = async (req, res) => {
         }
 
 
-        eventQuery.where('category').equals(categoryID._id);
+        eventQuery.where('category').equals(categoryID.name);
     }
 
     if (lat && lng) {
@@ -221,7 +221,7 @@ exports.getAllPaginated = async (req, res) => {
         }
 
 
-        eventQuery.where('category').equals(categoryID._id);
+        eventQuery.where('category').equals(categoryID.name);
     }
 
     if (lat && lng) {
@@ -328,7 +328,7 @@ exports.getAllEvents = (req, res) => {
 // @route   GET api/events/:id
 // @desc    Get event by id
 // @access  Public
-exports.getById = async (req, res) => {
+exports.getByIdAndFields = async (req, res) => {
     let event= await Event.findById(req.params.id).populate('category')
     let Newevent=[];
     event=event.toJSON();
@@ -355,6 +355,15 @@ exports.getById = async (req, res) => {
                 res.status(400).json({message: "Error in getting event by id"});
             }
 }
+
+
+exports.getById = (req, res) => {
+    Event.findById(req.params.id).populate('category')
+        .then(event => res.json(event))
+        .catch(err => res.status(400).json(err));
+}
+
+
 
 exports.getPrivateEventByPassword = async(req, res)=>{
     try{
